@@ -1,0 +1,105 @@
+body {
+  font-family: 'Nokia Cellphone';
+  font-size: 16px;
+  font-weight: normal;
+  line-height: 32px;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: normal;
+}
+
+h1 {
+  font-family: 'Atari System';
+  font-size: 64px;
+  letter-spacing: -2px;
+  line-height: 64px;
+  margin: 0.5em 0;
+}
+
+h2 {
+  font-family: 'Atari System';
+  font-size: 32px;
+  margin-bottom: 1em;
+}
+
+h3 {
+  font-family: 'Nokia Cellphone';
+  font-size: 16px;
+  margin-bottom: 1em;
+}
+
+p {
+  font-family: 'Volter Goldfish';
+  font-size: 18px;
+}
+
+small {
+  font-family: '04b03';
+  font-size: 16px;
+  line-height: 16px;
+}
+
+i,
+b {
+  font-style: normal;
+  font-weight: normal;
+  text-decoration: none;
+}
+
+/* family classes */
+
+.arrows {
+  font-family: 'PixArrows'; font-size: 31px;
+}
+
+.atari {
+  font-family: 'Atari System';
+  font-size: 32px;
+}
+
+.death,
+.beast {
+  font-family: '5 Pixdeath';
+  font-size: 16px;
+}
+
+.dos,
+.terminal {
+  font-family: 'Perfect DOS';
+  font-size: 32px;
+}
+
+.debug {
+  font-family: 'Perfect DOS';
+  font-size: 16px;
+}
+
+.fourbee {
+  font-family: '04b03';
+  font-size: 16px;
+  line-height: 16px;
+}
+
+.nokia {
+  font-family: 'Nokia Cellphone';
+}
+
+.pixel,
+.computer {
+  font-family: 'Computer Pixel';
+  font-size: 40px;
+}
+
+.romulus,
+.human {
+  font-family: 'Romulus';
+  font-size: 32px;
+}
+
+.volter {
+  font-family: 'Volter Goldfish';
+  font-size: 18px;
+}
