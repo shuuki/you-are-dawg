@@ -26,22 +26,22 @@ console.log(verse);		// Let me hear you shout
 
 
 // Print some things
-d.write("the first season is: " +
-				verse.season[0].name + "<br>");
-d.write("the phases of the moon are: " +
-				_.pluck(verse.moon, "name").join(", ") + "<br>");
-d.write("the total weight of all terrain is: " +
-				_.reduce(_.pluck(verse.land, "chance"), $.sum) + "<br>");
+//d.write("the first season is: " +
+//				verse.season[0].name + "<br>");
+//d.write("the phases of the moon are: " +
+//				_.pluck(verse.moon, "name").join(", ") + "<br>");
+//d.write("the total weight of all terrain is: " +
+//				_.reduce(_.pluck(verse.land, "chance"), $.sum) + "<br>");
 
 // fire off the finder to give me something... i got 99 problems but sprites ain't one
-var maplike = $.correlatum(Math.random, 99,
-	_.pluck(verse.land, "sprite"),
-	_.pluck(verse.land, "chance")).join("");
-d.write("here's a weighted pseudorandom blob: " +"<p class='glyph'>"+ maplike + "</p><br>");
+//var maplike = $.correlatum(Math.random, 99,
+//	_.pluck(verse.land, 'sprite'),
+//	_.pluck(verse.land, 'chance')).join('');
+//d.write("here's a weighted pseudorandom blob: " +"<p class='glyph'>"+ maplike + "</p><br>");
 
 // fire off the thing and tell me what time it is at 12
-d.write("12:00 is called " + $.correlator(_.pluck(verse.sun, "name"), _.pluck(verse.sun, "time"), 12) + "<br>")
-d.write("06:00 is called " + $.correlator(_.pluck(verse.sun, "name"), _.pluck(verse.sun, "time"), 6) + "<br>")
+//d.write("12:00 is called " + $.correlator(_.pluck(verse.sun, "name"), _.pluck(verse.sun, "time"), 12) + "<br>")
+//d.write("06:00 is called " + $.correlator(_.pluck(verse.sun, "name"), _.pluck(verse.sun, "time"), 6) + "<br>")
 
 d.write('<hr>');
 
@@ -49,6 +49,7 @@ d.write('<hr>');
 /////////////////
 // Enter Dawg
 /////////////////
+
 var gameNode = d3.select(d.body).append('div').classed('game', true);
 
 // Same seed every run for now
@@ -112,7 +113,6 @@ var treeTrail = flyd.on((pos) => {
 	gameLand.at(chunk[0], chunk[1])[local[1]][local[0]] = '?';
 });
 
-
 // Draw a trail of trees! For the player
 treeTrail(player.pos);
 treeTrail(squirrel.pos);
@@ -151,12 +151,12 @@ var update = streams.interval(500, () => {
 
 
 
-var dogOnSand = flyd.combine((dog) => {
+var dogOnBones = flyd.combine((dog) => {
 	var pos = dog();
 	var chunk = getChunk(pos);
 	var terrainChunk = gameLand.at(chunk[0], chunk[1]);
 	var local = toLocal(chunk, pos);
-	return terrainChunk[local[1]][local[0]] === '.';
+	return terrainChunk[local[1]][local[0]] === '&';
 }, [player.pos]);
 
 var actorDistance = flyd.combine((a, b) => $.dist(a(), b()));
@@ -264,8 +264,8 @@ flyd.on(_.partial(renderMap, map2), actorLayer);
 
 // Applies class to selection based on boolean eval of stream's val
 var classFrom = (className, selection, stream) => flyd.on((val) => selection.classed(className, !!val), stream);
-// Apply '.other' to map2 if dogOnSand
-classFrom('other', map2, dogOnSand);
+// Apply '.other' to map2 if dogOnBones
+classFrom('other', map2, dogOnBones);
 classFrom('faded', map, canTalkToHuman);
 classFrom('other', map, canEatSquirrel);
 
