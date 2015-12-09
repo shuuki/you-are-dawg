@@ -73,7 +73,7 @@ var actorByName = _.indexBy(actors, 'name');
 
 
 
-
+// Some sensible defaults
 var defaultControls = {
 	// Up, W
 	38: 'North', 87: 'North',
@@ -86,11 +86,9 @@ var defaultControls = {
 };
 
 module.exports = {
-	land: land,
-	sun: sun,
-	moon: moon,
-	season: season,
-	actors: actorByName,
+	land,
+	sun, moon, season,		// The sun and the stars, how they travel
+	actors: actorByName,	// A motly crew
 	// Some controls, map of KeyEvent.which => Command
 	controls: defaultControls
 };

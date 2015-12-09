@@ -67,7 +67,7 @@ var lookup = flyd.curryN(2,
 var time = flyd.stream(Date.now());
 
 function step(timestamp) {
-	time(timestamp);
+	time(Date.now());
 
 	if (!time.end())//		 					Until the end of time
 	{

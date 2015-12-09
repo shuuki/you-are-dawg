@@ -13,52 +13,9 @@ var log = streams.log; // EVEN SHORTER
 // Style
 require('./index.less');
 
-// Time stream form window.requestAnimationFrame
 var time = streams.time;
 
 console.log(verse);
-
-/**
- * Takes 2 arrays aligned by index of labels and their weights.
- * @param {string[]} label - List of labels
- * @param {number[]} bounds - Weight of each label
- * @param {number} count - How many items to get
- * @param {() -> number} [rng] - Optional random number generator
- * @return {string[]} - List of `label` items `count` long.
- */
-function correlatum(label, bounds, count, rng){
-	var result = [];
-	if (!rng) rng = Math.random;
-	
-	// Grab stuff outta' data
-	var totalWeight = _.reduce(bounds, $.sum);
-	
-	for (var k = 0; k < count; k++) {
-		var roll = rng() * totalWeight;
-		_.forEach(bounds, (bound, i) => {
-			roll -= bound;
-			if (roll <= 0) {
-				result.push(label[i])
-				return false; // Secret lodash early out!
-			}
-		});
-	}
-	
-	return result;
-}
-
-function correlator(labels, weights, seed) {
-	var request;
-	
-	_.forEach(weights, (bin, i) => {
-		if (seed <= bin) {
-			request = labels[i];
-			return false;
-		}
-	});
-	
-	return request;
-}
 
 
 /**
@@ -77,15 +34,14 @@ var go = (d, w, verse) => {
 					_.reduce(_.pluck(verse.land, "chance"), $.sum) + "<br>");
 
 // fire off the finder to give me something... i got 99 problems but sprites ain't one
-	var maplike = correlatum(
+	var maplike = $.correlatum(Math.random, 99,
 		_.pluck(verse.land, "sprite"),
-		_.pluck(verse.land, "chance"),
-		99).join("");
+		_.pluck(verse.land, "chance")).join("");
 	d.write("here's a weighted pseudorandom blob: " +"<p class='glyph'>"+ maplike + "</p><br>");
 
 	// fire off the thing and tell me what time it is at 12
-	d.write("12:00 is called " + correlator(_.pluck(verse.sun, "name"), _.pluck(verse.sun, "time"), 12) + "<br>")
-	d.write("06:00 is called " + correlator(_.pluck(verse.sun, "name"), _.pluck(verse.sun, "time"), 6) + "<br>")
+	d.write("12:00 is called " + $.correlator(Math.random, _.pluck(verse.sun, "name"), _.pluck(verse.sun, "time"), 12) + "<br>")
+	d.write("06:00 is called " + $.correlator(Math.random, _.pluck(verse.sun, "name"), _.pluck(verse.sun, "time"), 6) + "<br>")
 
 	d.write('<hr>');
 	
@@ -141,10 +97,11 @@ var go = (d, w, verse) => {
 	
 	// Generate a chunk
 	var genChunk = (rows, cols, rng) => {
-		return _.chunk(correlatum(
-		_.pluck(verse.land, "sprite"),
-		_.pluck(verse.land, "chance"),
-		rows * cols, rng), cols);
+		return _.chunk($.correlatum(
+			rng, rows * cols,
+			_.pluck(verse.land, "sprite"),
+			_.pluck(verse.land, "chance")
+		), cols);
 	}
 	
 	/**
@@ -472,7 +429,7 @@ var go = (d, w, verse) => {
 	w.addEventListener('keydown', keys);
 	var keyCode = keys.map((x) => x.which);
 	var keyToDirection = streams.lookup(verse.controls, keyCode);
-	
+
 	// Merge direction commands together
 	var merged = flyd.merge(keyToDirection, clicks);
 	
