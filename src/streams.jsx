@@ -57,7 +57,10 @@ var log = flyd.map((x) => { console.log(x); return x; });
  * @param  {stream<T>} stream - Source values
  * @return {stream<*>} - Stream of mapped values
  */
-var lookup = flyd.curryN(2, (map, stream) => flyd.combine((x, self) => self(map[stream()]), [stream]));
+var lookup = flyd.curryN(2,
+	(map, stream) => flyd.combine(
+		(x, self) => {self(map[stream()])}, [stream])
+);
 
 
 // Time stream synced to window's animation frame
