@@ -1,0 +1,32 @@
+{
+  "name": "you-are-dawg",
+  "version": "0.0.1",
+  "description": "Woof",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shuuki/you-are-dawg.git"
+  },
+  "author": "",
+  "license": "BSD",
+  "bugs": {
+    "url": "https://github.com/shuuki/you-are-dawg/issues"
+  },
+  "homepage": "https://github.com/shuuki/you-are-dawg#readme",
+  "dependencies": {
+    "chance": "^0.8.0",
+    "d3": "^3.5.10",
+    "flyd": "^0.2.0",
+    "lodash": "^3.10.1"
+  },
+  "devDependencies": {
+    "babel-core": "^6.3.15",
+    "babel-loader": "^6.2.0",
+    "babel-preset-es2015": "^6.3.13",
+    "webpack": "^1.12.9",
+    "webpack-dev-server": "^1.14.0"
+  }
+}
