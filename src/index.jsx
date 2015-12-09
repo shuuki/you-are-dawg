@@ -3,6 +3,9 @@ var chance = require('chance');
 var d3 = require('d3');
 var _ = require('lodash');
 
+// Style
+require('./index.less');
+
 // vvvvvvvv sandbox vvvvvvv
 
 // Helpers
