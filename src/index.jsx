@@ -1,5 +1,7 @@
 // Libs
 var flyd = require('flyd');
+flyd.obj = require('flyd/module/obj');
+
 var chance = require('chance');
 var d3 = require('d3');
 var _ = require('lodash');
@@ -8,6 +10,7 @@ var _ = require('lodash');
 var verse = require('./data.jsx');			// A universe of data
 var $ = require('./core.jsx');				// Core nice stuff 
 var streams = require('./streams.jsx');		// Stream goodies
+var render = require('./render.jsx');		// My eyes still work
 
 // Style
 require('./index.less');
@@ -43,19 +46,6 @@ d.write("06:00 is called " + $.correlator(_.pluck(verse.sun, "name"), _.pluck(ve
 d.write('<hr>');
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 /////////////////
 // Enter Dawg
 /////////////////
@@ -66,12 +56,6 @@ var seed = 314159;
 var rand = new Chance(seed);
 var getNumber = () => rand.random();
 
-
-
-
-
-
-//////////////////////// Mix of render + data gen for terrain information (2 uses right now)
 
 
 // Render config
@@ -87,122 +71,28 @@ var toLocal = (chunk, pos) => [
 ];
 
 
-
-// Generate single tile
-var genChunk = (rng, rows, cols) => {
-	return _.chunk($.correlatum(
-		rng, rows * cols,
-		_.pluck(verse.land, "sprite"),
-		_.pluck(verse.land, "chance")
-	), cols);
-} // @todo: This can be way smarter -- this is just chunks in a vaccum with probability
-
-/**
- * Land represents the terrain of the world.
- * It's in charge of generating/remembering a world based on (x, y) coordinates.
- * @todo: manipulations?
- */
-var Land = function(rng){ this.rng =  rng; this._data = {}; };
-
-/** Unique way to map (a, b) to a string key for lookup */
-Land.prototype.keyFn = function(a, b){ return a + ',' + b; };
-
-/** Get or generate the map at (a, b) -- currently using 20x20 chunks -- returns as a [row][col] array! */
-Land.prototype.at = function(a, b){
-	var key = this.keyFn(a, b);
-	if (!this._data[key]) {
-		this._data[key] = genChunk(getNumber, chunkWidth, chunkHeight);
-	};
-	return this._data[key];
-};
-
-
-
-
-
-// @fixme: A lot of logic below uses mappings above to conver points between spaces.
-// @todo: abstract that?
-
-
-
-
-
-
 //////////////
 // Some actors / state
 //////////////
 
-
-// Player object, has data and position in the grid
-var player = { pos: flyd.stream([10, 10]) };
-
-// Instance of land to work with
-var gameLand = new Land(rand);
+// THe world for now
+var gameLand = new render.Land(getNumber, {w: chunkWidth, h: chunkHeight});
 
 
-
-///////////
-// Camera view
-///////////
-var activeChunk = player.pos.map(getChunk)
-var terrain = flyd.combine((chunk) => {
-	var chunkPos = chunk();
-	
-	var land = _.cloneDeep(
-		gameLand.at(chunkPos[0], chunkPos[1])
-	);
-	
-	return land.map((x) => x.join(''));
-}, [activeChunk]);
-
-
-
-
-
-// We have player.pos
-var dawgActor = flyd.combine((pos) => {
-	return {
-		name: 'dawg',
-		pos: pos(),
-		sprite: verse.actors.dawg.sprite
-	};
-}, [player.pos]);
-
-var bird = {
-	pos: flyd.stream([-10, 9])
+// Actors -- Living things in the world.
+var actorsByName = _.indexBy(verse.actors, 'name');
+var actor = (name, pos) => {
+	var newActor = _.cloneDeep(actorsByName[name]);
+	newActor.pos = !pos ? [0, 0] : pos;
+	return flyd.obj.streamProps(newActor);
 };
-var birdActor = flyd.combine((pos) => {
-	return {
-		name: 'bird',
-		pos: pos(),
-		sprite: verse.actors.bird.sprite
-	}
-}, [bird.pos]);
-
-var human = {
-	pos: flyd.stream([12, 5])
-};
-var humanActor = flyd.combine((pos) => {
-	return {
-		name: 'human',
-		pos: pos(),
-		sprite: verse.actors.human.sprite
-	}
-}, [human.pos]);
-
-var squirrel = {
-	pos: flyd.stream([3, 5])
-};
-var squirrelActor = flyd.combine((pos) => {
-	return {
-		name: 'squirrel',
-		pos: pos(),
-		sprite: verse.actors.squirrel.sprite
-	}
-}, [squirrel.pos]);
 
 
-
+// Let's make a player
+var player = actor('dawg', [10, 10]);
+var bird = actor('bird', [-10, 9]);
+var human = actor('human', [12, 5]);
+var squirrel = actor('squirrel', [3, 5]);
 
 
 
@@ -302,6 +192,10 @@ var canEatSquirrel = actorDistance([player.pos, squirrel.pos]).map((x) => x < 1)
 
 
 /// RENDER ACTORS
+
+var actorTriggers = [bird, human, squirrel, player].map(flyd.obj.stream);
+actorTriggers.push(activeChunk); // And the lense
+
 var actorLayer = flyd.combine(function(){
 	var chunk = arguments[arguments.length -3]();
 	var actorsToRender = Array.prototype.slice.call(arguments, 0, -3)
@@ -330,7 +224,7 @@ var actorLayer = flyd.combine(function(){
 	emptyMap = emptyMap.slice(0, chunkHeight).map((row) => row.slice(0, chunkWidth));
 	
 	return emptyMap.map((x) => x.join(''));
-}, [birdActor, humanActor, squirrelActor, dawgActor, activeChunk]);
+}, actorTriggers);
 
 
 
@@ -341,6 +235,25 @@ var actorLayer = flyd.combine(function(){
 
 
 
+
+
+
+
+
+
+///////////
+// Camera view
+///////////
+var activeChunk = player.pos.map(getChunk)		// Track the player
+var cameraView = flyd.combine((chunk) => {
+	var chunkPos = chunk();
+	
+	var land = _.cloneDeep(
+		gameLand.at(chunkPos[0], chunkPos[1])
+	);
+	
+	return land.map((x) => x.join(''));
+}, [activeChunk]);
 
 
 
@@ -368,7 +281,7 @@ var renderMap = (map, land) => {
 
 // Bind and attach render
 var boundRender = _.partial(renderMap, map);
-flyd.on(boundRender, terrain);
+flyd.on(boundRender, cameraView);				// Render active
 
 var map2 = gameNode.append('div').classed('actor map', true);
 flyd.on(_.partial(renderMap, map2), actorLayer);

@@ -60,14 +60,13 @@ var season = [
 
 
 
-var a = (name, sprite) => { return { name: name, sprite: sprite }; };
+var a = (name, sprite) => { return { name, sprite }; };
 var actors = [
 	a('bird', 'B'),
 	a('dawg', '@'),
 	a('human', '!'),
 	a('squirrel', 'S')
 ];
-var actorByName = _.indexBy(actors, 'name');
 
 
 
@@ -88,7 +87,7 @@ var defaultControls = {
 module.exports = {
 	land,
 	sun, moon, season,		// The sun and the stars, how they travel
-	actors: actorByName,	// A motly crew
+	actors,	// A motly crew
 	// Some controls, map of KeyEvent.which => Command
 	controls: defaultControls
 };
