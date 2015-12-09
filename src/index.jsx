@@ -109,7 +109,7 @@ var squirrel = actor('squirrel', [3, 5]);
 var treeTrail = flyd.on((pos) => {
 	var chunk = getChunk(pos);
 	var local = toLocal(chunk, pos);
-	gameLand.at(chunk[0], chunk[1])[local[1]][local[0]] = 'T';
+	gameLand.at(chunk[0], chunk[1])[local[1]][local[0]] = '?';
 });
 
 
