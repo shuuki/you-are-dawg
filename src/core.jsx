@@ -46,13 +46,7 @@ var correlatum = flyd.curryN(4, (rng, count, label, bounds) => {
 		return out;
 	});
 });
-var correlator = (labels, weights, seed) => 
-	_.first(correlatum(
-		() => seed / _.reduce(weights, sum),	// Produces exactly that bin
-		1,
-		labels,
-		weights
-	));
+var correlator = (labels, weights, seed) => labels[_.findIndex(weights, (w) => seed <= w)];
 
 
 

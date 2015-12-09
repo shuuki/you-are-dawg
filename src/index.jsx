@@ -37,8 +37,8 @@ var maplike = $.correlatum(Math.random, 99,
 d.write("here's a weighted pseudorandom blob: " +"<p class='glyph'>"+ maplike + "</p><br>");
 
 // fire off the thing and tell me what time it is at 12
-d.write("12:00 is called " + $.correlator(Math.random, _.pluck(verse.sun, "name"), _.pluck(verse.sun, "time"), 12) + "<br>")
-d.write("06:00 is called " + $.correlator(Math.random, _.pluck(verse.sun, "name"), _.pluck(verse.sun, "time"), 6) + "<br>")
+d.write("12:00 is called " + $.correlator(_.pluck(verse.sun, "name"), _.pluck(verse.sun, "time"), 12) + "<br>")
+d.write("06:00 is called " + $.correlator(_.pluck(verse.sun, "name"), _.pluck(verse.sun, "time"), 6) + "<br>")
 
 d.write('<hr>');
 
@@ -382,7 +382,7 @@ flyd.on(_.partial(renderMap, map2), actorLayer);
 
 
 // Applies class to selection based on boolean eval of stream's val
-var classFrom = (class, selection, stream) => flyd.on((val) => selection.classed(class, !!val), stream);
+var classFrom = (className, selection, stream) => flyd.on((val) => selection.classed(className, !!val), stream);
 
 
 // Apply '.other' to map2 if dogOnSand

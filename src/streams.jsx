@@ -80,7 +80,7 @@ window.requestAnimationFrame(step);
 
 
 var keys = flyd.stream();
-window.addEventListener('keydown', keyStream);
+window.addEventListener('keydown', keys);
 
 
 
