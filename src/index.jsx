@@ -1,46 +1,22 @@
+// Libs
 var flyd = require('flyd');
 var chance = require('chance');
 var d3 = require('d3');
 var _ = require('lodash');
 
+// Deps
+var verse = require('./data.jsx');			// A universe of data
+var $ = require('./core.jsx');				// Core nice stuff 
+var streams = require('./streams.jsx');		// Stream goodies
+var log = streams.log; // EVEN SHORTER
+
 // Style
 require('./index.less');
 
-// vvvvvvvv sandbox vvvvvvv
+// Time stream form window.requestAnimationFrame
+var time = streams.time;
 
-// Helpers
-var sum = (a, b) => a+b;
-var diff = (a, b) => a-b;
-var square = (a) => a*a;
-var dist = (a, b) => Math.sqrt(square(diff(a[0], b[0])) + square(diff(a[1], b[1])));
-
-var durationStream = flyd.curryN(2, (time, duration) => {
-	var last;
-	return flyd.combine(() => {
-		if (last === undefined)
-		{
-			last = time();
-		}
-		else if (time() - last >= duration)
-		{
-			last = time();
-			return true;
-		}
-	}, [time]);
-});
-
-// Log a stream to the console
-var log = flyd.map((x) => { console.log(x); return x; });
-
-// performs a lookup on a map object from stream object
-var lookup = flyd.curryN(2, (map, stream) => flyd.combine(() => map[stream()], [stream]));
-
-var time = flyd.stream(Date.now());
-var deltaTime = flyd.scan((prev, next) => {
-}, time);
-setInterval(() => time(Date.now()), 10);
-
-
+console.log(verse);
 
 /**
  * Takes 2 arrays aligned by index of labels and their weights.
@@ -55,7 +31,7 @@ function correlatum(label, bounds, count, rng){
 	if (!rng) rng = Math.random;
 	
 	// Grab stuff outta' data
-	var totalWeight = _.reduce(bounds, sum);
+	var totalWeight = _.reduce(bounds, $.sum);
 	
 	for (var k = 0; k < count; k++) {
 		var roll = rng() * totalWeight;
@@ -98,7 +74,7 @@ var go = (d, w, verse) => {
 	d.write("the phases of the moon are: " +
 					_.pluck(verse.moon, "name").join(", ") + "<br>");
 	d.write("the total weight of all terrain is: " +
-					_.reduce(_.pluck(verse.land, "chance"), sum) + "<br>");
+					_.reduce(_.pluck(verse.land, "chance"), $.sum) + "<br>");
 
 // fire off the finder to give me something... i got 99 problems but sprites ain't one
 	var maplike = correlatum(
@@ -251,7 +227,7 @@ var go = (d, w, verse) => {
 		return {
 			name: 'dawg',
 			pos: pos(),
-			sprite: verse.dawg.sprite
+			sprite: verse.actors.dawg.sprite
 		};
 	}, [player.pos]);
 	
@@ -262,7 +238,7 @@ var go = (d, w, verse) => {
 		return {
 			name: 'bird',
 			pos: pos(),
-			sprite: verse.bird.sprite
+			sprite: verse.actors.bird.sprite
 		}
 	}, [bird.pos]);
 	
@@ -273,7 +249,7 @@ var go = (d, w, verse) => {
 		return {
 			name: 'human',
 			pos: pos(),
-			sprite: verse.human.sprite
+			sprite: verse.actors.human.sprite
 		}
 	}, [human.pos]);
 	
@@ -284,7 +260,7 @@ var go = (d, w, verse) => {
 		return {
 			name: 'squirrel',
 			pos: pos(),
-			sprite: verse.squirrel.sprite
+			sprite: verse.actors.squirrel.sprite
 		}
 	}, [squirrel.pos]);
 	
@@ -315,7 +291,7 @@ var go = (d, w, verse) => {
 
 	
 	// Make the squirrel move!
-	flyd.on(() => {
+	var update = streams.interval(500, () => {
 		var cur = squirrel.pos();
 		cur[0] = cur[0] + (1 - _.random(2));
 		cur[1] = cur[1] + (1 - _.random(2));
@@ -325,9 +301,15 @@ var go = (d, w, verse) => {
 		curBird[0] = curBird[0] + 1;
 		curBird[1] = Math.random() < 0.3 ? (curBird[1] + Math.random() > 0.5 ? 1 : -1) : curBird[1];
 		bird.pos(curBird);
-	}, durationStream(time, 500));
+
+		return [squirrel, bird];
+	});
+
 	
 	
+
+
+
 	var dogOnSand = flyd.combine((dog) => {
 		var pos = dog();
 		var chunk = getChunk(pos);
@@ -336,7 +318,7 @@ var go = (d, w, verse) => {
 		return terrainChunk[local[1]][local[0]] === '.';
 	}, [player.pos]);
 	
-	var actorDistance = flyd.combine((a, b) => dist(a(), b()));
+	var actorDistance = flyd.combine((a, b) => $.dist(a(), b()));
 	
 	var distanceToHuman = actorDistance([player.pos, human.pos]);
 	var canTalkToHuman = distanceToHuman.map((x) => x < 1.5);
@@ -489,7 +471,7 @@ var go = (d, w, verse) => {
 	var keys = flyd.stream();
 	w.addEventListener('keydown', keys);
 	var keyCode = keys.map((x) => x.which);
-	var keyToDirection = lookup(verse.controls, keyCode);
+	var keyToDirection = streams.lookup(verse.controls, keyCode);
 	
 	// Merge direction commands together
 	var merged = flyd.merge(keyToDirection, clicks);
@@ -614,89 +596,6 @@ var go = (d, w, verse) => {
 
 
 // vvvvvvvv data vvvvvvv
-var verse = {
-	land: [
-		{chance: 100, sprite: ".", name: "sand"},
-		{chance: 90, sprite: ",", name: "short grass"},
-		{chance: 50, sprite: "/", name: "tall grass"},
-		{chance: 15, sprite: ";", name: "dirt"},
-		{chance: 5, sprite: "i", name: "reeds"},
-		{chance: 1, sprite: "$", name: "stuff"},
-		{chance: 1, sprite: "&", name: "bones"},
-		{chance: 1, sprite: "%", name: "more bones"},
-		{chance: 1, sprite: "?", name: "tracks"},
-		{chance: 2, sprite: "h", name: "dead tree"},
-		{chance: 2, sprite: "A", name: "spruce"},
-		{chance: 2, sprite: "T", name: "pine"},
-		{chance: 3, sprite: "Y", name: "juniper"},
-		{chance: 2.5, sprite: "L", name: "oak"},
-		{chance: 2.5, sprite: "H", name: "aspen"},
-		{chance: 1, sprite: "D", name: "cement"},
-		{chance: 1, sprite: "n", name: "scruff"},
-		{chance: 1, sprite: "w", name: "water"},
-		{chance: 1, sprite: "s", name: "scrub"},
-		{chance: 1, sprite: "m", name: "cracked mud"},
-		{chance: 1, sprite: "g", name: "more asphalt"},
-		{chance: 1, sprite: "G", name: "asphalt"},
-		{chance: 10, sprite: "`", name: "dust"},
-		{chance: 10, sprite: ":", name: "more sand"},
-		{chance: 0.1, sprite: "_", name: "nothing"}
-	],
-	sun: [
-		{time: 5, name: "night"},
-		{time: 7, name: "dawn"},
-		{time: 11, name: "morning"},
-		{time: 13, name: "noon"},
-		{time: 15, name: "afternoon"},
-		{time: 19, name: "evening"},
-		{time: 21, name: "twilight"},
-		{time: 24, name: "night"}	
-	],
-	moon: [
-		{limit: 89, name: "new"},
-		{limit: 179, name: "crescent"},
-		{limit: 269, name: "first quarter"},
-		{limit: 359, name: "gibbous"},
-		{limit: 449, name: "full"},
-		{limit: 539, name: "disseminating"},
-		{limit: 629, name: "last quarter"},
-		{limit: 720, name: "balsamic"}
-	],
-	season: [
-		{limit: 2191, name: "summer"},
-		{limit: 4382, name: "autumn"},
-		{limit: 6572, name: "winter"},
-		{limit: 8764, name: "spring"}
-	],
-	// Some data about real things
-	dawg: {
-		sprite: [
-			['Q', '@', 'Q'],
-			['@', 'Q', '@'],
-			['Q', '@', 'Q']
-		]
-	},
-	bird: {
-		sprite: 'B'
-	},
-	squirrel: {
-		sprite: 'S'
-	},
-	human: {
-		sprite: '!'
-	},
-	// Some controls, map of KeyEvent.which => Command
-	controls: {
-		// Up, W
-		38: 'North', 87: 'North',
-		// Down, S
-		40: 'South', 83: 'South',
-		// Left, A
-		37: 'West', 65: 'West',
-		// Right, D
-		68: 'East', 39: 'East'
-	}
-};
 
 // Kick it off!!!!
 go(document, window, verse);
