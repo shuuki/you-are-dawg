@@ -115,7 +115,7 @@ var treeTrail = flyd.on((pos) => {
 
 // Draw a trail of trees! For the player
 treeTrail(player.pos);
-
+treeTrail(squirrel.pos);
 
 
 
@@ -174,31 +174,19 @@ var canEatSquirrel = actorDistance([player.pos, squirrel.pos]).map((x) => x < 1)
 
 
 
+///////////
+// RENDER LOGIC
+///////////
+var activeChunk = player.pos.map(getChunk)		// Track the player
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/// RENDER ACTORS
 
 var actorTriggers = [bird, human, squirrel, player].map(flyd.obj.stream);
 actorTriggers.push(activeChunk); // And the lense
 
 var actorLayer = flyd.combine(function(){
-	var chunk = arguments[arguments.length -3]();
-	var actorsToRender = Array.prototype.slice.call(arguments, 0, -3)
+	var actors = Array.prototype.slice.call(arguments, 0, -3);
+	var chunk = arguments[arguments.length - 3]();
+	var actorsToRender = actors
 		.map((x) => x())
 		.filter((x) => _.isEqual(getChunk(x.pos), chunk));
 	
@@ -227,24 +215,9 @@ var actorLayer = flyd.combine(function(){
 }, actorTriggers);
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ///////////
 // Camera view
 ///////////
-var activeChunk = player.pos.map(getChunk)		// Track the player
 var cameraView = flyd.combine((chunk) => {
 	var chunkPos = chunk();
 	
@@ -257,9 +230,8 @@ var cameraView = flyd.combine((chunk) => {
 
 
 
-
-
-
+////////
+// Render it all to the DOM as p-tags
 
 // DOM element to render game into
 var map = gameNode.append('div').classed('map', true);
@@ -283,30 +255,19 @@ var renderMap = (map, land) => {
 var boundRender = _.partial(renderMap, map);
 flyd.on(boundRender, cameraView);				// Render active
 
+// Actor overlay
 var map2 = gameNode.append('div').classed('actor map', true);
 flyd.on(_.partial(renderMap, map2), actorLayer);
 
 
 
 
-
-
-
-
-
 // Applies class to selection based on boolean eval of stream's val
 var classFrom = (className, selection, stream) => flyd.on((val) => selection.classed(className, !!val), stream);
-
-
 // Apply '.other' to map2 if dogOnSand
 classFrom('other', map2, dogOnSand);
 classFrom('faded', map, canTalkToHuman);
 classFrom('other', map, canEatSquirrel);
-
-
-
-
-
 
 
 
@@ -344,9 +305,6 @@ var keyToDirection = streams.lookup(
 
 // Moves player.pos on events from keyToDirection
 cardinal(keyToDirection, player.pos);
-
-
-
 
 
 
