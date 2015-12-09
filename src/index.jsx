@@ -381,27 +381,14 @@ flyd.on(_.partial(renderMap, map2), actorLayer);
 
 
 
+// Applies class to selection based on boolean eval of stream's val
+var classFrom = (class, selection, stream) => flyd.on((val) => selection.classed(class, !!val), stream);
 
 
-
-
-
-
-
-
-
-
-flyd.on((onSand) => {
-	map2.classed('other', onSand);
-}, dogOnSand);
-
-flyd.on((canTalk) => {
-	map.classed('faded', canTalk);
-}, canTalkToHuman);
-
-flyd.on((canEat) => {
-	map.classed('other', canEat);
-}, canEatSquirrel);
+// Apply '.other' to map2 if dogOnSand
+classFrom('other', map2, dogOnSand);
+classFrom('faded', map, canTalkToHuman);
+classFrom('other', map, canEatSquirrel);
 
 
 
@@ -414,41 +401,36 @@ flyd.on((canEat) => {
 
 
 
+// Move pos stream in a cardinal manor
+var cardinal = (directionStream, pos) => {
+	return directionStream.map((direction) => {
+		var currentPos = pos();
+		switch (direction) {
+			case 'East':
+				currentPos[0] = currentPos[0] + 1;
+				break;
+			case 'West':
+				currentPos[0] = currentPos[0] - 1;
+				break;
+			case 'North':
+				currentPos[1] = currentPos[1] + 1;
+				break;
+			case 'South':
+				currentPos[1] = currentPos[1] - 1;
+				break;
+		}
+		pos(currentPos);
+	});
+}
 
+// Map keys to key codes
+var keyToDirection = streams.lookup(
+	verse.controls,
+	streams.keys.map((x) => x.which)	// Map out key code
+);
 
-
-
-// Track key pressess!
-var keys = flyd.stream();
-w.addEventListener('keydown', keys);
-var keyCode = keys.map((x) => x.which);
-var keyToDirection = streams.lookup(verse.controls, keyCode);
-
-// Merge direction commands together
-var merged = keyToDirection;
-
-// On direction command, update player position
-flyd.on((direction) => {
-	var currentPos = player.pos();
-	
-	switch (direction) {
-		case 'East':
-			currentPos[0] = currentPos[0] + 1;
-			break;
-		case 'West':
-			currentPos[0] = currentPos[0] - 1;
-			break;
-		case 'North':
-			currentPos[1] = currentPos[1] + 1;
-			break;
-		case 'South':
-			currentPos[1] = currentPos[1] - 1;
-			break;
-	}
-	
-	// And push the update
-	player.pos(currentPos);
-}, merged);
+// Moves player.pos on events from keyToDirection
+cardinal(keyToDirection, player.pos);
 
 
 
@@ -461,11 +443,9 @@ flyd.on((direction) => {
 
 
 
-
-
-
-
-
+//////////
+//	Minimap code. Perfect for now.
+//////////
 var minimap = gameNode.append('div').classed('minimap map', true);
 var minimapData = [];
 var chunks = flyd.combine((chunk) => {

@@ -61,11 +61,6 @@ var correlator = (labels, weights, seed) =>
 
 
 
-
-
-
-
-
 module.exports = {
 	// Maths
 	sum, diff, square, dist,

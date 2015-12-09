@@ -79,6 +79,11 @@ window.requestAnimationFrame(step);
 
 
 
+var keys = flyd.stream();
+window.addEventListener('keydown', keyStream);
+
+
+
 module.exports = {
 	// Generate
 	later,
@@ -89,4 +94,5 @@ module.exports = {
 	log,
 	// Static streams
 	time,
+	keys // DOM events
 };
