@@ -63,8 +63,8 @@ var getNumber = () => rand.random();
 
 
 // Render config
-var chunkWidth = 20;
-var chunkHeight = 20;
+var chunkWidth = 50;
+var chunkHeight = 50;
 
 
 // Chunk math -- transform points in different spaces
@@ -82,6 +82,8 @@ var toLocal = (chunk, pos) => [
 // THe world for now
 var gameLand = new render.Land(getNumber, {w: chunkWidth, h: chunkHeight});
 
+// Some facts
+var directions = ['North', 'South', 'East', 'West'];
 
 // Actors -- Living things in the world.
 var actorsByName = _.indexBy(verse.actors, 'name');
@@ -92,9 +94,9 @@ var actor = (name, pos) => {
 };
 
 
-// Let's make a player
+// Let's make some actors
 var player = actor('dawg', [10, 10]);
-var bird = actor('bird', [-10, 9]);
+var birds = _.map(new Array(250), () => actor('bird', [_.random(-50, 50), _.random(-50, 50)]));
 var human = actor('human', [12, 5]);
 var squirrel = actor('squirrel', [3, 5]);
 
@@ -109,18 +111,46 @@ var squirrel = actor('squirrel', [3, 5]);
 // Gimmicks Playground
 ////////////
 
+
+// Move a pos stream in a cardinal way
+var cardinal = (directionStream, pos) => {
+	return directionStream.map((direction) => {
+		var currentPos = pos();
+		switch (direction) {
+			case 'East':
+				currentPos[0] = currentPos[0] + 1;
+				break;
+			case 'West':
+				currentPos[0] = currentPos[0] - 1;
+				break;
+			case 'North':
+				currentPos[1] = currentPos[1] + 1;
+				break;
+			case 'South':
+				currentPos[1] = currentPos[1] - 1;
+				break;
+		}
+		pos(currentPos);
+	});
+}
+
 // Tree trail!
-var treeTrail = flyd.on((pos) => {
+var trail = flyd.curryN(2, (character, stream) => flyd.on((pos) => {
 	var chunk = getChunk(pos);
 	var local = toLocal(chunk, pos);
-	gameLand.at(chunk[0], chunk[1])[local[1]][local[0]] = '?';
-});
+	gameLand.at(chunk[0], chunk[1])[local[1]][local[0]] = character;
+}, stream));
+
+var treeTrail = trail('T');
+var boneTrail = trail('&');
 
 // Draw a trail of trees! For the player
 treeTrail(player.pos);
 treeTrail(squirrel.pos);
 
 
+// The birds spread sadness.
+birds.forEach((x) => boneTrail(x.pos));
 
 
 
@@ -131,23 +161,25 @@ treeTrail(squirrel.pos);
 
 
 
+var directionGen = () => streams.interval(100, () => _.sample(directions));
 
+// Make the birds and squirrel... scrobble.
+birds.forEach((x) => cardinal(directionGen(), x.pos));
 
-
-// Make the squirrel move!
-var update = streams.interval(100, () => {
-	var cur = squirrel.pos();
-	cur[0] = cur[0] + (1 - _.random(2));
-	cur[1] = cur[1] + (1 - _.random(2));
-	squirrel.pos(cur);
+// // Make the squirrel move!
+// var update = streams.interval(100, () => {
+// 	var cur = squirrel.pos();
+// 	cur[0] = cur[0] + (1 - _.random(2));
+// 	cur[1] = cur[1] + (1 - _.random(2));
+// 	squirrel.pos(cur);
 	
-	var curBird = bird.pos();
-	curBird[0] = curBird[0] + 1;
-	curBird[1] = Math.random() < 0.3 ? (curBird[1] + Math.random() > 0.5 ? 1 : -1) : curBird[1];
-	bird.pos(curBird);
+// 	var curBird = bird.pos();
+// 	curBird[0] = curBird[0] + 1;
+// 	curBird[1] = Math.random() < 0.3 ? (curBird[1] + Math.random() > 0.5 ? 1 : -1) : curBird[1];
+// 	bird.pos(curBird);
 
-	return [squirrel, bird];
-});
+// 	return [squirrel, bird];
+// });
 
 
 
@@ -181,9 +213,8 @@ var canEatSquirrel = actorDistance([player.pos, squirrel.pos]).map((x) => x < 1)
 ///////////
 var activeChunk = player.pos.map(getChunk)		// Track the player
 
-
-// Actors to render
-var actorStreams = [bird, human, squirrel, player].map(flyd.obj.stream);
+// Things to redraw actor layer with
+var actorStreams = birds.concat([squirrel, player, human]).map(flyd.obj.stream);
 
 // Updated when actors change
 var actorLayer = flyd.combine(function()
@@ -274,33 +305,6 @@ classFrom('other', map2, dogOnBones);
 classFrom('faded', map, canTalkToHuman);
 classFrom('other', map, canEatSquirrel);
 
-
-
-
-
-
-
-// Move pos stream in a cardinal manor
-var cardinal = (directionStream, pos) => {
-	return directionStream.map((direction) => {
-		var currentPos = pos();
-		switch (direction) {
-			case 'East':
-				currentPos[0] = currentPos[0] + 1;
-				break;
-			case 'West':
-				currentPos[0] = currentPos[0] - 1;
-				break;
-			case 'North':
-				currentPos[1] = currentPos[1] + 1;
-				break;
-			case 'South':
-				currentPos[1] = currentPos[1] - 1;
-				break;
-		}
-		pos(currentPos);
-	});
-}
 
 // Map keys to key codes
 var keyToDirection = streams.lookup(
