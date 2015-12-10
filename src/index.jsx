@@ -15,14 +15,14 @@ var render = require('./render.jsx');		// My eyes still work
 // Style
 require('./index.less');
 
-var time = streams.time;
-
 // Shortcuts
+var time = streams.time;
 var log = streams.log;
 var d = document;
 var w = window;
 
 console.log(verse);		// Let me hear you shout
+
 
 
 // Print some things
@@ -44,6 +44,9 @@ d.write("12:00 is called " + $.correlator(_.pluck(verse.sun, "name"), _.pluck(ve
 d.write("06:00 is called " + $.correlator(_.pluck(verse.sun, "name"), _.pluck(verse.sun, "time"), 6) + "<br>")
 
 d.write('<hr>');
+
+
+
 
 
 /////////////////
@@ -132,7 +135,7 @@ treeTrail(squirrel.pos);
 
 
 // Make the squirrel move!
-var update = streams.interval(500, () => {
+var update = streams.interval(100, () => {
 	var cur = squirrel.pos();
 	cur[0] = cur[0] + (1 - _.random(2));
 	cur[1] = cur[1] + (1 - _.random(2));
@@ -163,7 +166,6 @@ var actorDistance = flyd.combine((a, b) => $.dist(a(), b()));
 
 var distanceToHuman = actorDistance([player.pos, human.pos]);
 var canTalkToHuman = distanceToHuman.map((x) => x < 1.5);
-
 var canEatSquirrel = actorDistance([player.pos, squirrel.pos]).map((x) => x < 1);
 
 
@@ -180,16 +182,18 @@ var canEatSquirrel = actorDistance([player.pos, squirrel.pos]).map((x) => x < 1)
 var activeChunk = player.pos.map(getChunk)		// Track the player
 
 
-var actorTriggers = [bird, human, squirrel, player].map(flyd.obj.stream);
-actorTriggers.push(activeChunk); // And the lense
+// Actors to render
+var actorStreams = [bird, human, squirrel, player].map(flyd.obj.stream);
 
-var actorLayer = flyd.combine(function(){
-	var actors = Array.prototype.slice.call(arguments, 0, -3);
-	var chunk = arguments[arguments.length - 3]();
+// Updated when actors change
+var actorLayer = flyd.combine(function()
+{
+	var actors = Array.prototype.slice.call(arguments, 0, -2);
+	var chunk = activeChunk();
 	var actorsToRender = actors
 		.map((x) => x())
 		.filter((x) => _.isEqual(getChunk(x.pos), chunk));
-	
+
 	var emptyMap = _.chunk(_.map(new Array(chunkWidth * chunkHeight), (x) => 'a'), chunkWidth);
 	
 	actorsToRender.forEach((actor) => {
@@ -212,7 +216,8 @@ var actorLayer = flyd.combine(function(){
 	emptyMap = emptyMap.slice(0, chunkHeight).map((row) => row.slice(0, chunkWidth));
 	
 	return emptyMap.map((x) => x.join(''));
-}, actorTriggers);
+}, actorStreams);
+
 
 
 ///////////
@@ -226,12 +231,12 @@ var cameraView = flyd.combine((chunk) => {
 	);
 	
 	return land.map((x) => x.join(''));
-}, [activeChunk]);
-
+}, [activeChunk, time]);
 
 
 ////////
-// Render it all to the DOM as p-tags
+// Render it all to the DOM as p-tags?
+////////
 
 // DOM element to render game into
 var map = gameNode.append('div').classed('map', true);
@@ -373,4 +378,4 @@ var chunks = flyd.combine((chunk) => {
 	}, []);
 
 	renderMap(minimap, out);
-}, [activeChunk]);
+}, [activeChunk, time]);
