@@ -1,15 +1,17 @@
-### YOU ARE DAWG
+###YOU_ARE_DAWG
+
+a journey
 
 ---
 
 
-shared design resources in `/common` 
+### develop
+1. Pull repo, have `npm` and `node` ready
+2. `npm install`
+3. `node serve` to host at `http://localhost:8080/`
 
-look for `library.css` in `/common/fonts` to load webfonts
 
-to update icomoon glyphs, replace `/common/fonts/dawgverse` 
-
-main game files in `/game`
-
-map editor and other goodies live in `/tools` 
-
+### design
+* shared design resources in `/common` 
+* look for `library.css` in `/common/fonts` to load webfonts
+* to update icomoon glyphs, replace `/common/fonts/dawgverse` 
