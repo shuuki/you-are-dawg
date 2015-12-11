@@ -1,7 +1,7 @@
-var flyd = require('flyd');
+var _ = require('lodash');
 
 // Some maths
-var sum = (a, b) => a+b;
+var sum = (a, b) => a+b; var ssum = _.spread(sum); // Spread something?
 var diff = (a, b) => a-b;
 var square = (a) => a*a;
 var dist = (a, b) => Math.sqrt(
@@ -10,7 +10,36 @@ var dist = (a, b) => Math.sqrt(
 );
 
 
+/**
+ * Vector interface.
+ * Assumes you call fns with same length vectors.
+ * @type {Object}
+ */
+var Vec = {
+	move: (src, by) => _.zip(src, by).map(ssum)
+};
 
+
+
+
+
+
+
+var Arr2D = {
+	create: (w, h) => _.map(new Array(w), (x) => new Array(h)),
+	fill: (arr, val) => _.map(arr, (row) => _.fill(row, val)),
+	extract: _.curry((arr, w, h, x, y) => {
+		x = Math.max(Math.min(x, 0), arr.length);
+		w = x + w > arr.length ? arr.length - x : w;
+		y = Math.max(Math.min(y, 0), arr[0].length);
+		h = y + h > arr[0].length ? arr[0].length - y : h;
+		return _.map(new Array(w), (row, a) => {
+			return _.map(new Array(h), (cell, b) => {
+				return arr[x + a][y + b];
+			});
+		});
+	}, 5)
+};
 
 
 
@@ -30,7 +59,7 @@ var dist = (a, b) => Math.sqrt(
  * @param {number[]} bounds - Weight of each label
  * @return {string[]} - List of `label` items `count` long.
  */
-var correlatum = flyd.curryN(4, (rng, count, label, bounds) => {
+var correlatum = _.curry((rng, count, label, bounds) => {
 	var totalWeight = _.reduce(bounds, sum);
 
 	return _.map(new Array(count), () => {
@@ -45,9 +74,18 @@ var correlatum = flyd.curryN(4, (rng, count, label, bounds) => {
 		});
 		return out;
 	});
-});
+}, 4);
 var correlator = (labels, weights, seed) => labels[_.findIndex(weights, (w) => seed <= w)];
 
+
+
+
+
+
+// Curry stuff
+sum = _.curry(sum, 2);
+diff = _.curry(diff, 2);
+dist = _.curry(dist, 2);
 
 
 
@@ -59,5 +97,10 @@ module.exports = {
 	// Maths
 	sum, diff, square, dist,
 	// Randoms
-	correlatum, correlator
+	correlatum, correlator,
+	// Geometry?
+	// @todo: Rectangle
+	Vec,
+	// Data
+	Arr2D
 };
