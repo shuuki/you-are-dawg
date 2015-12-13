@@ -1,6 +1,7 @@
 module.exports = {
     context: process.cwd() + '/src/',
     entry: { null: "./index.jsx" },
+    devtool: 'cheap-source-map',
     output: {
         path: '/',
         filename: "main.bundle.js"
