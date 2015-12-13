@@ -105,11 +105,12 @@ Land.prototype.getRect = function(pos, w, h)
 	var actors = _.filter(this._actors, (x) => $.Rect.contains(rect, x.pos))
 	// Transform to local and write
 		.map((x) => {
+			var chunk = $.getChunk([w, h], pos);
+			var local = $.toLocal([w, h], chunk, x.pos);
+			land[h - local[1] - 1][local[0]] = x.sprite;
 			return x;
 		});
-		// .map((a) => land[a.pos[1]][a.pos[]] = a.sprite);
 
-	console.log(JSON.stringify(_.pluck(actors, 'pos')));
 	return land;
 };
 
