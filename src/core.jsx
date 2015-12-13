@@ -2,10 +2,10 @@ var _ = require('lodash');
 
 // Some maths
 var sum = (a, b) => a+b; var ssum = _.spread(sum); // Spread something?
-var diff = (a, b) => a-b;
-var mult = (a, b) => a*b;
+var diff = (a, b) => a-b; var sdiff = _.spread(diff);
+var mult = (a, b) => a*b; var smult = _.spread(mult);
 var square = (a) => a*a;
-var div = (a, b) => a/b;
+var div = (a, b) => a/b; var sdiv = _.spread(div);
 var dist = (a, b) => Math.sqrt(
 	square(diff(a[0], b[0])) +
 	square(diff(a[1], b[1]))
@@ -18,7 +18,10 @@ var dist = (a, b) => Math.sqrt(
  * @type {Object}
  */
 var Vec = {
-	move: (src, by) => _.zip(src, by).map(ssum)
+	diff: (src, by) => _.zip(src, by).map(sdiff),
+	div: (src, by) => _.zip(src, by).map(sdiv),
+	mult: (src, by) => _.zip(src, by).map(smult),
+	sum: (src, by) => _.zip(src, by).map(ssum)
 };
 
 
@@ -26,7 +29,8 @@ var Vec = {
 var Rect = {
 	create: (pos, dims) => { return {pos, dims}; },
 	contains: (rect, pt) => _.every(pt, (d, i) =>
-		d <= rect.pos[i] + rect.dims[i]
+		d >= rect.pos[i] &&
+		d < rect.pos[i] + rect.dims[i]
 	)
 };
 
@@ -108,11 +112,13 @@ var inMap = _.curry((map, data) => map[data] !== undefined);
 
 var getChunk = function(dims, pos)
 {
-	return pos.map((x, i) => Math.floor(x / dims[i]));
+	return Vec.div(pos, dims).map(Math.floor);
+	// pos.map((x, i) => Math.floor(x / dims[i]));
 };
 var toLocal = function(dims, chunk, pos)
 {
-	return pos.map((x, i) => x - chunk[i] * dims[i]);
+	return Vec.diff(pos, Vec.mult(chunk, dims));
+	// return pos.map((x, i) => x - chunk[i] * dims[i]);
 };
 
 

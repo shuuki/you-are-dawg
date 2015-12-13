@@ -101,15 +101,16 @@ Land.prototype.getRect = function(pos, w, h)
 	var land = genChunk(this.rng, w, h);
 	var rect = $.Rect.create(pos, [w, h]);
 
-	// Filter visible
-	var actors = _.filter(this._actors, (x) => $.Rect.contains(rect, x.pos))
-	// Transform to local and write
-		.map((x) => {
-			var chunk = $.getChunk([w, h], pos);
-			var local = $.toLocal([w, h], chunk, x.pos);
-			land[h - local[1] - 1][local[0]] = x.sprite;
-			return x;
-		});
+	var actors = this._actors.map((actor) => {
+		if ($.Rect.contains(rect, actor.pos))
+		{
+			var local = $.Vec.diff(actor.pos, pos);
+			local[1] = h - local[1] - 1;
+			land[local[1]][local[0]] = actor.sprite;
+		}
+
+		return actor;
+	});
 
 	return land;
 };
@@ -160,14 +161,6 @@ Render.prototype.to = function(selection)
 
 	return this;
 };
-Render.prototype.getChunk = function(pos)
-{
-	return $.getChunk([this.width, this.height], pos);
-};
-Render.prototype.toLocal = function(chunk, pos)
-{
-	return $.toLocal([this.width, this.height], chunk, pos);
-};
 
 
 
@@ -179,14 +172,11 @@ Render.prototype.toLocal = function(chunk, pos)
 
 
 var Camera = (renderer, config) => {
-	var half = _.partialRight($.div, 2);
-	
 	var fn = function()
 	{
-		var renderPoint = _.zip(this.target.pos, [renderer.width, renderer.height])
-			.map($.diff).map(half);
-
-		return config.source.getRect(this.target.pos, renderer.width, renderer.height);
+		var halfWidth = [-renderer.width, -renderer.height].map((x) => x / 2);
+		var renderPoint = $.Vec.sum(this.target.pos, halfWidth);
+		return config.source.getRect(renderPoint, renderer.width, renderer.height);
 	};
 
 	fn.target = config.target;

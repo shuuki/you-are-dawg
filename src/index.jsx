@@ -103,10 +103,15 @@ var actor = (name, pos) => {
 var player = actor('dawg', [10, 10]);
 
 
+// Move the player by keys
 logic.add(() => {
 	var commands = commandState();
 	player.pos = _.reduce(commands, (pos, v, dir) => gimmicks.move.cardinal(dir, pos), player.pos);
 });
+
+
+
+var birds = _.map(new Array(1000), (x) => actor('bird', [_.random(-100, 100), _.random(-100, 100)]));
 
 
 
@@ -123,7 +128,6 @@ logic.add(() => {
 
 
 // A camera lense into gameLand
-
 var playerCam = render.Camera(render.Renderer, { target: player, source: gameLand });
 render.Renderer.add(playerCam);
 

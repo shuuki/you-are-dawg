@@ -15,20 +15,20 @@ var $ = require('./core.jsx');
 // Move a pos by a direction
 var cardinal = _.curry((direction, pos) => {
 	switch (direction) {
-		case 'East': return $.Vec.move(pos, [1, 0]);
-		case 'West': return $.Vec.move(pos, [-1, 0]);
-		case 'North': return $.Vec.move(pos, [0, 1]);
-		case 'South': return $.Vec.move(pos, [0, -1]);
+		case 'East': return $.Vec.sum(pos, [1, 0]);
+		case 'West': return $.Vec.sum(pos, [-1, 0]);
+		case 'North': return $.Vec.sum(pos, [0, 1]);
+		case 'South': return $.Vec.sum(pos, [0, -1]);
 	};
 	return pos;
 }, 2);
 
 var randomMove = _.curry((rng, pos) => () => {
 	var x = rng();
-	if (x <= 0.25) return $.Vec.move(pos, [1, 0]);
-	if (x <= 0.5) return $.Vec.move(pos, [-1, 0]);
-	if (x <= 0.75) return $.Vec.move(pos, [0, 1]);
-	return $.Vec.move(pos, [0, -1]);
+	if (x <= 0.25) return $.Vec.sum(pos, [1, 0]);
+	if (x <= 0.5) return $.Vec.sum(pos, [-1, 0]);
+	if (x <= 0.75) return $.Vec.sum(pos, [0, 1]);
+	return $.Vec.sum(pos, [0, -1]);
 }, 2);
 
 
