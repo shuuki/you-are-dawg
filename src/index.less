@@ -1,3 +1,5 @@
+@import url(https://i.icomoon.io/public/188ac2dd2d/DAWG/style.css);
+
 body {
 	background: #181818;
 	color: #ccc;
@@ -6,6 +8,14 @@ body {
 	letter-spacing: 0.5px;
 	line-height: 1;
 }
+
+
+
+
+
+
+
+
 
 .glyph {
 	font-family: dawgverse;
@@ -17,10 +27,6 @@ body {
 	word-break: break-all;
 	margin: 0;
 	padding: 0;
-}
-
-.flex-row {
-	display: flex;
 }
 
 .game {
@@ -45,8 +51,18 @@ body {
 	cursor: crosshair;
 }
 
-.actor {
-	color: lavender;
+.keys {
+	position: absolute;
+	right: 0;
+	top: 0;
+	
+	.down {
+		color: chartreuse;
+	}
+
+	ul& {
+		.inline-list
+	}
 }
 
 .minimap {
@@ -56,4 +72,22 @@ body {
 	font-size: 2px;
 }
 
-@import url(https://i.icomoon.io/public/188ac2dd2d/DAWG/style.css);
+
+
+
+
+
+// tools?
+.inline-list {
+	margin: 0;
+	padding: 0;
+	li {
+		display: inline-block;
+		list-style: none;
+		margin: 0.125em;
+	}
+}
+
+.flex-row {
+	display: flex;
+}

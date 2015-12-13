@@ -1,6 +1,9 @@
 // Libs
 var flyd = require('flyd');
+flyd.filter = require('flyd/module/filter');
 flyd.obj = require('flyd/module/obj');
+flyd.scanmerge = require('flyd/module/scanmerge');
+flyd.dropRepeats = require('flyd/module/droprepeats').dropRepeats;
 
 var chance = require('chance');
 var d3 = require('d3');
@@ -23,6 +26,20 @@ var w = window;
 
 console.log(verse);		// Let me hear you shout
 
+// Key state
+var getWhich = $.get('which');
+var whichDown = flyd.dropRepeats(streams.keys.down.map(getWhich));
+var whichUp = streams.keys.up.map(getWhich);
+
+var filterUndefined = flyd.filter($.neq(undefined));
+var mapKeys = (stream) => filterUndefined(streams.lookup(verse.controls, stream));
+
+var keyboardState = flyd.scanmerge([
+	[mapKeys(whichDown), (state, key) => { if (!state[key]) state[key] = 0; state[key]++; return state; }],
+	[mapKeys(whichUp), (state, key) => { state[key]--; return state; }]
+], _.zipObject(verse.commands));
+
+
 /////////////////
 // Enter Dawg
 /////////////////
@@ -44,25 +61,23 @@ render.Renderer.width = render.Renderer.height = 40;
 // Some actors / state
 //////////////
 
-// THe world for now
+// The world for now
 var gameLand = new render.Land(getNumber);
-
-// Some facts
-var directions = ['North', 'South', 'East', 'West'];
 
 // Actors -- Living things in the world.
 var actorsByName = _.indexBy(verse.actors, 'name');
 var actor = (name, pos) => {
 	var newActor = _.cloneDeep(actorsByName[name]);
 	newActor.pos = !pos ? [0, 0] : pos;
+
+	// Also push into the world
+	gameLand.add(newActor);
+
 	return newActor;
 };
 
 // Let's make some actors
 var player = actor('dawg', [10, 10]);
-var birds = _.map(new Array(250), () => actor('bird', [_.random(-50, 50), _.random(-50, 50)]));
-var human = actor('human', [12, 5]);
-var squirrel = actor('squirrel', [3, 5]);
 
 
 
@@ -78,100 +93,28 @@ var squirrel = actor('squirrel', [3, 5]);
 
 
 
+// A camera lense into gameLand
+var camera = (config) => {
+	var half = _.partialRight($.div, 2);
+	
+	var fn = function()
+	{
+		var renderPoint = _.zip(this.target.pos, [render.Renderer.width, render.Renderer.height])
+			.map($.diff).map(half);
+		return config.source.getRect(this.target.pos, render.Renderer.width, render.Renderer.height);
+	};
 
-// Let's make a logical world
-var logic = [];
+	fn.target = config.target;
 
-var moveBirds = (birds) => {
-
+	return fn;
 }
+var playerCam = camera({ target: player, source: gameLand });
+render.Renderer.add(playerCam);
 
 
 
 
 
-
-// var dogOnBones = flyd.combine((dog) => {
-// 	var pos = dog();
-// 	var chunk = getChunk(pos);
-// 	var terrainChunk = gameLand.at(chunk[0], chunk[1]);
-// 	var local = toLocal(chunk, pos);
-// 	return terrainChunk[local[1]][local[0]] === '&';
-// }, [player.pos]);
-
-// var distanceToHuman = actorDistance([player.pos, human.pos]);
-// var canTalkToHuman = distanceToHuman.map((x) => x < 1.5);
-// var canEatSquirrel = actorDistance([player.pos, squirrel.pos]).map((x) => x < 1);
-
-
-
-
-
-
-
-
-
-///////////
-// RENDER LOGIC
-///////////
-// var activeChunk = player.pos.map(getChunk)		// Track the player
-
-// // Things to redraw actor layer with
-// var actorStreams = birds.concat([squirrel, player, human]).map(flyd.obj.stream);
-
-// // Updated when actors change
-// var actorLayer = flyd.combine(function()
-// {
-// 	var actors = Array.prototype.slice.call(arguments, 0, -2);
-// 	var chunk = activeChunk();
-// 	var actorsToRender = actors
-// 		.map((x) => x())
-// 		.filter((x) => _.isEqual(getChunk(x.pos), chunk));
-
-// 	var emptyMap = _.chunk(_.map(new Array(chunkWidth * chunkHeight), (x) => 'a'), chunkWidth);
-	
-// 	actorsToRender.forEach((actor) => {
-// 		var local = toLocal(chunk, actor.pos);
-// 		if (_.isArray(actor.sprite))
-// 		{
-// 			actor.sprite.forEach((row, yOffset) => {
-// 				row.forEach((cell, xOffset) => {
-// 					if (local[1] + yOffset < chunkWidth && local[0] + xOffset < chunkHeight)
-// 					emptyMap[local[1] + yOffset][local[0] + xOffset] = cell;
-// 				});
-// 			});
-// 		}
-// 		else
-// 		{
-// 			emptyMap[local[1]][local[0]] = actor.sprite;
-// 		}
-// 	});
-	
-// 	emptyMap = emptyMap.slice(0, chunkHeight).map((row) => row.slice(0, chunkWidth));
-	
-// 	return emptyMap.map((x) => x.join(''));
-// }, actorStreams);
-
-
-
-// ///////////
-// // Camera view
-// ///////////
-// var cameraView = flyd.combine((chunk) => {
-// 	var chunkPos = chunk();
-	
-// 	var land = _.cloneDeep(
-// 		gameLand.at(chunkPos[0], chunkPos[1])
-// 	);
-	
-// 	return land.map((x) => x.join(''));
-// }, [activeChunk, time]);
-
-
-
-
-var getGameLandRect = () => gameLand.getRect(0, 0, render.Renderer.width, render.Renderer.height);
-render.Renderer.add(getGameLandRect);
 
 
 
@@ -183,7 +126,7 @@ var renderFn = () => render.Renderer.to(map);
 
 // Main Update Loop
 var update = (time) => {
-	renderFn(); // Render map
+	renderFn(); // Render
 	// console.log(time, render.Renderer, map);
 };
 
@@ -194,42 +137,21 @@ flyd.on(update, time);
 
 
 
+// Render keyboard state
+var renderKeyboard = (selection, data) => {
+	var u = selection.selectAll('li').data(data);
+	var e = u.enter().append('li').text((d) => d[0]);
 
+	[u, e].map((sel) => {
+		sel.classed('down', (d) => d[1] > 0);
+	});
 
+	u.exit().remove();
 
-
-
-
-
-
-// Actor overlay
-// var map2 = gameNode.append('div').classed('actor map', true);
-// flyd.on(_.partial(renderMap, map2), actorLayer);
-
-
-
-
-// Applies class to selection based on boolean eval of stream's val
-// var classFrom = (className, selection, stream) => flyd.on((val) => selection.classed(className, !!val), stream);
-// // Apply '.other' to map2 if dogOnBones
-// classFrom('other', map2, dogOnBones);
-// classFrom('faded', map, canTalkToHuman);
-// classFrom('other', map, canEatSquirrel);
-
-
-// Map keys to key codes
-// var keyToDirection = streams.lookup(
-// 	verse.controls,
-// 	streams.keys.map((x) => x.which)	// Map out key code
-// );
-
-// Moves player.pos on events from keyToDirection
-// cardinal(keyToDirection, player.pos);
-
-
-
-
-
+	return u;
+};
+var keys = gameNode.append('ul').classed('keys', true);
+flyd.on((state) => renderKeyboard(keys, _.pairs(state)), keyboardState);
 
 
 

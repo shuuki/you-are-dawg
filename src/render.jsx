@@ -41,8 +41,8 @@ var renderMap = (map, land) => {
 	var rows = map.selectAll('p').data(land);
 	// Render the data as text
 	[
-		rows,						// d3 update 
-	 	rows.enter()				// and endter
+		rows,							// d3 update 
+	 	rows.enter()			// and endter
 			.append('p')
 			.classed('glyph', true)
 	].forEach((sel) => sel.text((d) => d));
@@ -88,21 +88,24 @@ var Land = function(rng, config)
 {
 	this.rng = rng;
 	this._data = [[]];
+	this._actors = [];
 	this.config = config;
 };
-
-Land.prototype.getRect = function(x, y, w, h)
+Land.prototype.add = function(source)
 {
-	return genChunk(this.rng, w, h);
+	this._actors.push(source);
+	return this;
 };
+Land.prototype.getRect = function(pos, w, h)
+{
+	var land = genChunk(this.rng, w, h);
+	var rect = $.Rect.create(pos, [w, h]);
 
-Land.prototype.at = function(a, b){
-	return this.getRect(0, 0, a, b);
-	// var key = this.keyFn(a, b);
-	// if (!this._data[key]) {
-	// 	this._data[key] = genChunk(this.rng, this.config.w, this.config.h);
-	// };
-	// return this._data[key];
+	// Push visible actors into tile
+	var actors = _.filter(this._actors, (x) => $.Rect.contains(rect, x.pos))
+		.map((a) => land[a.pos[0]][a.pos[1]] = a.sprite);
+	
+	return land;
 };
 
 
@@ -139,14 +142,12 @@ Render.prototype.remove = function(source)
 Render.prototype.to = function(selection)
 {
 	// grab sources
-	var layers = this.sources().map((x) => x());
+	var layers = this.sources().map((x) => x.call(x));
 
 	// Flatten grid via merge and then map empty cells to 'a'
 	var land = layers.reduce(_.merge, []).map((row) =>
 		row.map((c) => (!c ? 'a' : c))
 	).map((row) => row.join(''));
-
-	// console.log(selection);
 
 	// Do render
 	renderMap(selection, land);
@@ -164,7 +165,18 @@ Render.prototype.toLocal = function(chunk, pos)
 		// Invert the y-axis for rendering
 		this.height - (pos[1] - chunk[1] * this.height) - 1
 	];
-}
+};
+
+
+
+
+
+
+
+
+
+
+
 
 
 

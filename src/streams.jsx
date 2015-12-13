@@ -1,3 +1,4 @@
+var _ = require('lodash');
 var flyd = require('flyd');
 
 // @see https://github.com/paldepind/flyd/tree/master/module/every
@@ -63,6 +64,7 @@ var lookup = flyd.curryN(2,
 );
 
 
+
 // Time stream synced to window's animation frame
 var time = flyd.stream(Date.now());
 
@@ -79,8 +81,9 @@ window.requestAnimationFrame(step);
 
 
 
-var keys = flyd.stream();
-window.addEventListener('keydown', keys);
+var keys = { down: flyd.stream(), up: flyd.stream() };
+window.addEventListener('keydown', keys.down);
+window.addEventListener('keyup', keys.up);
 
 
 
