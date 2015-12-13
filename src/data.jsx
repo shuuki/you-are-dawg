@@ -71,7 +71,6 @@ var actors = [
 
 
 
-
 // Some sensible defaults
 var defaultControls = {
 	// Up, W
@@ -84,10 +83,14 @@ var defaultControls = {
 	68: 'East', 39: 'East'
 };
 
+var commands = _.uniq(_.values(defaultControls)); // Extract commands
+
+
 module.exports = {
 	land,
 	sun, moon, season,		// The sun and the stars, how they travel
 	actors,	// A motly crew
 	// Some controls, map of KeyEvent.which => Command
-	controls: defaultControls
+	controls: defaultControls,
+	commands
 };
