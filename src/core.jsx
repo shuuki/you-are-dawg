@@ -110,16 +110,12 @@ var inMap = _.curry((map, data) => map[data] !== undefined);
 
 
 
-var getChunk = function(dims, pos)
-{
-	return Vec.div(pos, dims).map(Math.floor);
-	// pos.map((x, i) => Math.floor(x / dims[i]));
-};
-var toLocal = function(dims, chunk, pos)
-{
-	return Vec.diff(pos, Vec.mult(chunk, dims));
-	// return pos.map((x, i) => x - chunk[i] * dims[i]);
-};
+var getChunk = _.curry((dims, pos) =>
+	Vec.div(pos, dims)
+		.map(Math.floor), 2);
+var toLocal = _.curry((dims, chunk, pos) =>
+	Vec.diff(pos, 
+		Vec.mult(chunk, dims)), 3);
 
 
 
