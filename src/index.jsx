@@ -73,7 +73,7 @@ var rand = new Chance(seed);
 var getNumber = () => rand.random();
 
 // Change render dims
-render.Renderer.width = render.Renderer.height = 40;
+render.Renderer.width = render.Renderer.height = 20;
 
 
 //////////////

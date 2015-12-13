@@ -86,9 +86,14 @@ var renderMap = (map, land) => {
  */
 var Land = function(rng, config)
 {
-	this.rng = rng;
-	this._data = [[]];
-	this._actors = [];
+	this.rng = rng;								// Random source
+
+	// this._dataOffset = [0, 0];		// Offset
+	this._data = {};							// Coarse information
+	this.keyFn = (pos) => pos.toString();
+
+	this._actors = [];						// Actors in the world
+	this.chunkSize = [25, 25];		// Resolution of land generation
 	this.config = config;
 };
 Land.prototype.add = function(source)
@@ -96,21 +101,60 @@ Land.prototype.add = function(source)
 	this._actors.push(source);
 	return this;
 };
+
+var applyMin = $.Vec.ap(Math.min, Math);
+var applyMax = $.Vec.ap(Math.max, Math);
+
 Land.prototype.getRect = function(pos, w, h)
 {
-	var land = genChunk(this.rng, w, h);
 	var rect = $.Rect.create(pos, [w, h]);
+	var corners = $.Rect.corners(rect);
+	var chunks = _.uniq(corners.map($.getChunk(this.chunkSize)), _.isEqual);
+	
+	// Get the bounds of display, array offset
+	var min = $.getChunk(this.chunkSize,
+		corners.reduce((pos, corner) =>
+		applyMin(_.zip(pos, corner)), corners[0].slice(0))
+	);
+	var max = $.getChunk(this.chunkSize,
+		corners.reduce((pos, corner) =>
+		applyMax(_.zip(pos, corner)), corners[0].slice(0))
+	);
+	var numChunks = $.Vec.diff(max, min);
 
-	var actors = this._actors.map((actor) => {
-		if ($.Rect.contains(rect, actor.pos))
+	var shift = min.map((x) => x > 0 ? x : -x);
+
+	var chunkToAcc = (chunk) => $.Vec.mult(
+		$.Vec.sum(shift, chunk),
+		this.chunkSize
+	);
+
+	// Land for each chunk
+	var land = chunks.reduce((acc, chunk, i) => {
+		var key = this.keyFn(chunk);
+		var land = this._data[key];
+		var chunkRect = $.Rect.create(chunk, this.chunkSize);
+		
+		if (!land)
 		{
-			var local = $.Vec.diff(actor.pos, pos);
-			local[1] = h - local[1] - 1;
-			land[local[1]][local[0]] = actor.sprite;
+			land = this._data[key] = genChunk(this.rng, this.chunkSize[0], this.chunkSize[1]);
 		}
 
-		return actor;
-	});
+		return $.Arr2D.copy(acc, chunkToAcc(chunk), land, $.Rect.create([0, 0], this.chunkSize));
+	}, $.Arr2D.create(this.chunkSize[0] * numChunks[0], this.chunkSize[1] * numChunks[1]));
+
+	// console.log(land);
+	
+	// var actors = this._actors.map((actor) => {
+	// 	if ($.Rect.contains(rect, actor.pos))
+	// 	{
+	// 		var local = $.Vec.diff(actor.pos, pos);
+	// 		local[1] = h - local[1] - 1;
+	// 		land[local[1]][local[0]] = actor.sprite;
+	// 	}
+
+	// 	return actor;
+	// });
 
 	return land;
 };

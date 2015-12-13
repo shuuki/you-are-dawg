@@ -11,6 +11,27 @@ var dist = (a, b) => Math.sqrt(
 	square(diff(a[1], b[1]))
 );
 
+var _pCache = [];
+var permutations = (emptyVal, arr) => {
+	var pMap = _pCache[arr.length];
+	if (!pMap)
+	{
+		pMap = _.map(new Array(arr.length * arr.length), (x, i) => {
+			var settings = i.toString(2).split('');
+			if (settings.length < arr.length)
+			{
+				var prepend = _.fill(new Array(arr.length - settings.length), emptyVal);
+				settings.splice.apply(settings, [0, 0].concat(prepend));
+			}
+			return settings;
+		});
+	}
+
+	return pMap.map((permutation) => {
+		return arr.map((x, i) => (+permutation[i]) ? x : emptyVal);
+	});
+};
+
 
 /**
  * Vector interface.
@@ -18,10 +39,11 @@ var dist = (a, b) => Math.sqrt(
  * @type {Object}
  */
 var Vec = {
-	diff: (src, by) => _.zip(src, by).map(sdiff),
-	div: (src, by) => _.zip(src, by).map(sdiv),
-	mult: (src, by) => _.zip(src, by).map(smult),
-	sum: (src, by) => _.zip(src, by).map(ssum)
+	diff: _.curry((src, by) => _.zip(src, by).map(sdiff), 2),
+	div: _.curry((src, by) => _.zip(src, by).map(sdiv), 2),
+	mult: _.curry((src, by) => _.zip(src, by).map(smult), 2),
+	sum: _.curry((src, by) => _.zip(src, by).map(ssum), 2),
+	ap: _.curry((fn, self, arr) => arr.map((x) => fn.apply(self, x)), 3)
 };
 
 
@@ -31,7 +53,8 @@ var Rect = {
 	contains: (rect, pt) => _.every(pt, (d, i) =>
 		d >= rect.pos[i] &&
 		d < rect.pos[i] + rect.dims[i]
-	)
+	),
+	corners: (rect) => permutations(0, rect.dims).map(Vec.sum(rect.pos))
 };
 
 
@@ -42,16 +65,27 @@ var Arr2D = {
 	create: (w, h) => _.map(new Array(w), (x) => new Array(h)),
 	fill: (arr, val) => _.map(arr, (row) => _.fill(row, val)),
 	extract: _.curry((arr, w, h, x, y) => {
-		x = Math.max(Math.min(x, 0), arr.length);
+		x = Math.min(Math.max(x, 0), arr.length);
 		w = x + w > arr.length ? arr.length - x : w;
-		y = Math.max(Math.min(y, 0), arr[0].length);
+		y = Math.min(Math.max(y, 0), arr[0].length);
 		h = y + h > arr[0].length ? arr[0].length - y : h;
 		return _.map(new Array(w), (row, a) => {
 			return _.map(new Array(h), (cell, b) => {
 				return arr[x + a][y + b];
 			});
 		});
-	}, 5)
+	}, 5),
+	copy: (dest, destPos, source, sourceRect) => {
+		var toPaste = Arr2D.extract(source, sourceRect.dims[0], sourceRect.dims[1], sourceRect.pos[0], sourceRect.pos[1]);
+		
+		_.forEach(toPaste, (row, i) => {
+			_.forEach(row, (val, j) => {
+				dest[destPos[0] + i][destPos[1] + j] = val;
+			});
+		});
+
+		return dest;
+	}
 };
 
 
