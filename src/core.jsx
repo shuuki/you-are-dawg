@@ -102,8 +102,23 @@ var pickFilter = _.curry((pick, filter, collection) =>
 3); // curried
 
 var neq = _.curry((a, b) => a !== b, 2);
-
 var inMap = _.curry((map, data) => map[data] !== undefined);
+
+
+
+var getChunk = function(dims, pos)
+{
+	return pos.map((x, i) => Math.floor(x / dims[i]));
+};
+var toLocal = function(dims, chunk, pos)
+{
+	return pos.map((x, i) => x - chunk[i] * dims[i]);
+};
+
+
+
+
+
 
 // Curry stuff
 sum = _.curry(sum, 2);
@@ -124,6 +139,7 @@ module.exports = {
 	// Extraction
 	correlatum, correlator, pickFilter,
 	// Geometry?
+	getChunk, toLocal,
 	// @todo: Rectangle
 	Vec, Rect,
 	// Data

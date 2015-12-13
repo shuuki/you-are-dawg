@@ -10,11 +10,12 @@ var d3 = require('d3');
 var _ = require('lodash');
 
 // Deps
-var verse = require('./data.jsx');			// A universe of data
-var $ = require('./core.jsx');				// Core nice stuff 
+var verse = require('./data.jsx');				// A universe of data
+var $ = require('./core.jsx');						// Core nice stuff 
 var streams = require('./streams.jsx');		// Stream goodies
-var render = require('./render.jsx');		// My eyes still work
+var render = require('./render.jsx');			// My eyes still work
 var gimmicks = require('./gimmicks.jsx');	// A joke here, some bones there
+var logic = require('./logic.jsx');				// A wise man once
 
 // Style
 require('./index.less');
@@ -102,20 +103,14 @@ var actor = (name, pos) => {
 var player = actor('dawg', [10, 10]);
 
 
+logic.add(() => {
+	var commands = commandState();
+	player.pos = _.reduce(commands, (pos, v, dir) => gimmicks.move.cardinal(dir, pos), player.pos);
+});
 
 
 
 
-
-
-
-
-
-// Move the player based on keyboard
-var directions = ['North', 'South', 'East', 'West'];
-// Select from keybord state where a direction-key is down
-var activeDirection = $.pickFilter(directions, (x) => x[1] > 0);
-var moveCommands = keyboardState.map(activeDirection);
 
 
 
@@ -138,13 +133,13 @@ var map = gameNode.append('div').classed('map', true);
 var renderFn = () => render.Renderer.to(map);
 
 // Main Update Loop
+var lastTime = time();
 var update = (time) => {
-	renderFn(); // Render
-	// console.log(time, render.Renderer, map);
+	var delta = time - lastTime;
+	logic.step(delta);
+	renderFn();
 };
 
-
-// Trigger update on time
 flyd.on(update, time);
 
 

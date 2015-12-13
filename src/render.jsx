@@ -101,10 +101,15 @@ Land.prototype.getRect = function(pos, w, h)
 	var land = genChunk(this.rng, w, h);
 	var rect = $.Rect.create(pos, [w, h]);
 
-	// Push visible actors into tile
+	// Filter visible
 	var actors = _.filter(this._actors, (x) => $.Rect.contains(rect, x.pos))
-		.map((a) => land[a.pos[0]][a.pos[1]] = a.sprite);
-	
+	// Transform to local and write
+		.map((x) => {
+			return x;
+		});
+		// .map((a) => land[a.pos[1]][a.pos[]] = a.sprite);
+
+	console.log(JSON.stringify(_.pluck(actors, 'pos')));
 	return land;
 };
 
@@ -156,15 +161,11 @@ Render.prototype.to = function(selection)
 };
 Render.prototype.getChunk = function(pos)
 {
-	return [Math.floor(pos[0] / this.width), Math.floor(pos[1] / this.height)];
+	return $.getChunk([this.width, this.height], pos);
 };
 Render.prototype.toLocal = function(chunk, pos)
 {
-	return [
-		pos[0] - chunk[0] * this.width,
-		// Invert the y-axis for rendering
-		this.height - (pos[1] - chunk[1] * this.height) - 1
-	];
+	return $.toLocal([this.width, this.height], chunk, pos);
 };
 
 
