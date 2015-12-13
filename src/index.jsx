@@ -112,10 +112,16 @@ logic.add(() => {
 
 
 var birds = _.map(new Array(1000), (x) => actor('bird', [_.random(-100, 100), _.random(-100, 100)]));
+var humans = _.map(new Array(1000), (x) => actor('human', [_.random(-200, -100), _.random(-200, -100)]));
 
 
 
-
+var randomMover = gimmicks.move.randomMove(getNumber);
+logic.add(() => {
+	var movePos = (x) => x.pos = randomMover(x.pos);
+	birds.forEach(movePos);
+	humans.forEach(movePos);
+}, 500);
 
 
 
@@ -142,6 +148,7 @@ var update = (time) => {
 	var delta = time - lastTime;
 	logic.step(delta);
 	renderFn();
+	lastTime = time;
 };
 
 flyd.on(update, time);

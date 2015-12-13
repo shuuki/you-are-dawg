@@ -23,7 +23,7 @@ var cardinal = _.curry((direction, pos) => {
 	return pos;
 }, 2);
 
-var randomMove = _.curry((rng, pos) => () => {
+var randomMove = _.curry((rng, pos) => {
 	var x = rng();
 	if (x <= 0.25) return $.Vec.sum(pos, [1, 0]);
 	if (x <= 0.5) return $.Vec.sum(pos, [-1, 0]);
