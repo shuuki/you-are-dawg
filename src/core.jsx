@@ -3,7 +3,9 @@ var _ = require('lodash');
 // Some maths
 var sum = (a, b) => a+b; var ssum = _.spread(sum); // Spread something?
 var diff = (a, b) => a-b;
+var mult = (a, b) => a*b;
 var square = (a) => a*a;
+var div = (a, b) => a/b;
 var dist = (a, b) => Math.sqrt(
 	square(diff(a[0], b[0])) +
 	square(diff(a[1], b[1]))
@@ -20,6 +22,13 @@ var Vec = {
 };
 
 
+
+var Rect = {
+	create: (pos, dims) => { return {pos, dims}; },
+	contains: (rect, pt) => _.every(pt, (d, i) =>
+		d <= rect.pos[i] + rect.dims[i]
+	)
+};
 
 
 
@@ -81,9 +90,15 @@ var correlator = (labels, weights, seed) => labels[_.findIndex(weights, (w) => s
 
 
 
+var get = _.curry((prop, obj) => _.get(obj, prop), 2);
+var neq = _.curry((a, b) => a !== b, 2);
+
+
 
 // Curry stuff
 sum = _.curry(sum, 2);
+mult = _.curry(mult, 2);
+div = _.curry(div, 2);
 diff = _.curry(diff, 2);
 dist = _.curry(dist, 2);
 
@@ -95,12 +110,14 @@ dist = _.curry(dist, 2);
 
 module.exports = {
 	// Maths
-	sum, diff, square, dist,
+	sum, diff, square, dist, mult, div,
 	// Randoms
 	correlatum, correlator,
 	// Geometry?
 	// @todo: Rectangle
-	Vec,
+	Vec, Rect,
 	// Data
-	Arr2D
+	Arr2D, get: get,
+	// Boolean logic
+	neq
 };
