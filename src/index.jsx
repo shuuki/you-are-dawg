@@ -28,17 +28,35 @@ console.log(verse);		// Let me hear you shout
 
 // Key state
 var getWhich = $.get('which');
-var whichDown = flyd.dropRepeats(streams.keys.down.map(getWhich));
-var whichUp = streams.keys.up.map(getWhich);
+var gameControls = _.keys(verse.controls);
+var filterKeys = flyd.filter($.inMap(verse.controls));
+var whichDown = filterKeys(streams.keys.down.map(getWhich));
+var whichUp = filterKeys(streams.keys.up.map(getWhich));
 
 var filterUndefined = flyd.filter($.neq(undefined));
-var mapKeys = (stream) => filterUndefined(streams.lookup(verse.controls, stream));
 
 var keyboardState = flyd.scanmerge([
-	[mapKeys(whichDown), (state, key) => { if (!state[key]) state[key] = 0; state[key]++; return state; }],
-	[mapKeys(whichUp), (state, key) => { state[key]--; return state; }]
-], _.zipObject(verse.commands));
+	// On down, increase
+	[whichDown, (state, key) => {
+		state[key] = true;
+		return state;
+	}],
+	// On up, reduce count
+	[whichUp, (state, key) => {
+		state[key] = false;
+		return state;
+	}]
+], _.zipObject(gameControls, gameControls.map(_.constant(0))));
 
+// Transform the keys into {command: keys pressed that are triggering}
+var commandState = keyboardState.map(
+	(x) => _(x)
+	.pairs()
+	.filter((a) => a[1])
+	.map((a) => a[0])
+	.groupBy((key) => verse.controls[key])
+	.value()
+);
 
 /////////////////
 // Enter Dawg
@@ -76,6 +94,10 @@ var actor = (name, pos) => {
 	return newActor;
 };
 
+
+
+
+
 // Let's make some actors
 var player = actor('dawg', [10, 10]);
 
@@ -89,35 +111,26 @@ var player = actor('dawg', [10, 10]);
 
 
 
+// Move the player based on keyboard
+var directions = ['North', 'South', 'East', 'West'];
+// Select from keybord state where a direction-key is down
+var activeDirection = $.pickFilter(directions, (x) => x[1] > 0);
+var moveCommands = keyboardState.map(activeDirection);
+
+
+
+
+
+
+
 
 
 
 
 // A camera lense into gameLand
-var camera = (config) => {
-	var half = _.partialRight($.div, 2);
-	
-	var fn = function()
-	{
-		var renderPoint = _.zip(this.target.pos, [render.Renderer.width, render.Renderer.height])
-			.map($.diff).map(half);
-		return config.source.getRect(this.target.pos, render.Renderer.width, render.Renderer.height);
-	};
 
-	fn.target = config.target;
-
-	return fn;
-}
-var playerCam = camera({ target: player, source: gameLand });
+var playerCam = render.Camera(render.Renderer, { target: player, source: gameLand });
 render.Renderer.add(playerCam);
-
-
-
-
-
-
-
-
 
 
 // DOM element to render game into
@@ -137,22 +150,35 @@ flyd.on(update, time);
 
 
 
+
+
+
+
+
 // Render keyboard state
 var renderKeyboard = (selection, data) => {
 	var u = selection.selectAll('li').data(data);
-	var e = u.enter().append('li').text((d) => d[0]);
+	var e = u.enter().append('li');
 
 	[u, e].map((sel) => {
-		sel.classed('down', (d) => d[1] > 0);
+		sel.classed('active', (d) => d[1]).text((d) => d[0]);
 	});
 
 	u.exit().remove();
 
 	return u;
 };
-var keys = gameNode.append('ul').classed('keys', true);
-flyd.on((state) => renderKeyboard(keys, _.pairs(state)), keyboardState);
 
+var keyDisplay = gameNode.append('div').classed('keys', true);
+
+keyDisplay.append('h6').text('Mapped Key Codes');
+var keyCodes = keyDisplay.append('ul');
+
+keyDisplay.append('h6').text('Active Commands');
+var activeCommands = keyDisplay.append('ul');
+
+flyd.on((state) => renderKeyboard(keyCodes, _.pairs(state)), keyboardState);
+flyd.on((state) => renderKeyboard(activeCommands, _.pairs(state)), commandState);
 
 
 
@@ -232,5 +258,6 @@ window.game = {
 	gimmicks,
 	render,
 	$,
-	streams
+	streams,
+	keyboardState
 };

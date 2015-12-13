@@ -89,11 +89,21 @@ var correlator = (labels, weights, seed) => labels[_.findIndex(weights, (w) => s
 
 
 
-
+// Nifty things
 var get = _.curry((prop, obj) => _.get(obj, prop), 2);
+
+var pickFilter = _.curry((pick, filter, collection) =>
+	_(collection)
+		.pick(pick)
+		.pairs()
+		.filter(filter)
+		.pluck(0)
+		.value(),
+3); // curried
+
 var neq = _.curry((a, b) => a !== b, 2);
 
-
+var inMap = _.curry((map, data) => map[data] !== undefined);
 
 // Curry stuff
 sum = _.curry(sum, 2);
@@ -111,13 +121,13 @@ dist = _.curry(dist, 2);
 module.exports = {
 	// Maths
 	sum, diff, square, dist, mult, div,
-	// Randoms
-	correlatum, correlator,
+	// Extraction
+	correlatum, correlator, pickFilter,
 	// Geometry?
 	// @todo: Rectangle
 	Vec, Rect,
 	// Data
-	Arr2D, get: get,
+	Arr2D, get: get, inMap,
 	// Boolean logic
 	neq
 };

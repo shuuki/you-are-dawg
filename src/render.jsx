@@ -176,6 +176,23 @@ Render.prototype.toLocal = function(chunk, pos)
 
 
 
+var Camera = (renderer, config) => {
+	var half = _.partialRight($.div, 2);
+	
+	var fn = function()
+	{
+		var renderPoint = _.zip(this.target.pos, [renderer.width, renderer.height])
+			.map($.diff).map(half);
+
+		return config.source.getRect(this.target.pos, renderer.width, renderer.height);
+	};
+
+	fn.target = config.target;
+
+	return fn;
+}
+
+
 
 
 
@@ -184,5 +201,6 @@ Render.prototype.toLocal = function(chunk, pos)
 
 module.exports = {
 	Land,
+	Camera,
 	Renderer: new Render(30, 30)		 // Singleton render manager?
 };
