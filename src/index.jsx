@@ -25,6 +25,15 @@ var time = streams.time;
 var log = streams.log;
 var w = window;
 
+
+
+
+
+
+
+
+
+
 console.log(verse);		// Let me hear you shout
 
 // Key state
@@ -73,7 +82,7 @@ var rand = new Chance(seed);
 var getNumber = () => rand.random();
 
 // Change render dims
-render.Renderer.width = render.Renderer.height = 20;
+render.Renderer.width = render.Renderer.height = 40;
 
 
 //////////////
@@ -104,10 +113,11 @@ var player = actor('dawg', [10, 10]);
 
 
 // Move the player by keys
-logic.add(() => {
+var playerMover = () => {
 	var commands = commandState();
 	player.pos = _.reduce(commands, (pos, v, dir) => gimmicks.move.cardinal(dir, pos), player.pos);
-});
+};
+logic.add(playerMover);
 
 
 
@@ -186,7 +196,8 @@ var activeCommands = keyDisplay.append('ul');
 flyd.on((state) => renderKeyboard(keyCodes, _.pairs(state)), keyboardState);
 flyd.on((state) => renderKeyboard(activeCommands, _.pairs(state)), commandState);
 
-
+// Debug live values
+// flyd.on((state) => renderLiveDebug, _toLog);
 
 //////////
 //	Minimap code. Perfect for now.

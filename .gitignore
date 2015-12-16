@@ -1,2 +1,8 @@
+#deps
 node_modules
+
+#artifacts
 bin
+
+#ides
+*.sublime-*

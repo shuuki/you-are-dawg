@@ -51,6 +51,9 @@ var renderMap = (map, land) => {
 };
 
 
+var applyMin = $.Vec.ap(Math.min, Math);
+var applyMax = $.Vec.ap(Math.max, Math);
+
 
 
 
@@ -90,7 +93,7 @@ var Land = function(rng, config)
 
 	// this._dataOffset = [0, 0];		// Offset
 	this._data = {};							// Coarse information
-	this.keyFn = (pos) => pos.toString();
+	this.keyFn = (pos) => pos.join(',');
 
 	this._actors = [];						// Actors in the world
 	this.chunkSize = [25, 25];		// Resolution of land generation
@@ -102,59 +105,66 @@ Land.prototype.add = function(source)
 	return this;
 };
 
-var applyMin = $.Vec.ap(Math.min, Math);
-var applyMax = $.Vec.ap(Math.max, Math);
-
 Land.prototype.getRect = function(pos, w, h)
 {
-	var rect = $.Rect.create(pos, [w, h]);
-	var corners = $.Rect.corners(rect);
-	var chunks = _.uniq(corners.map($.getChunk(this.chunkSize)), _.isEqual);
+	// var rect = $.Rect.create(pos, [w, h]);
+	// var corners = $.Rect.corners(rect);
+	// var chunks = _.uniq(corners.map($.getChunk(this.chunkSize)), _.isEqual);
 	
-	// Get the bounds of display, array offset
-	var min = $.getChunk(this.chunkSize,
-		corners.reduce((pos, corner) =>
-		applyMin(_.zip(pos, corner)), corners[0].slice(0))
-	);
-	var max = $.getChunk(this.chunkSize,
-		corners.reduce((pos, corner) =>
-		applyMax(_.zip(pos, corner)), corners[0].slice(0))
-	);
-	var numChunks = $.Vec.diff(max, min);
+	// // Get the bounds of display, array offset
+	// var min = $.getChunk(this.chunkSize,
+	// 	corners.reduce((pos, corner) =>
+	// 	applyMin(_.zip(pos, corner)), corners[0].slice(0))
+	// );
+	// var max = $.getChunk(this.chunkSize,
+	// 	corners.reduce((pos, corner) =>
+	// 	applyMax(_.zip(pos, corner)), corners[0].slice(0))
+	// );
+	// var numChunks = $.Vec.diff(max, min);
 
-	var shift = min.map((x) => x > 0 ? x : -x);
+	// var shift = min.map((x) => x > 0 ? x : -x);
 
-	var chunkToAcc = (chunk) => $.Vec.mult(
-		$.Vec.sum(shift, chunk),
-		this.chunkSize
-	);
+	// var chunkToAcc = (chunk) => $.Vec.mult(
+	// 	$.Vec.sum(shift, chunk),
+	// 	this.chunkSize
+	// );
 
-	// Land for each chunk
-	var land = chunks.reduce((acc, chunk, i) => {
-		var key = this.keyFn(chunk);
-		var land = this._data[key];
-		var chunkRect = $.Rect.create(chunk, this.chunkSize);
+	// // Land for each chunk
+	// var land = chunks.reduce((acc, chunk, i) => {
+	// 	var key = this.keyFn(chunk);
+	// 	var land = this._data[key];
+	// 	var chunkRect = $.Rect.create(chunk, this.chunkSize);
 		
-		if (!land)
-		{
-			land = this._data[key] = genChunk(this.rng, this.chunkSize[0], this.chunkSize[1]);
-		}
+	// 	if (!land)
+	// 	{
+	// 		land = this._data[key] = genChunk(this.rng, this.chunkSize[0], this.chunkSize[1]);
+	// 	}
 
-		return $.Arr2D.copy(acc, chunkToAcc(chunk), land, $.Rect.create([0, 0], this.chunkSize));
-	}, $.Arr2D.create(this.chunkSize[0] * numChunks[0], this.chunkSize[1] * numChunks[1]));
+	// 	return $.Arr2D.copy(acc, chunkToAcc(chunk), land, $.Rect.create([0, 0], this.chunkSize));
+	// }, $.Arr2D.create(this.chunkSize[0] * numChunks[0], this.chunkSize[1] * numChunks[1]));
 
 	// console.log(land);
 	
-	// var actors = this._actors.map((actor) => {
-	// 	if ($.Rect.contains(rect, actor.pos))
-	// 	{
-	// 		var local = $.Vec.diff(actor.pos, pos);
-	// 		local[1] = h - local[1] - 1;
-	// 		land[local[1]][local[0]] = actor.sprite;
-	// 	}
+	var key = this.keyFn(pos);
+	var land = this._data[key];
+	if (!land)
+	{
+		land = this._data[key] = genChunk(this.rng, w, h);
+	}
+	land = _.cloneDeep(land);
 
-	// 	return actor;
-	// });
+	var rect = $.Rect.create([0, 0], [w, h]);
+
+	var actors = this._actors.map((actor) => {
+		var local = $.toLocal([w, h], pos, actor.pos);
+		local[1] = h - local[1] - 1;
+		if ($.Rect.contains(rect, local))
+		{
+			land[local[1]][local[0]] = actor.sprite;
+		}
+
+		return actor;
+	});
 
 	return land;
 };
@@ -205,7 +215,10 @@ Render.prototype.to = function(selection)
 
 	return this;
 };
-
+Render.prototype.getChunk = function(pos)
+{
+	return $.getChunk([this.width, this.height], pos);
+};
 
 
 
@@ -216,10 +229,10 @@ Render.prototype.to = function(selection)
 
 
 var Camera = (renderer, config) => {
+
 	var fn = function()
 	{
-		var halfWidth = [-renderer.width, -renderer.height].map((x) => x / 2);
-		var renderPoint = $.Vec.sum(this.target.pos, halfWidth);
+		var renderPoint = renderer.getChunk(this.target.pos);
 		return config.source.getRect(renderPoint, renderer.width, renderer.height);
 	};
 
