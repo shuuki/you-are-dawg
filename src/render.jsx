@@ -214,7 +214,7 @@ var Camera = (renderer, config) => {
 
 
 
-var Minimap = ()
+// var Minimap = ()
 
 
 

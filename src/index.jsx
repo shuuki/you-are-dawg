@@ -25,7 +25,28 @@ var time = streams.time;
 var log = streams.log;
 var w = window;
 
+var __logI = 0;
+var logCollect = flyd.stream([]);
+var logValues = (stream, label) => {
+	label = label || '' + __logI++;
+	var dedupe = flyd.dropRepeats(stream);
 
+	flyd.on((v) => {
+		var arr = logCollect();
+		var x = _.find(arr, { label });
+		if (!x) { x = { label }; arr.push(x); }
+		x.value = v;
+		logCollect(arr);
+	}, dedupe);
+
+	flyd.on(() => {
+		var arr = logCollect();
+		_.remove(arr, { label });
+		logCollect(arr);
+	}, dedupe.end);
+	
+	return stream;
+}
 
 
 
@@ -101,6 +122,8 @@ var actor = (name, pos) => {
 	// Also push into the world
 	gameLand.add(newActor);
 
+	newActor.life = flyd.stream(newActor);
+
 	return newActor;
 };
 
@@ -110,28 +133,31 @@ var actor = (name, pos) => {
 
 // Let's make some actors
 var player = actor('dawg', [10, 10]);
-
+logValues(player.life.map((x) => x.pos.join(',')), 'Dawg Paws');
 
 // Move the player by keys
 var playerMover = () => {
 	var commands = commandState();
 	player.pos = _.reduce(commands, (pos, v, dir) => gimmicks.move.cardinal(dir, pos), player.pos);
+	
+	// @todo: solve the listen problem?
+	player.life(player);
 };
 logic.add(playerMover);
 
 
 
-var birds = _.map(new Array(1000), (x) => actor('bird', [_.random(-100, 100), _.random(-100, 100)]));
-var humans = _.map(new Array(1000), (x) => actor('human', [_.random(-200, -100), _.random(-200, -100)]));
+var birds = _.map(new Array(5000), (x) => actor('bird', [_.random(-500, 500), _.random(-500, 500)]));
+var humans = _.map(new Array(5000), (x) => actor('human', [_.random(-500, 500), _.random(-500, 500)]));
 
 
 
 var randomMover = gimmicks.move.randomMove(getNumber);
-logic.add(() => {
-	var movePos = (x) => x.pos = randomMover(x.pos);
-	birds.forEach(movePos);
-	humans.forEach(movePos);
-}, 500);
+var movePos = (x) => x.pos = randomMover(x.pos);
+
+birds.concat(humans).forEach((thing) => {
+	logic.add(() => movePos(thing), _.random(100, 1000));
+})
 
 
 
@@ -197,8 +223,20 @@ flyd.on((state) => renderKeyboard(keyCodes, _.pairs(state)), keyboardState);
 flyd.on((state) => renderKeyboard(activeCommands, _.pairs(state)), commandState);
 
 // Debug live values
-// flyd.on((state) => renderLiveDebug, _toLog);
+var logger = gameNode.append('div').classed('logger', true).append('ul');
+var renderLiveDebug = (data) => {
+	var u = logger.selectAll('li').data(data);
+	var e = u.enter().append('li');
+	e.append('b');
+	e.append('span');
 
+	[u, e].map((sel) => {
+		sel.select('b').text((d) => d.label + ':');
+		sel.select('span').text((d) => d.value);
+	});
+};
+flyd.on(renderLiveDebug, logCollect);
+// log(logCollect);
 //////////
 //	Minimap code. Perfect for now.
 //////////
