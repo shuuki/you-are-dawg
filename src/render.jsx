@@ -107,44 +107,6 @@ Land.prototype.add = function(source)
 
 Land.prototype.getRect = function(pos, w, h)
 {
-	// var rect = $.Rect.create(pos, [w, h]);
-	// var corners = $.Rect.corners(rect);
-	// var chunks = _.uniq(corners.map($.getChunk(this.chunkSize)), _.isEqual);
-	
-	// // Get the bounds of display, array offset
-	// var min = $.getChunk(this.chunkSize,
-	// 	corners.reduce((pos, corner) =>
-	// 	applyMin(_.zip(pos, corner)), corners[0].slice(0))
-	// );
-	// var max = $.getChunk(this.chunkSize,
-	// 	corners.reduce((pos, corner) =>
-	// 	applyMax(_.zip(pos, corner)), corners[0].slice(0))
-	// );
-	// var numChunks = $.Vec.diff(max, min);
-
-	// var shift = min.map((x) => x > 0 ? x : -x);
-
-	// var chunkToAcc = (chunk) => $.Vec.mult(
-	// 	$.Vec.sum(shift, chunk),
-	// 	this.chunkSize
-	// );
-
-	// // Land for each chunk
-	// var land = chunks.reduce((acc, chunk, i) => {
-	// 	var key = this.keyFn(chunk);
-	// 	var land = this._data[key];
-	// 	var chunkRect = $.Rect.create(chunk, this.chunkSize);
-		
-	// 	if (!land)
-	// 	{
-	// 		land = this._data[key] = genChunk(this.rng, this.chunkSize[0], this.chunkSize[1]);
-	// 	}
-
-	// 	return $.Arr2D.copy(acc, chunkToAcc(chunk), land, $.Rect.create([0, 0], this.chunkSize));
-	// }, $.Arr2D.create(this.chunkSize[0] * numChunks[0], this.chunkSize[1] * numChunks[1]));
-
-	// console.log(land);
-	
 	var key = this.keyFn(pos);
 	var land = this._data[key];
 	if (!land)
@@ -181,11 +143,15 @@ Land.prototype.getRect = function(pos, w, h)
 
 
 
-var Render = function(width, height)
+var Render = function(width, height, renderFn)
 {
 	var sources = flyd.stream([]);
+	
+	// Defaults
+	renderFn = renderFn || renderMap;
+
 	/*shrug assign self props?*/
-	_.merge(this, { width, height, sources });
+	_.merge(this, { width, height, sources, renderFn });
 };
 Render.prototype.title = 'RenderManager';
 Render.prototype.add = function(source)
@@ -211,7 +177,7 @@ Render.prototype.to = function(selection)
 	).map((row) => row.join(''));
 
 	// Do render
-	renderMap(selection, land);
+	this.renderFn(selection, land);
 
 	return this;
 };
@@ -240,6 +206,15 @@ var Camera = (renderer, config) => {
 
 	return fn;
 }
+
+
+
+
+
+
+
+
+var Minimap = ()
 
 
 
