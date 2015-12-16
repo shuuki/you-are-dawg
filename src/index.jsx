@@ -147,8 +147,8 @@ logic.add(playerMover);
 
 
 
-var birds = _.map(new Array(5000), (x) => actor('bird', [_.random(-500, 500), _.random(-500, 500)]));
-var humans = _.map(new Array(5000), (x) => actor('human', [_.random(-500, 500), _.random(-500, 500)]));
+var birds = _.map(new Array(2000), (x) => actor('bird', [_.random(-500, 500), _.random(-500, 500)]));
+var humans = _.map(new Array(2000), (x) => actor('human', [_.random(-500, 500), _.random(-500, 500)]));
 
 
 
@@ -172,6 +172,39 @@ birds.concat(humans).forEach((thing) => {
 // A camera lense into gameLand
 var playerCam = render.Camera(render.Renderer, { target: player, source: gameLand });
 render.Renderer.add(playerCam);
+
+
+
+
+
+
+
+
+
+
+
+
+
+var mapCam = () => {
+	var pt = player.pos();
+	console.log(pt);
+	return [[]];
+}
+render.Minimap.add(mapCam);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // DOM element to render game into
@@ -236,6 +269,9 @@ var renderLiveDebug = (data) => {
 	});
 };
 flyd.on(renderLiveDebug, logCollect);
+
+
+
 // log(logCollect);
 //////////
 //	Minimap code. Perfect for now.

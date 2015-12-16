@@ -1,5 +1,6 @@
 var _ = require('lodash');
 var flyd = require('flyd');
+var d3 = require('d3');
 
 var $ = require('./core.jsx');
 var verse = require('./data.jsx');
@@ -31,6 +32,25 @@ var genChunk = (rng, rows, cols) => {
 
 
 
+// Actual function because this
+var basicRender = function(data, index) {
+	var sprites = _.pluck(data.actors, 'sprite');
+	sprites.unshift(data.land);
+	
+	var spans = d3.select(this).selectAll('span').data(sprites);
+	var e = spans.enter().append('span');
+	[spans, e].forEach((sel) => {
+		sel.text((d) => d);
+	});
+
+	spans.exit().remove();
+};
+
+
+
+
+
+
 
 /**
  * Render array of characters into `p` tags
@@ -38,16 +58,17 @@ var genChunk = (rng, rows, cols) => {
  * @param  {string[]} land  Each item is a row as a string
  */
 var renderMap = (map, land) => {
-	var rows = map.selectAll('p').data(land);
-	// Render the data as text
-	[
-		rows,							// d3 update 
-	 	rows.enter()			// and endter
-			.append('p')
-			.classed('glyph', true)
-	].forEach((sel) => sel.text((d) => d));
-	// Cleanup
-	rows.exit().remove();
+	var tr = map.classed('glyph', true).selectAll('tr').data(land);
+	var tr_e = tr.enter().append('tr');
+	tr.exit().remove();
+
+	var td = tr.selectAll('td').data((d) => d);
+	var td_e = td.enter().append('td');
+	[td, td_e].forEach((sel) => {
+		sel.each(basicRender);
+	});
+
+	td.exit().remove();
 };
 
 
@@ -113,19 +134,20 @@ Land.prototype.getRect = function(pos, w, h)
 	{
 		land = this._data[key] = genChunk(this.rng, w, h);
 	}
-	land = _.cloneDeep(land);
+	land = _.map(land, (rows) => rows.map((cell) => {
+		return { land: cell, actors: [] };
+	}));
 
 	var rect = $.Rect.create([0, 0], [w, h]);
 
-	var actors = this._actors.map((actor) => {
+	this._actors.forEach((actor) => {
 		var local = $.toLocal([w, h], pos, actor.pos);
 		local[1] = h - local[1] - 1;
+		
 		if ($.Rect.contains(rect, local))
 		{
-			land[local[1]][local[0]] = actor.sprite;
+			land[local[1]][local[0]].actors.push(actor);
 		}
-
-		return actor;
 	});
 
 	return land;
@@ -172,9 +194,10 @@ Render.prototype.to = function(selection)
 	var layers = this.sources().map((x) => x.call(x));
 
 	// Flatten grid via merge and then map empty cells to 'a'
-	var land = layers.reduce(_.merge, []).map((row) =>
-		row.map((c) => (!c ? 'a' : c))
-	).map((row) => row.join(''));
+	var land = layers.reduce((grid, chunk) => {
+		_.merge(grid, chunk);
+		return grid;
+	}, []);
 
 	// Do render
 	this.renderFn(selection, land);
@@ -226,5 +249,6 @@ var Camera = (renderer, config) => {
 module.exports = {
 	Land,
 	Camera,
-	Renderer: new Render(30, 30)		 // Singleton render manager?
+	Renderer: new Render(30, 30),		 // Singleton render manager?
+	Minimap: new Render(200, 200, renderMap) // Are the pieces coming together already?
 };
