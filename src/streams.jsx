@@ -65,6 +65,30 @@ var lookup = flyd.curryN(2,
 
 
 
+var movingAverage = flyd.curryN(2,
+	(width, s) => {
+		var last = 0;
+		var n = 0;
+		return flyd.scan((acc, next) => {
+			if (n < width)
+			{
+				n++;
+			}
+			else
+			{
+				acc -= (last / width);
+			}
+			acc += (next / width);
+			last = next;
+			return acc;
+		}, 0, s);
+	});
+
+
+
+
+
+
 // Time stream synced to window's animation frame
 var time = flyd.stream(Date.now());
 
@@ -94,7 +118,7 @@ module.exports = {
 	lookup,
 	every,
 	// Transform
-	log,
+	log, movingAverage,
 	// Static streams
 	time,
 	keys // DOM events

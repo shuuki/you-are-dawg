@@ -52,7 +52,12 @@ var logValues = (stream, label) => {
 
 
 // Frames per second (I prefer millis per frame)
-logValues(flyd.previous(time).map((p) => Math.floor(1 / (time() - p) * 1000)), 'FPS');
+logValues(
+	streams.movingAverage(120, // keep 120 frames in average
+		flyd.previous(time).map(
+			(p) => isNaN(p) ? 0 : 1000 / (time() - p)
+		)
+	).map((x) => x.toFixed(2)), 'FPS');
 
 
 console.log(verse);		// Let me hear you shout
@@ -103,7 +108,7 @@ var rand = new Chance(seed);
 var getNumber = () => rand.random();
 
 // Change render dims
-render.Renderer.width = render.Renderer.height = 40;
+render.Renderer.width = render.Renderer.height = 20;
 
 
 //////////////
