@@ -156,7 +156,7 @@ var randomMover = gimmicks.move.randomMove(getNumber);
 var movePos = (x) => x.pos = randomMover(x.pos);
 
 birds.concat(humans).forEach((thing) => {
-	logic.add(() => movePos(thing), _.random(100, 1000));
+	logic.add(() => movePos(thing), _.random(1000000, 10000000));
 })
 
 

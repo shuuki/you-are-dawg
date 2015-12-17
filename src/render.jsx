@@ -38,9 +38,9 @@ var basicRender = function(data, index) {
 		acc.push(layer.land);
 		acc.push.apply(acc, _.pluck(layer.actors, 'sprite'));
 		return acc;
-	}, [])
+	}, []);
 
-	var spans = d3.select(this).selectAll('span').data(sprites);
+	var spans = d3.select(this).select('div').selectAll('span').data(sprites);
 	var e = spans.enter().append('span');
 	[spans, e].forEach((sel) => {
 		sel.text((d) => d);
