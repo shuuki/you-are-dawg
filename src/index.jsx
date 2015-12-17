@@ -51,9 +51,8 @@ var logValues = (stream, label) => {
 
 
 
-// Millis per frame
+// Frames per second (I prefer millis per frame)
 logValues(flyd.previous(time).map((p) => Math.floor(1 / (time() - p) * 1000)), 'FPS');
-
 
 
 console.log(verse);		// Let me hear you shout
