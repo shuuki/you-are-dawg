@@ -4,6 +4,7 @@ flyd.filter = require('flyd/module/filter');
 flyd.obj = require('flyd/module/obj');
 flyd.scanmerge = require('flyd/module/scanmerge');
 flyd.dropRepeats = require('flyd/module/droprepeats').dropRepeats;
+flyd.previous = require('flyd/module/previous');
 
 var chance = require('chance');
 var d3 = require('d3');
@@ -50,6 +51,8 @@ var logValues = (stream, label) => {
 
 
 
+// Frames per second (I prefer millis per frame)
+logValues(flyd.previous(time).map((p) => Math.floor(1 / (time() - p) * 1000)), 'FPS');
 
 
 
