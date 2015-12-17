@@ -34,9 +34,12 @@ var genChunk = (rng, rows, cols) => {
 
 // Actual function because this
 var basicRender = function(data, index) {
-	var sprites = _.pluck(data.actors, 'sprite');
-	sprites.unshift(data.land);
-	
+	var sprites = _.reduce(data, (acc, layer) => {
+		acc.push(layer.land);
+		acc.push.apply(acc, _.pluck(layer.actors, 'sprite'));
+		return acc;
+	}, [])
+
 	var spans = d3.select(this).selectAll('span').data(sprites);
 	var e = spans.enter().append('span');
 	[spans, e].forEach((sel) => {
@@ -63,7 +66,7 @@ var renderMap = (map, land) => {
 	tr.exit().remove();
 
 	var td = tr.selectAll('td').data((d) => d);
-	var td_e = td.enter().append('td');
+	var td_e = td.enter().append('td').append('div');
 	[td, td_e].forEach((sel) => {
 		sel.each(basicRender);
 	});
@@ -190,14 +193,26 @@ Render.prototype.remove = function(source)
 };
 Render.prototype.to = function(selection)
 {
-	// grab sources
-	var layers = this.sources().map((x) => x.call(x));
-
+	var land = $.Arr2D.fill(
+		$.Arr2D.create(this.width, this.height),
+		() => []
+	);
+	
 	// Flatten grid via merge and then map empty cells to 'a'
-	var land = layers.reduce((grid, chunk) => {
-		_.merge(grid, chunk);
-		return grid;
-	}, []);
+	var layers = this.sources().map((x) => x.call(x));
+	for (var i = 0; i < layers.length; i++)
+	{
+		for (var c = 0; c < layers[i].length; c++)
+		{
+			for (var r = 0; r < layers[i][c].length; r++)
+			{
+				if (layers[i][c][r])
+				{
+					land[c][r].push(layers[i][c][r]);
+				}
+			}
+		}
+	}
 
 	// Do render
 	this.renderFn(selection, land);

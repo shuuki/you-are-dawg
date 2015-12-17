@@ -63,7 +63,8 @@ var Rect = {
 
 var Arr2D = {
 	create: (w, h) => _.map(new Array(w), (x) => new Array(h)),
-	fill: (arr, val) => _.map(arr, (row) => _.fill(row, val)),
+	fill: (arr, val) => _.map(arr, (row) =>
+		_.map(row, (c) => _.isFunction(val) ? val() : val)),
 	extract: _.curry((arr, w, h, x, y) => {
 		x = Math.min(Math.max(x, 0), arr.length);
 		w = x + w > arr.length ? arr.length - x : w;
