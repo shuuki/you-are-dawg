@@ -152,15 +152,16 @@ logic.add(playerMover);
 
 
 
-var birds = _.map(new Array(2000), (x) => actor('bird', [_.random(-500, 500), _.random(-500, 500)]));
-var humans = _.map(new Array(2000), (x) => actor('human', [_.random(-500, 500), _.random(-500, 500)]));
+var birds = _.map(new Array(5000), (x) => actor('bird', [_.random(-500, 500), _.random(-500, 500)]));
+var humans = _.map(new Array(5000), (x) => actor('human', [_.random(-500, 500), _.random(-500, 500)]));
+var squirrel = _.map(new Array(5000), (x) => actor('squirrel', [_.random(-500, 500), _.random(-500, 500)]));
 
 
 
 var randomMover = gimmicks.move.randomMove(getNumber);
 var movePos = (x) => x.pos = randomMover(x.pos);
 
-birds.concat(humans).forEach((thing) => {
+birds.concat(humans).concat(squirrel).forEach((thing) => {
 	logic.add(() => movePos(thing), _.random(100, 1000));
 })
 
