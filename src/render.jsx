@@ -42,10 +42,8 @@ var basicRender = function(data, index) {
 
 	var spans = d3.select(this).select('div').selectAll('span').data(sprites);
 	var e = spans.enter().append('span');
-	[spans, e].forEach((sel) => {
-		sel.text((d) => d);
-	});
-
+	spans.text((d) => d);
+	
 	spans.exit().remove();
 };
 
@@ -98,7 +96,14 @@ var applyMax = $.Vec.ap(Math.max, Math);
 
 
 
-
+/**
+ * @typedef {object} Source
+ * @method getRect
+ *  @param {[number, number]} pos Tuple of numbers for (x, y)
+ *  @param {number} w width of rect
+ *  @param {number} h height of rect
+ *  @returns {object[][]} Rectangle of cells of objects
+ */
 
 
 
@@ -122,27 +127,32 @@ var Land = function(rng, config)
 	this._actors = [];						// Actors in the world
 	this.chunkSize = [25, 25];		// Resolution of land generation
 	this.config = config;
+
+	this._cache = [[]]; // Last getRect result
 };
 Land.prototype.add = function(source)
 {
+	// @todo: Easy optimization if actors is slow -> sort by dawg pos
 	this._actors.push(source);
 	return this;
 };
-
 Land.prototype.getRect = function(pos, w, h)
 {
+	// Grab current land (string[][])
 	var key = this.keyFn(pos);
 	var land = this._data[key];
 	if (!land)
 	{
 		land = this._data[key] = genChunk(this.rng, w, h);
 	}
+
+	// Transform the land from string[][] to
+	// (string[][]) -> {land: {cell: string}, actors}[][]
 	land = _.map(land, (rows) => rows.map((cell) => {
 		return { land: cell, actors: [] };
 	}));
 
 	var rect = $.Rect.create([0, 0], [w, h]);
-
 	this._actors.forEach((actor) => {
 		var local = $.toLocal([w, h], pos, actor.pos);
 		local[1] = h - local[1] - 1;
@@ -153,8 +163,41 @@ Land.prototype.getRect = function(pos, w, h)
 		}
 	});
 
+	// Update cache to new land
+	this._cache = land;
 	return land;
 };
+
+
+
+
+// idea
+// we leave Land dedicated to managing the terrain
+// For the game world, we can have "Logic" blocks
+// Logic is represented by a function which gets every object
+// of a cell, is allowed to transform it, and must return it
+// 
+// @see: logic.jsx
+//  so,
+//  Logic.fn : (Cell) -> Cell
+//  
+//  they're run in order of added for sanity sake
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -197,7 +240,7 @@ Render.prototype.to = function(selection)
 		$.Arr2D.create(this.width, this.height),
 		() => []
 	);
-	
+
 	// Flatten grid via merge and then map empty cells to 'a'
 	var layers = this.sources().map((x) => x.call(x));
 	for (var i = 0; i < layers.length; i++)

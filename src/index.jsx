@@ -16,10 +16,25 @@ var $ = require('./core.jsx');						// Core nice stuff
 var streams = require('./streams.jsx');		// Stream goodies
 var render = require('./render.jsx');			// My eyes still work
 var gimmicks = require('./gimmicks.jsx');	// A joke here, some bones there
-var logic = require('./logic.jsx');				// A wise man once
+var Logic = require('./logic.jsx');				// A wise man once
 
 // Style
 require('./index.less');
+
+
+
+
+var getNumber = () => Math.random();
+
+
+
+
+// Model and Controller
+var gameLand = new render.Land(getNumber);
+var logic = new Logic(gameLand);
+
+
+
 
 // Shortcuts
 var time = streams.time;
@@ -94,41 +109,65 @@ var commandState = keyboardState.map(
 	.value()
 );
 
-/////////////////
-// Enter Dawg
-/////////////////
+
+
+
+
+
+/////////////////////////////// Enter Dawg //////////////////////////
+
+
+
 
 var gameNode = d3.select(document.body)
 	.append('div')
 	.classed('game', true);
 
-// Same seed every run for now
-var seed = 314159;
-var rand = new Chance(seed);
-var getNumber = () => rand.random();
+
+
 
 // Change render dims
-render.Renderer.width = render.Renderer.height = 20;
+render.Renderer.width = render.Renderer.height = 25;
+
+
+
+
+
+
+
 
 
 //////////////
 // Some actors / state
 //////////////
 
-// The world for now
-var gameLand = new render.Land(getNumber);
-
-// Actors -- Living things in the world.
+// Actors -- Living things in the world. A lookup.
 var actorsByName = _.indexBy(verse.actors, 'name');
+
+/**
+ * Make a new actor with a default name and position.
+ * Shapes loaded from `actorsByName`
+ *
+ * @name Actor
+ * @typedef {object} Actor
+ * @prop {string} name
+ * @prop {[number, number]} pos
+ * @prop {stream<Actor>} life - stream of own value. Used to update on mutation.
+ */
 var actor = (name, pos) => {
+	name = name || 'nothing';
 	var newActor = _.cloneDeep(actorsByName[name]);
 	newActor.pos = !pos ? [0, 0] : pos;
 
-	// Also push into the world
-	gameLand.add(newActor);
-
 	newActor.life = flyd.stream(newActor);
 
+	return newActor;
+};
+
+// Get an actor + add to game
+var gameActor = (name, pos) => {
+	var newActor = actor(name, pos);
+	gameLand.add(newActor);
 	return newActor;
 };
 
@@ -137,11 +176,11 @@ var actor = (name, pos) => {
 
 
 // Let's make some actors
-var player = actor('dawg', [10, 10]);
+var player = gameActor('dawg', [10, 10]);
 logValues(player.life.map((x) => x.pos.join(',')), 'Dawg Paws');
 
 // Move the player by keys
-var playerMover = () => {
+var playerMover = (cells) => {
 	var commands = commandState();
 	player.pos = _.reduce(commands, (pos, v, dir) => gimmicks.move.cardinal(dir, pos), player.pos);
 	
@@ -149,26 +188,6 @@ var playerMover = () => {
 	player.life(player);
 };
 logic.add(playerMover);
-
-
-
-var birds = _.map(new Array(5000), (x) => actor('bird', [_.random(-500, 500), _.random(-500, 500)]));
-var humans = _.map(new Array(5000), (x) => actor('human', [_.random(-500, 500), _.random(-500, 500)]));
-var squirrel = _.map(new Array(5000), (x) => actor('squirrel', [_.random(-500, 500), _.random(-500, 500)]));
-
-
-
-var randomMover = gimmicks.move.randomMove(getNumber);
-var movePos = (x) => x.pos = randomMover(x.pos);
-
-birds.concat(humans).concat(squirrel).forEach((thing) => {
-	logic.add(() => movePos(thing), _.random(100, 1000));
-})
-
-
-
-
-
 
 
 
@@ -183,6 +202,8 @@ render.Renderer.add(playerCam);
 
 
 
+// An experiment with life?
+var seeds = actor('seed');
 
 
 
@@ -191,6 +212,12 @@ render.Renderer.add(playerCam);
 
 
 
+
+
+
+
+
+// @todo: finish minimap render
 var mapCam = () => {
 	var pt = player.pos();
 	console.log(pt);
@@ -220,12 +247,11 @@ var renderFn = () => render.Renderer.to(map);
 // Main Update Loop
 var lastTime = time();
 var update = (time) => {
-	var delta = time - lastTime;
-	logic.step(delta);
-	renderFn();
-	lastTime = time;
+	var delta = time - lastTime;		// The time that has past
+	logic.step(delta);						// Tells us how to change
+	renderFn();									// The results of which we see
+	lastTime = time;					// Then we step forward
 };
-
 flyd.on(update, time);
 
 

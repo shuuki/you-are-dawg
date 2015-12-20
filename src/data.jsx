@@ -59,13 +59,31 @@ var season = [
 
 
 
-
+/**
+ * a : an actor
+ * What happens if we think of these as, "nouns with properties"
+ * then elsewhere we give  these descriptions logic.
+ * @param  {string} name - Actor's name.
+ * @param  {string} sprite - For now, a char
+ * @return {Actor} - a new Actor
+ */
 var a = (name, sprite) => { return { name, sprite }; };
+
 var actors = [
+	a('nothing', '_'),
 	a('bird', 'B'),
 	a('dawg', '@'),
 	a('human', '!'),
-	a('squirrel', 'S')
+	a('squirrel', 'S'),
+	// Maybe another structure...
+	a('seed', '`'),
+	a('sprout', '`'),					// I'm kind of liking this short-hand langauge....
+	a('sapling', ','),	// "a sapling is `,` 
+	a('aspen', 'H'),							// Lol, "a aspen" 
+	a('spruce', 'A'),
+	a('pint', 'T'),
+	// And an attribute that you can really play with
+	a('water', 'w')
 ];
 
 
