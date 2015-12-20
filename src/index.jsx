@@ -150,7 +150,8 @@ var actorsByName = _.indexBy(verse.actors, 'name');
  *
  * @name Actor
  * @typedef {object} Actor
- * @prop {string} name
+ * @prop {string} name - What should I look up?
+ * @prop {object} status - Arbitrary shape status object for now
  * @prop {[number, number]} pos
  * @prop {stream<Actor>} life - stream of own value. Used to update on mutation.
  */
@@ -159,6 +160,7 @@ var actor = (name, pos) => {
 	var newActor = _.cloneDeep(actorsByName[name]);
 	newActor.pos = !pos ? [0, 0] : pos;
 
+	newActor.status = {};
 	newActor.life = flyd.stream(newActor);
 
 	return newActor;
@@ -171,24 +173,44 @@ var gameActor = (name, pos) => {
 	return newActor;
 };
 
+var cooldown = (max, current) => {
+	return { max, current: !current ? 0 : current };
+}
 
 
 
 
 // Let's make some actors
 var player = gameActor('dawg', [10, 10]);
+
+// some player-only stuff
+_.merge(player.status, { sniffing: false, move: cooldown(25) });
+
 logValues(player.life.map((x) => x.pos.join(',')), 'Dawg Paws');
+// logValues(player.life.map((x) => JSON.stringify(x.status)), 'stats');
 
 // Move the player by keys
-var playerMover = (cells) => {
+var playerMover = (cells, delta) => {
+	// Snap to max is someone shortened it
+	player.status.move.current = Math.min(player.status.move.current, player.status.move.max);
+	if (player.status.move.current > 0)
+	{
+		player.status.move.current -= delta;
+	}
 	var commands = commandState();
-	player.pos = _.reduce(commands, (pos, v, dir) => gimmicks.move.cardinal(dir, pos), player.pos);
-	
-	// @todo: solve the listen problem?
+	player.status.sniffing = !_.isEmpty(commands.sniff);
+	player.status.move.max = player.status.sniffing ? 250 : 25;
+
+	if (!_.isEmpty(commands) && player.status.move.current <= 0)
+	{
+		player.pos = _.reduce(commands, (pos, v, dir) => gimmicks.move.cardinal(dir, pos), player.pos);
+		player.status.move.current = player.status.move.max;
+	}
+
+	// @todo: check if changed
 	player.life(player);
 };
-logic.add(playerMover);
-
+logic.add(playerMover); // No time given 
 
 
 
@@ -203,7 +225,7 @@ render.Renderer.add(playerCam);
 
 
 // An experiment with life?
-var seeds = actor('seed');
+var seeds = [actor('seed')];
 
 
 
@@ -243,6 +265,11 @@ render.Minimap.add(mapCam);
 // DOM element to render game into
 var map = gameNode.append('div').classed('map', true);
 var renderFn = () => render.Renderer.to(map);
+
+logic.add(() => {
+	map.classed('sniffing', player.status.sniffing);
+}, 100);
+
 
 // Main Update Loop
 var lastTime = time();

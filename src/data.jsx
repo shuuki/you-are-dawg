@@ -20,7 +20,7 @@ var land = [
 	{chance: 0.2, sprite: "H", name: "aspen"},
 	//{chance: 1, sprite: "D", name: "cement"},
 	//{chance: 1, sprite: "n", name: "scruff"},
-	//{chance: 1, sprite: "w", name: "water"},
+	{chance: 1, sprite: "w", name: "water"}				// If this engine is good. I should be able to rip us out of the wasts and into the forest.
 	//{chance: 1, sprite: "s", name: "scrub"},
 	//{chance: 1, sprite: "m", name: "cracked mud"},
 	//{chance: 1, sprite: "g", name: "more asphalt"},
@@ -98,7 +98,9 @@ var defaultControls = {
 	// Left, A
 	37: 'West', 65: 'West',
 	// Right, D
-	68: 'East', 39: 'East'
+	68: 'East', 39: 'East',
+	// Shift, either
+	16: 'sniff'
 };
 
 var commands = _.uniq(_.values(defaultControls)); // Extract commands

@@ -39,7 +39,6 @@ body {
 
 .map {
 	font-size: 16px;
-	color: gray;
 	
 	&.other {
 		color: red;
@@ -50,6 +49,10 @@ body {
 	}
 
 	td {
+		transition: all 1s;
+		color: gray;
+		text-shadow: none;
+
 		width: 1em;
 		height: 1em;	
 		div {
@@ -68,6 +71,18 @@ body {
 	
 	position: absolute;
 	cursor: crosshair;
+}
+
+.sniffing {
+	color: grey;
+	
+	&.map {
+		td {
+			transition: all 2.5s ease-out;
+			color: lighten(grey, 25%);
+			text-shadow: 0 0 10px red;
+		}
+	}
 }
 
 .keys {
