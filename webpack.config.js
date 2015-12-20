@@ -12,7 +12,7 @@ module.exports = {
     module: {
         loaders: [
             { test: /\.jsx$/, loader: "babel", exclude: "/(node_modules|bower_components)/" },
-            { test: /\.less$/, loader: "style!css!less", exclude: "/(node_modules|bower_components)/" }
+            { test: /\.less$/, loader: "style!css!autoprefixer!less", exclude: "/(node_modules|bower_components)/" }
         ]
     }
 };
