@@ -14,5 +14,5 @@ var port = 8080;
 var host = 'localhost';
 
 server.listen(port, host, function(){
-  console.log('Server running on: ' + protocol + '://' + host + ':' + port);
+  console.log('Walking the dawg on: ' + protocol + '://' + host + ':' + port);
 });

@@ -6,3 +6,5 @@ bin
 
 #ides
 *.sublime-*
+
+.DS_Store
