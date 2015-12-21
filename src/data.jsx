@@ -81,7 +81,7 @@ var actors = [
 	a('sapling', ','),	// "a sapling is `,` 
 	a('aspen', 'H'),							// Lol, "a aspen" 
 	a('spruce', 'A'),
-	a('pint', 'T'),
+	a('pine', 'T'),
 	// And an attribute that you can really play with
 	a('water', 'w')
 ];
