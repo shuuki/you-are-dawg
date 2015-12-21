@@ -127,7 +127,7 @@ var gameNode = d3.select(document.body)
 
 
 // Change render dims
-render.Renderer.width = render.Renderer.height = 25;
+render.Renderer.width = render.Renderer.height = 20;
 
 
 
@@ -184,7 +184,7 @@ var cooldown = (max, current) => {
 var player = gameActor('dawg', [10, 10]);
 
 // some player-only stuff
-_.merge(player.status, { sniffing: false, move: cooldown(25) });
+_.merge(player.status, { sniffing: false, move: cooldown(250) });
 
 logValues(player.life.map((x) => x.pos.join(',')), 'Dawg Paws');
 // logValues(player.life.map((x) => JSON.stringify(x.status)), 'stats');
