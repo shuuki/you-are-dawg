@@ -21,12 +21,12 @@ var verse = require('./data.jsx');
 //////////
 // Different ways to render the game world.
 //////////
-var genChunk = (rng, rows, cols) => {
+var genChunk = (rng, dims) => {
 	return _.chunk($.correlatum(
-		rng, rows * cols,
+		rng, dims[0] * dims[1],
 		_.pluck(verse.land, "sprite"),
 		_.pluck(verse.land, "chance")
-	), cols);
+	), dims[0]);
 };
 
 
@@ -138,14 +138,14 @@ Land.prototype.add = function(source)
 	this._actors.push(source);
 	return this;
 };
-Land.prototype.getRect = function(pos, w, h)
+Land.prototype.getRect = function(dims, pos)
 {
 	// Grab current land (string[][])
 	var key = this.keyFn(pos);
 	var land = this._data[key];
 	if (!land)
 	{
-		land = this._data[key] = genChunk(this.rng, w, h);
+		land = this._data[key] = genChunk(this.rng, dims);
 	}
 
 	// Transform the land from string[][] to
@@ -154,10 +154,10 @@ Land.prototype.getRect = function(pos, w, h)
 		return { land: cell, actors: [] };
 	}));
 
-	var rect = $.Rect.create([0, 0], [w, h]);
+	var rect = $.Rect.create([0, 0], dims);
 	this._actors.forEach((actor) => {
-		var local = $.toLocal([w, h], pos, actor.pos);
-		local[1] = h - local[1] - 1;
+		var local = $.toLocal(dims, pos, actor.pos);
+		local[1] = dims[1] - local[1] - 1;
 		
 		if ($.Rect.contains(rect, local))
 		{
@@ -166,7 +166,7 @@ Land.prototype.getRect = function(pos, w, h)
 	});
 
 	// Update cache to new land
-	this._cache = {pos:$.Rect.create(pos, [w, h]), land};
+	this._cache = { pos, dims, land };
 	return land;
 };
 
@@ -213,15 +213,16 @@ Land.prototype.getRect = function(pos, w, h)
 
 
 
-var Render = function(width, height, renderFn)
+var Render = function(renderFn, config)
 {
 	var sources = flyd.stream([]);
-	
+
 	// Defaults
 	renderFn = renderFn || renderMap;
 
 	/*shrug assign self props?*/
-	_.merge(this, { width, height, sources, renderFn });
+	_.merge(this, config);
+	_.merge(this, { sources, renderFn });
 };
 Render.prototype.title = 'RenderManager';
 Render.prototype.add = function(source)
@@ -239,7 +240,7 @@ Render.prototype.remove = function(source)
 Render.prototype.to = function(selection)
 {
 	var land = $.Arr2D.fill(
-		$.Arr2D.create(this.width, this.height),
+		$.Arr2D.create(this.dims[0], this.dims[1]),
 		() => []
 	);
 
@@ -266,7 +267,7 @@ Render.prototype.to = function(selection)
 };
 Render.prototype.getChunk = function(pos)
 {
-	return $.getChunk([this.width, this.height], pos);
+	return $.getChunk(this.dims, pos);
 };
 
 
@@ -282,7 +283,7 @@ var Camera = (renderer, config) => {
 	var fn = function()
 	{
 		var renderPoint = renderer.getChunk(this.target.pos);
-		return config.source.getRect(renderPoint, renderer.width, renderer.height);
+		return config.source.getRect(renderer.dims, renderPoint);
 	};
 
 	fn.target = config.target;
@@ -309,6 +310,6 @@ var Camera = (renderer, config) => {
 module.exports = {
 	Land,
 	Camera,
-	Renderer: new Render(30, 30),		 // Singleton render manager?
+	Renderer: new Render(),	
 	Minimap: new Render(200, 200, renderMap) // Are the pieces coming together already?
 };

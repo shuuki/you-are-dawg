@@ -30,7 +30,7 @@ var getNumber = () => Math.random();
 
 
 // Model and Controller
-var renderDims = [25, 25];
+var renderDims = [15, 15];
 var gameLand = new render.Land(getNumber, { dims: renderDims });
 var logic = new Logic(gameLand);
 render.Renderer.dims = renderDims;
