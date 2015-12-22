@@ -143,7 +143,24 @@ Land.prototype.at = function(pos)
 	var chunk = $.getChunk(this.dims, pos);
 	var key = this.keyFn(chunk);
 	var local = $.toLocal(this.dims, chunk, pos);
-	var land = this._data[key];
+	var terrain = this._data[key];
+	if (!terrain)
+	{
+		terrain = this._data[key] = genChunk(this.rng, this.dims);
+	}
+	var land = {
+		land: this._data[key][local[1]][local[0]],
+		actors: []
+	};
+	var atTestPt = $.Vec.eq(pos);
+	this._actors.forEach((actor) => {
+		if (atTestPt(actor.pos))
+		{
+			land.actors.push(actor);
+		}
+	});
+
+	return land;
 };
 Land.prototype.getRect = function(dims, pos)
 {

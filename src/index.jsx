@@ -199,7 +199,7 @@ var playerMover = (cells, delta) => {
 		player.status.move.current = player.status.move.max;
 	}
 
-	// tileUnderPlayer(_.pluck(cells, 'actors'));
+	tileUnderPlayer(gameLand.at(player.pos));
 
 	// @todo: check if changed
 	player.life(player);

@@ -39,6 +39,7 @@ var permutations = (emptyVal, arr) => {
  * @type {Object}
  */
 var Vec = {
+	eq: _.curry((a, b) => _.every(a, (x, i) => a[i] === b[i]), 2),
 	diff: _.curry((src, by) => _.zip(src, by).map(sdiff), 2),
 	div: _.curry((src, by) => _.zip(src, by).map(sdiv), 2),
 	mult: _.curry((src, by) => _.zip(src, by).map(smult), 2),
