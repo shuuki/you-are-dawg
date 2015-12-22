@@ -151,7 +151,7 @@ var getChunk = _.curry((dims, pos) =>
 var toLocal = _.curry((dims, chunk, pos) =>
 	Vec.diff(pos, 
 		Vec.mult(chunk, dims)), 3);
-
+// ugh h - local[1] - 1
 
 
 

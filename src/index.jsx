@@ -30,9 +30,10 @@ var getNumber = () => Math.random();
 
 
 // Model and Controller
-var gameLand = new render.Land(getNumber);
+var renderDims = [25, 25];
+var gameLand = new render.Land(getNumber, { dims: renderDims });
 var logic = new Logic(gameLand);
-
+render.Renderer.dims = renderDims;
 
 
 
@@ -126,16 +127,6 @@ var gameNode = d3.select(document.body)
 
 
 
-// Change render dims
-render.Renderer.width = render.Renderer.height = 20;
-
-
-
-
-
-
-
-
 
 //////////////
 // Some actors / state
@@ -187,7 +178,8 @@ var player = gameActor('dawg', [10, 10]);
 _.merge(player.status, { sniffing: false, move: cooldown(250) });
 
 logValues(player.life.map((x) => x.pos.join(',')), 'Dawg Paws');
-// logValues(player.life.map((x) => JSON.stringify(x.status)), 'stats');
+var tileUnderPlayer = flyd.stream({});
+logValues(tileUnderPlayer.map(JSON.stringify));
 
 // Move the player by keys
 var playerMover = (cells, delta) => {
@@ -206,6 +198,8 @@ var playerMover = (cells, delta) => {
 		player.pos = _.reduce(commands, (pos, v, dir) => gimmicks.move.cardinal(dir, pos), player.pos);
 		player.status.move.current = player.status.move.max;
 	}
+
+	// tileUnderPlayer(_.pluck(cells, 'actors'));
 
 	// @todo: check if changed
 	player.life(player);
@@ -226,7 +220,19 @@ render.Renderer.add(playerCam);
 
 // An experiment with life?
 var seeds = [actor('seed')];
-
+logic.add((cells, delta) => {
+	seeds.forEach((seed) => {
+		var localSeed = $.toLocal(cells.pos.dims, cells.pos.pos, seed.pos);
+		if (!(isNaN(localSeed[0]) || isNaN(localSeed[1])))
+		{
+			if ($.Rect.contains(cells.pos, localSeed))
+			{
+				console.log('!');
+				// var contents = cells[localSeed[1]][localSeed[0]];
+			}
+		}
+	});
+});
 
 
 

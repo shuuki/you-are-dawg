@@ -45,6 +45,7 @@ Logic.prototype.step = function(delta)
 {
 	// @todo: better than this
 	var lastLand = this.land._cache;
+	
 	// @todo: Should sort by time after diff -- some things can jump in the future
 	// @todo: better datastructure for time remaining buckets
 	this.sources().forEach((source) => {

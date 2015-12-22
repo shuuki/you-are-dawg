@@ -125,10 +125,12 @@ var Land = function(rng, config)
 	this.keyFn = (pos) => pos.join(',');
 
 	this._actors = [];						// Actors in the world
-	this.chunkSize = [25, 25];		// Resolution of land generation
-	this.config = config;
+	this._cache = {pos: [0, 0], land: [[]]}; // Last getRect result
 
-	this._cache = [[]]; // Last getRect result
+	this.dims = [20, 20]; // Default to 20x20
+
+	// set config
+	_.merge(this, config);
 };
 Land.prototype.add = function(source)
 {
@@ -164,7 +166,7 @@ Land.prototype.getRect = function(pos, w, h)
 	});
 
 	// Update cache to new land
-	this._cache = land;
+	this._cache = {pos:$.Rect.create(pos, [w, h]), land};
 	return land;
 };
 
