@@ -1,6 +1,8 @@
 var _ = require('lodash');
 
 var land = [
+
+	// materials of the ground
 	{chance: 50, sprite: ".", name: "sand"},
 	{chance: 100, sprite: "`", name: "dust"},
 	{chance: 20, sprite: ":", name: "more sand"},
@@ -8,24 +10,35 @@ var land = [
 	{chance: 1, sprite: "/", name: "tall grass"},
 	{chance: 2, sprite: ";", name: "dirt"},
 	{chance: 5, sprite: "i", name: "reeds"},
-	{chance: 0.1, sprite: "$", name: "stuff"},
-	{chance: 0.01, sprite: "&", name: "bones"},
-	{chance: 0.01, sprite: "%", name: "more bones"},
-	{chance: 0.01, sprite: "?", name: "tracks"},
+	{chance: 0.01, sprite: "n", name: "scruff"},
 	{chance: 0.5, sprite: "h", name: "dead tree"},
+	{chance: 0.01, sprite: "s", name: "scrub"},
+	{chance: 0.01, sprite: "m", name: "cracked mud"},
+
+
+	// the trees
 	{chance: 2, sprite: "A", name: "spruce"},
 	{chance: 2, sprite: "T", name: "pine"},
 	{chance: 0.3, sprite: "Y", name: "juniper"},
 	{chance: 2.5, sprite: "L", name: "oak"},
 	{chance: 0.2, sprite: "H", name: "aspen"},
+
+	// things you find that may be of interest
+	{chance: 0.1, sprite: "$", name: "stuff"},
+	{chance: 0.01, sprite: "&", name: "bones"},
+	{chance: 0.01, sprite: "%", name: "more bones"},
+	{chance: 0.01, sprite: "?", name: "tracks"},
+
+	// human-made materials
 	{chance: 0.01, sprite: "D", name: "cement"},
-	{chance: 0.01, sprite: "n", name: "scruff"},
-	{chance: 0.01, sprite: "w", name: "water"}, 	// If this engine is good. I should be able to rip us out of the wasts and into the forest.
-	{chance: 0.01, sprite: "s", name: "scrub"},
-	{chance: 0.01, sprite: "m", name: "cracked mud"},
 	{chance: 0.001, sprite: "g", name: "more asphalt"},
 	{chance: 0.001, sprite: "G", name: "asphalt"},
-	{chance: 0, sprite: "_", name: "nothing"}
+
+	// essential to life
+	{chance: 0.01, sprite: "w", name: "water"}, 	// If this engine is good. I should be able to rip us out of the wasts and into the forest.
+
+	// why is this here with chance set to zero? i dunno, but it's staying in
+	{chance: 0, sprite: "_", name: "nothing"} 
 ];
 
 var sun = [
@@ -77,9 +90,9 @@ var actors = [
 	a('squirrel', 'S'),
 	// Maybe another structure...
 	a('seed', '`'),
-	a('sprout', '`'),					// I'm kind of liking this short-hand langauge....
-	a('sapling', ','),	// "a sapling is `,` 
-	a('aspen', 'H'),							// Lol, "a aspen" 
+	a('sprout', '`'),		// I'm kind of liking this short-hand langauge....
+	a('sapling', ','),			// "a sapling is `,` 
+	a('aspen', 'H'),				// Lol, "a aspen" 
 	a('spruce', 'A'),
 	a('pine', 'T'),
 	// And an attribute that you can really play with
