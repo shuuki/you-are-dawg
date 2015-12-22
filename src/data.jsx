@@ -1,31 +1,31 @@
 var _ = require('lodash');
 
 var land = [
-	{chance: 20, sprite: ".", name: "sand"},
-	{chance: 15, sprite: "`", name: "dust"},
-	{chance: 1, sprite: ":", name: "more sand"},
-	{chance: 2, sprite: ",", name: "short grass"},
-	//{chance: 1, sprite: "/", name: "tall grass"},
+	{chance: 50, sprite: ".", name: "sand"},
+	{chance: 100, sprite: "`", name: "dust"},
+	{chance: 20, sprite: ":", name: "more sand"},
+	{chance: 5, sprite: ",", name: "short grass"},
+	{chance: 1, sprite: "/", name: "tall grass"},
 	{chance: 2, sprite: ";", name: "dirt"},
-	//{chance: 5, sprite: "i", name: "reeds"},
-	//{chance: 1, sprite: "$", name: "stuff"},
-	{chance: 0.1, sprite: "&", name: "bones"},
+	{chance: 5, sprite: "i", name: "reeds"},
+	{chance: 0.1, sprite: "$", name: "stuff"},
+	{chance: 0.01, sprite: "&", name: "bones"},
 	{chance: 0.01, sprite: "%", name: "more bones"},
 	{chance: 0.01, sprite: "?", name: "tracks"},
 	{chance: 0.5, sprite: "h", name: "dead tree"},
-	//{chance: 2, sprite: "A", name: "spruce"},
-	//{chance: 2, sprite: "T", name: "pine"},
+	{chance: 2, sprite: "A", name: "spruce"},
+	{chance: 2, sprite: "T", name: "pine"},
 	{chance: 0.3, sprite: "Y", name: "juniper"},
-	//{chance: 2.5, sprite: "L", name: "oak"},
+	{chance: 2.5, sprite: "L", name: "oak"},
 	{chance: 0.2, sprite: "H", name: "aspen"},
-	//{chance: 1, sprite: "D", name: "cement"},
-	//{chance: 1, sprite: "n", name: "scruff"},
-	{chance: 1, sprite: "w", name: "water"}				// If this engine is good. I should be able to rip us out of the wasts and into the forest.
-	//{chance: 1, sprite: "s", name: "scrub"},
-	//{chance: 1, sprite: "m", name: "cracked mud"},
-	//{chance: 1, sprite: "g", name: "more asphalt"},
-	//{chance: 1, sprite: "G", name: "asphalt"},
-	//{chance: 0.1, sprite: "_", name: "nothing"}
+	{chance: 0.01, sprite: "D", name: "cement"},
+	{chance: 0.01, sprite: "n", name: "scruff"},
+	{chance: 0.01, sprite: "w", name: "water"}, 	// If this engine is good. I should be able to rip us out of the wasts and into the forest.
+	{chance: 0.01, sprite: "s", name: "scrub"},
+	{chance: 0.01, sprite: "m", name: "cracked mud"},
+	{chance: 0.001, sprite: "g", name: "more asphalt"},
+	{chance: 0.001, sprite: "G", name: "asphalt"},
+	{chance: 0, sprite: "_", name: "nothing"}
 ];
 
 var sun = [
