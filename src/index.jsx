@@ -222,12 +222,12 @@ render.Renderer.add(playerCam);
 var seeds = [actor('seed')];
 logic.add((cells, delta) => {
 	seeds.forEach((seed) => {
-		var localSeed = $.toLocal(cells.pos.dims, cells.pos.pos, seed.pos);
+		var localSeed = $.toLocal(cells.dims, cells.pos, seed.pos);
 		if (!(isNaN(localSeed[0]) || isNaN(localSeed[1])))
 		{
-			if ($.Rect.contains(cells.pos, localSeed))
+			if ($.Rect.contains($.Rect.create(cells.dims, cells.pos), localSeed))
 			{
-				console.log('!');
+				// console.log('!');
 				// var contents = cells[localSeed[1]][localSeed[0]];
 			}
 		}
@@ -248,7 +248,7 @@ logic.add((cells, delta) => {
 // @todo: finish minimap render
 var mapCam = () => {
 	var pt = player.pos();
-	console.log(pt);
+	// console.log(pt);
 	return [[]];
 }
 render.Minimap.add(mapCam);

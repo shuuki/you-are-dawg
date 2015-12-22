@@ -125,9 +125,9 @@ var Land = function(rng, config)
 	this.keyFn = (pos) => pos.join(',');
 
 	this._actors = [];						// Actors in the world
-	this._cache = {pos: [0, 0], land: [[]]}; // Last getRect result
 
 	this.dims = [20, 20]; // Default to 20x20
+	this._cache = {pos: [0, 0], dims: this.dims, land: [[]]}; // Last getRect result
 
 	// set config
 	_.merge(this, config);
@@ -137,6 +137,13 @@ Land.prototype.add = function(source)
 	// @todo: Easy optimization if actors is slow -> sort by dawg pos
 	this._actors.push(source);
 	return this;
+};
+Land.prototype.at = function(pos)
+{
+	var chunk = $.getChunk(this.dims, pos);
+	var key = this.keyFn(chunk);
+	var local = $.toLocal(this.dims, chunk, pos);
+	var land = this._data[key];
 };
 Land.prototype.getRect = function(dims, pos)
 {
@@ -154,10 +161,9 @@ Land.prototype.getRect = function(dims, pos)
 		return { land: cell, actors: [] };
 	}));
 
-	var rect = $.Rect.create([0, 0], dims);
+	var rect = $.Rect.create(dims, [0, 0]);
 	this._actors.forEach((actor) => {
 		var local = $.toLocal(dims, pos, actor.pos);
-		local[1] = dims[1] - local[1] - 1;
 		
 		if ($.Rect.contains(rect, local))
 		{

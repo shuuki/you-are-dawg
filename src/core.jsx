@@ -49,7 +49,7 @@ var Vec = {
 
 
 var Rect = {
-	create: (pos, dims) => { return {pos, dims}; },
+	create: (dims, pos) => { return {pos, dims}; },
 	contains: (rect, pt) => _.every(pt, (d, i) =>
 		d >= rect.pos[i] &&
 		d < rect.pos[i] + rect.dims[i]
@@ -148,13 +148,11 @@ var inMap = _.curry((map, data) => map[data] !== undefined);
 var getChunk = _.curry((dims, pos) =>
 	Vec.div(pos, dims)
 		.map(Math.floor), 2);
-var toLocal = _.curry((dims, chunk, pos) =>
-	Vec.diff(pos, 
-		Vec.mult(chunk, dims)), 3);
-// ugh h - local[1] - 1
-
-
-
+var toLocal = _.curry((dims, chunk, pos) => {
+		var out = Vec.diff(pos, Vec.mult(chunk, dims));
+		out[1] = dims[1] - out[1] - 1;
+		return out;
+	}, 3);
 
 
 // Curry stuff
