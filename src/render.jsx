@@ -35,14 +35,20 @@ var genChunk = (rng, dims) => {
 // Actual function because this
 var basicRender = function(data, index) {
 	var sprites = _.reduce(data, (acc, layer) => {
-		acc.push(layer.land);
-		acc.push.apply(acc, _.pluck(layer.actors, 'sprite'));
+		acc.push({sprite: layer.land, name: 'land'});
+		acc.push.apply(acc, layer.actors);
 		return acc;
 	}, []);
 
+	// d3.select(this).select('div').attr('class', (d) => d[0].actors.reduce((acc, actor) => {
+	// 	acc.push(actor.name);
+	// 	return acc;
+	// }, []));
+
 	var spans = d3.select(this).select('div').selectAll('span').data(sprites);
 	var e = spans.enter().append('span');
-	spans.text((d) => d);
+	spans.attr('class', (d) => d.name);
+	spans.text((d) => d.sprite);
 	
 	spans.exit().remove();
 };

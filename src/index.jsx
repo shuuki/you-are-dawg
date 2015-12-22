@@ -191,7 +191,7 @@ var playerMover = (cells, delta) => {
 	}
 	var commands = commandState();
 	player.status.sniffing = !_.isEmpty(commands.sniff);
-	player.status.move.max = player.status.sniffing ? 250 : 25;
+	player.status.move.max = player.status.sniffing ? 400 : 200;
 
 	if (!_.isEmpty(commands) && player.status.move.current <= 0)
 	{
@@ -219,7 +219,7 @@ render.Renderer.add(playerCam);
 
 
 // An experiment with life?
-var seeds = [actor('seed')];
+var seeds = [gameActor('seed')];
 logic.add((cells, delta) => {
 	seeds.forEach((seed) => {
 		var localSeed = $.toLocal(cells.dims, cells.pos, seed.pos);
