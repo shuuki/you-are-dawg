@@ -340,5 +340,5 @@ module.exports = {
 	Land,
 	Camera,
 	Renderer: new Render(),	
-	Minimap: new Render(200, 200, renderMap) // Are the pieces coming together already?
+	Minimap: new Render() // Are the pieces coming together already?
 };

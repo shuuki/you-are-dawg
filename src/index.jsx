@@ -31,9 +31,11 @@ var getNumber = () => Math.random();
 
 // Model and Controller
 var renderDims = [15, 15];
+var minimapChunks = [3, 3];
 var gameLand = new render.Land(getNumber, { dims: renderDims });
 var logic = new Logic(gameLand);
 render.Renderer.dims = renderDims;
+render.Minimap.dims = $.Vec.mult(minimapChunks, renderDims);
 
 
 
@@ -171,15 +173,24 @@ var cooldown = (max, current) => {
 
 
 
-// Let's make some actors
+
+// Player stuff
 var player = gameActor('dawg', [10, 10]);
-
-// some player-only stuff
 _.merge(player.status, { sniffing: false, move: cooldown(250) });
-
 logValues(player.life.map((x) => x.pos.join(',')), 'Dawg Paws');
+
+
+
+
+// Something to update
 var tileUnderPlayer = flyd.stream({});
 logValues(tileUnderPlayer.map(JSON.stringify));
+
+
+
+
+
+
 
 // Move the player by keys
 var playerMover = (cells, delta) => {
@@ -210,9 +221,68 @@ logic.add(playerMover); // No time given
 
 
 
+
+
+
+
+// sniff sniff I found you
+logic.add(() => {
+	map.classed('sniffing', player.status.sniffing);
+}, 100);
+
+
+
+
+
+
+
+
+
 // A camera lense into gameLand
 var playerCam = render.Camera(render.Renderer, { target: player, source: gameLand });
 render.Renderer.add(playerCam);
+
+
+
+
+
+
+
+// And a minimap
+var minimapLand = () => {
+	var data = gameLand._data;
+	var cells = $.Arr2D.create(render.Minimap.dims[0], render.Minimap.dims[1]);
+	var center = minimapChunks.map((x) => Math.floor(x / 2));
+	var chunk = $.getChunk(render.Renderer.dims, player.pos);
+	var srcSize = $.Rect.create(render.Renderer.dims, [0, 0]);
+	
+	for (var x = -center[0]; x < minimapChunks[0] - center[0]; x++)
+	{
+		for (var y = -center[1]; y < minimapChunks[1] - center[1]; y++)
+		{
+			var pos = $.Vec.diff(chunk, [x, y]);
+			var key = gameLand.keyFn(pos);
+			if (data[key])
+			{
+				// Top left to paste
+				var offset = $.Vec.mult([-x + center[0], y + center[1]], render.Renderer.dims);
+				
+				for (var c = 0; c < data[key].length; c++)
+				{
+					for (var r = 0; r < data[key][c].length; r++)
+					{
+						cells[offset[1] + r][offset[0] + c] = { land: data[key][r][c]}
+					}
+				}
+			}
+		}
+	}
+
+	return cells;
+};
+render.Minimap.add(minimapLand);
+
+
 
 
 
@@ -245,36 +315,19 @@ logic.add((cells, delta) => {
 
 
 
-// @todo: finish minimap render
-var mapCam = () => {
-	var pt = player.pos();
-	// console.log(pt);
-	return [[]];
-}
-render.Minimap.add(mapCam);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// DOM element to render game into
+// I enjoy being able to see
 var map = gameNode.append('div').classed('map', true);
-var renderFn = () => render.Renderer.to(map);
+var minimap = gameNode.append('div').classed('minimap map', true);
 
-logic.add(() => {
-	map.classed('sniffing', player.status.sniffing);
-}, 100);
+
+
+
+// call our renderers?
+var renderFn = () => {
+	render.Renderer.to(map);
+	render.Minimap.to(minimap);
+};
 
 
 // Main Update Loop
@@ -334,71 +387,6 @@ var renderLiveDebug = (data) => {
 	});
 };
 flyd.on(renderLiveDebug, logCollect);
-
-
-
-// log(logCollect);
-//////////
-//	Minimap code. Perfect for now.
-//////////
-// var minimap = gameNode.append('div').classed('minimap map', true);
-// var minimapData = [];
-// var chunks = flyd.combine((chunk) => {
-// 	var currentChunk = chunk();
-// 	var data = gameLand._data;
-// 	var discoveredCells = _.keys(data);
-// 	var pairs = discoveredCells.map((str) => str.split(',').map((x) => +x));
-// 	var xBounds = [
-// 		_.min(_.pluck(pairs, '0')),
-// 		_.max(_.pluck(pairs, '0'))
-// 	];
-// 	var yBounds = [
-// 		_.min(_.pluck(pairs, '1')),
-// 		_.max(_.pluck(pairs, '1'))
-// 	];
-// 	var emptyMap = _.chunk(
-// 					_.map(new Array(chunkWidth * chunkHeight), (x) => 'a'),
-// 					chunkWidth);
-	
-// 	var rows = [];
-// 	for (var y = yBounds[1]; y >= yBounds[0]; y--)
-// 	{
-// 		var row = [];
-// 		for (var x = xBounds[0]; x <= xBounds[1]; x++)
-// 		{
-// 			var key = gameLand.keyFn(x, y);
-// 			if (data[key] === undefined)
-// 			{
-// 				row.push(emptyMap);
-// 			}
-// 			else
-// 			{
-// 				row.push(data[key]);
-// 			}
-// 		}
-// 		rows.push(row);
-// 	}
-	
-	
-// 	var out = rows.reduce((acc, row, i) => {
-// 		// Chunk row => actual row
-// 		var reducedRow = row.reduce((acc, chunk) => {
-// 			chunk.map((x) => x.join('')).forEach((row, i) => {
-// 				if (acc[i] === undefined) { acc[i] = ''; };
-// 				acc[i] += row;
-// 			});
-// 			return acc;
-// 		}, []);
-		
-// 		reducedRow.forEach((row) => acc.push(row));
-		
-		
-// 		return acc;
-// 	}, []);
-
-// 	renderMap(minimap, out);
-// }, [activeChunk, time]);
-
 
 
 
