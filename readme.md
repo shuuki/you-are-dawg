@@ -1,9 +1,5 @@
 #SUCH DAWG, MANY WOOF.
 
-a journey
-
----
-
 
 ### develop
 1. Pull repo, have `npm` and `node` ready
