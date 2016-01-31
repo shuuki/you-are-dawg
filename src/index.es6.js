@@ -11,14 +11,14 @@ var d3 = require('d3');
 var _ = require('lodash');
 
 // Deps
-var verse = require('./data.jsx');				// A universe of data
-var $ = require('./core.jsx');						// Core nice stuff 
-var streams = require('./streams.jsx');		// Stream goodies
-var render = require('./render.jsx');			// My eyes still work
-var gimmicks = require('./gimmicks.jsx');	// A joke here, some bones there
-var Logic = require('./logic.jsx');				// A wise man once
+var verse = require('./data.es6');				// A universe of data
+var $ = require('./core.es6');						// Core nice stuff 
+var streams = require('./streams.es6');		// Stream goodies
+var render = require('./render.es6');			// My eyes still work
+var gimmicks = require('./gimmicks.es6');	// A joke here, some bones there
+var Logic = require('./logic.es6');				// A wise man once
 
-// Style
+// Style require
 require('./index.less');
 
 

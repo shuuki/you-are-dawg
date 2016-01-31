@@ -1,6 +1,6 @@
 module.exports = {
     context: process.cwd() + '/src/',
-    entry: { null: "./index.jsx" },
+    entry: { null: "./index.es6.js" },
     devtool: 'cheap-source-map',
     output: {
         path: '/',
@@ -11,7 +11,7 @@ module.exports = {
     },
     module: {
         loaders: [
-            { test: /\.jsx$/, loader: "babel", exclude: "/(node_modules|bower_components)/" },
+            { test: /\.es6\.js$/, loader: "babel", exclude: "/(node_modules|bower_components)/" },
             { test: /\.less$/, loader: "style!css!autoprefixer!less", exclude: "/(node_modules|bower_components)/" }
         ]
     }

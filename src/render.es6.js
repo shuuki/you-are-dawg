@@ -2,8 +2,8 @@ var _ = require('lodash');
 var flyd = require('flyd');
 var d3 = require('d3');
 
-var $ = require('./core.jsx');
-var verse = require('./data.jsx');
+var $ = require('./core.es6');
+var verse = require('./data.es6');
 
 // Render a button row (?)
 // var btnRow = gameNode.append('div').classed('flex-row', true);
