@@ -5,16 +5,15 @@ var d3 = require('d3');
 var $ = require('./core.es6');
 var verse = require('./data.es6');
 
-// Render a button row (?)
-// var btnRow = gameNode.append('div').classed('flex-row', true);
-// var buttons = btnRow.append('div').classed('buttons', true);
-// var controls = ['North', 'South', 'East', 'West'];
-// var clicks = flyd.stream();
-// var up = buttons.selectAll('button').data(controls);
-// [up, up.enter().append('button')].forEach((group => {
-// 	group.on('click', clicks);
-// 	group.text((d) => d);
-// }));
+//  helper  to do a basic datajoin
+var joinElt = _.curry((elt, selection, data, keyFn) => {
+	var update = selection.selectAll(elt).data(data, keyFn);
+	update.text((d) => d); // Update
+	update.enter().append(elt).text((d) => d); // Enter
+	update.exit().remove(); // Exit
+	return update;
+}, 3);
+
 
 
 
@@ -337,6 +336,7 @@ var Camera = (renderer, config) => {
 
 
 module.exports = {
+	joinElt,
 	Land,
 	Camera,
 	Renderer: new Render(),	

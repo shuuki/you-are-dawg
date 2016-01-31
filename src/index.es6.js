@@ -17,6 +17,7 @@ var streams = require('./streams.es6');		// Stream goodies
 var render = require('./render.es6');			// My eyes still work
 var gimmicks = require('./gimmicks.es6');	// A joke here, some bones there
 var Logic = require('./logic.es6');				// A wise man once
+var actions = require('./actions.es6');		// Let things do stuf
 
 // Style require
 require('./index.less');
@@ -162,6 +163,7 @@ var actor = (name, pos) => {
 // Get an actor + add to game
 var gameActor = (name, pos) => {
 	var newActor = actor(name, pos);
+	newActor.toString = () => newActor.name;
 	gameLand.add(newActor);
 	return newActor;
 };
@@ -184,7 +186,7 @@ logValues(player.life.map((x) => x.pos.join(',')), 'Dawg Paws');
 
 // Something to update
 var tileUnderPlayer = flyd.stream({});
-logValues(tileUnderPlayer.map(JSON.stringify));
+logValues(tileUnderPlayer.map(JSON.stringify), 'Tile');
 
 
 
@@ -289,20 +291,141 @@ render.Minimap.add(minimapLand);
 
 
 // An experiment with life?
-var seeds = [gameActor('seed')];
-logic.add((cells, delta) => {
-	seeds.forEach((seed) => {
-		var localSeed = $.toLocal(cells.dims, cells.pos, seed.pos);
-		if (!(isNaN(localSeed[0]) || isNaN(localSeed[1])))
-		{
-			if ($.Rect.contains($.Rect.create(cells.dims, cells.pos), localSeed))
-			{
-				// console.log('!');
-				// var contents = cells[localSeed[1]][localSeed[0]];
-			}
-		}
+var seeds = [gameActor('seed', [5, 5])];
+// logic.add((cells, delta) => {
+// 	seeds.forEach((seed) => {
+// 		var localSeed = $.toLocal(cells.dims, cells.pos, seed.pos);
+// 		if (!(isNaN(localSeed[0]) || isNaN(localSeed[1])))
+// 		{
+// 			if ($.Rect.contains($.Rect.create(cells.dims, cells.pos), localSeed))
+// 			{
+
+// 			}
+// 		}
+// 	});
+// });
+
+
+
+
+
+
+var human = gameActor('human', [3, 4]);
+
+
+
+
+////////// ACTIONS?!
+var flow = flyd.stream();
+var doAction = (verb, locals) => {
+	flow({
+		action: actions.verbs[verb],
+		locals
 	});
+};
+
+
+
+
+
+
+
+// NPC STATE?
+var state = flyd.scan((acc, event) => {
+	acc.history.push(event);
+	var injectedLocals = _.map(event.action.requires, (label) => event.locals[label]);
+	acc.last = event.action.fn.apply(undefined, injectedLocals);
+	return acc;
+}, {
+	last: {},
+	history: []
+}, flow);
+
+logValues(state.map((s) => {
+	return JSON.stringify(s.last);
+}), 'Results');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// A dawg centric view
+var actionDiv = gameNode.append('div').classed('actions', true);
+actionDiv.append('label').text('Target');
+var targetSelect = actionDiv.append('select').classed('target', true);
+var targetBtns = actionDiv.append('div').classed('buttons', true);
+
+
+
+
+logic.add((cells, delta, actors) => {
+	var dawgChunk = $.getChunk(cells.dims, cells.pos);
+	var possibleActions = [];
+
+	var target = actors[targetSelect.node().selectedIndex];
+
+	if (target)
+	{
+		possibleActions = _.get(actions.verbMap, 'dawg.' + target.name, []);
+	}
+
+
+	render.joinElt('buttion', targetBtns, possibleActions)
+		.on('click', (d) => doAction(d, {
+			source: player,
+			target
+		}));
+
+	render.joinElt('option', targetSelect, _.map(actors, 'name'));
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -339,6 +462,21 @@ var update = (time) => {
 	lastTime = time;					// Then we step forward
 };
 flyd.on(update, time);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

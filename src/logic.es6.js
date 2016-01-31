@@ -45,6 +45,7 @@ Logic.prototype.step = function(delta)
 {
 	// @todo: better than this
 	var lastLand = this.land._cache;
+	var actors = _.flatten(_.map(_.flatten(lastLand.land), 'actors'));
 	
 	// @todo: Should sort by time after diff -- some things can jump in the future
 	// @todo: better datastructure for time remaining buckets
@@ -52,7 +53,7 @@ Logic.prototype.step = function(delta)
 		source[2] = source[2] - delta;
 		if (source[2] <= 0)
 		{
-			source[0](lastLand, delta);
+			source[0](lastLand, delta, actors);
 			source[2] = source[1];
 		}
 	});
