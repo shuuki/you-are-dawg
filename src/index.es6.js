@@ -96,7 +96,7 @@ logValues(
 	).map((x) => x.toFixed(2)), 'FPS');
 
 
-console.log(verse);		// Let me hear you shout
+console.log(verse, actions);		// Let me hear you shout
 
 // Key state
 var getWhich = $.get('which');
@@ -123,7 +123,7 @@ var keyboardState = flyd.scanmerge([
 // Transform the keys into {command: keys pressed that are triggering}
 var commandState = keyboardState.map(
 	(x) => _(x)
-	.pairs()
+	.toPairs()
 	.filter((a) => a[1])
 	.map((a) => a[0])
 	.groupBy((key) => verse.controls[key])
@@ -153,7 +153,7 @@ var gameNode = d3.select(document.body)
 //////////////
 
 // Actors -- Living things in the world. A lookup.
-var actorsByName = _.indexBy(verse.actors, 'name');
+var actorsByName = _.keyBy(verse.actors, 'name');
 
 /**
  * Make a new actor with a default name and position.
@@ -408,7 +408,8 @@ logic.add((cells, delta, actors) => {
 
 	if (source && target)
 	{
-		possibleActions = _.get(actions.verbMap, `${source.name}.${target.name}`, []);
+		var fromMap = _.get(actions.verbMap, `${source.name}.${target.name}`, []);
+		possibleActions = _.uniq(fromMap.concat(actions.getVerbs(source, target, {})));
 	}
 
 	render.joinElt('option', sourceSelect, _.map(actors, (actor) => actor.sprite));
@@ -530,8 +531,8 @@ var keys = gameNode.append('div').classed('keys', true);
 var keyDispaly = keys.append('div');
 var commandDisplay = keys.append('div');
 
-flyd.on((state) => renderKeyboard(keyDispaly, { data: _.pairs(state) }), keyboardState);
-flyd.on((state) => renderKeyboard(commandDisplay, { data: _.pairs(state) }), commandState);
+flyd.on((state) => renderKeyboard(keyDispaly, { data: _.toPairs(state) }), keyboardState);
+flyd.on((state) => renderKeyboard(commandDisplay, { data: _.toPairs(state) }), commandState);
 
 
 // Debug live values

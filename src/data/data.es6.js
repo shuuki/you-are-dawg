@@ -83,14 +83,14 @@ var season = [
  * @param  {string} sprite - For now, a char
  * @return {Actor} - a new Actor
  */
-var a = (name, sprite) => { return { name, sprite }; };
+var a = (name, sprite, tags) => { return { name, sprite, tags: tags || [] }; };
 
 var actors = [
 	a('nothing', '_'),
 	a('bird', 'B'),
-	a('dawg', '@'),
-	a('human', '!'),
-	a('squirrel', 'S'),
+	a('dawg', '@', ['animal']),
+	a('human', '!', ['animal']),
+	a('squirrel', 'S', ['animal']),
 	// Maybe another structure...
 	a('seed', '`'),
 	a('sprout', '`'),		// I'm kind of liking this short-hand langauge....

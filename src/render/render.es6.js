@@ -23,8 +23,8 @@ var joinElt = _.curry((elt, selection, data, keyFn) => {
 var genChunk = (rng, dims) => {
 	return _.chunk($.correlatum(
 		rng, dims[0] * dims[1],
-		_.pluck(verse.land, "sprite"),
-		_.pluck(verse.land, "chance")
+		_.map(verse.land, "sprite"),
+		_.map(verse.land, "chance")
 	), dims[0]);
 };
 
