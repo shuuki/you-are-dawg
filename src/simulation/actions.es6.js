@@ -31,6 +31,20 @@ var bark = makeAction('bark',
 
 
 
+var bite = makeAction('bite',
+	['source', 'target'],
+	(source, target) => {
+		if (target.status.hp > 0)
+		{
+			target.status.hp -= 2;
+		}
+		return `${source} bites ${target} -> ${target.status.hp}`;
+	})
+
+
+
+
+
 var verbMap = {
 	dawg: {
 		dawg: ['sniff', 'bark', 'growl', 'check'],
@@ -54,7 +68,7 @@ var getVerbs = (source, target, state) => {
 
 	if (_.includes(source.tags, 'fierce'))
 	{
-		verbs.push('bark', 'growl');
+		verbs.push('bark', 'growl', 'bite');
 	}
 
 	return verbs;

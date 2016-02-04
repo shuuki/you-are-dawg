@@ -174,7 +174,9 @@ var actor = (name, pos) => {
 	var newActor = _.cloneDeep(actorsByName[name]);
 	newActor.pos = !pos ? [0, 0] : pos;
 
-	newActor.status = {};
+	newActor.status = {
+		hp: 20
+	};
 	newActor.life = flyd.stream(newActor);
 
 	return newActor;
@@ -186,13 +188,15 @@ var gameActor = (name, pos) => {
 	var newActor = actor(name, pos);
 	newActor.id = _actorIdCount++;
 	newActor.toString = () => newActor.name;
+	
+	// This is where it goes into renderer
 	gameLand.add(newActor);
 	return newActor;
 };
 
 var cooldown = (max, current) => {
 	return { max, current: !current ? 0 : current };
-}
+};
 
 
 
@@ -387,7 +391,6 @@ logValues(state.map((s) => {
 
 
 
-
 // A dawg centric view
 var actionUi = {
 	log: gameNode.append('section').attr('id', 'log'),
@@ -460,7 +463,17 @@ flyd.on((state) => {
 
 
 
-
+// A grim reaper?
+logic.add((cells, delta, actors) => {
+	actors.forEach((actor) => {
+		// Death brings seeds?
+		if (actor.status.hp <= 0)
+		{
+			gameLand.remove(actor);
+			gameActor('seed', actor.pos);
+		}
+	})
+});
 
 
 

@@ -143,6 +143,11 @@ Land.prototype.add = function(source)
 	this._actors.push(source);
 	return this;
 };
+Land.prototype.remove = function(source)
+{
+	_.remove(this._actors, source);
+	return this;
+};
 Land.prototype.at = function(pos)
 {
 	var chunk = $.getChunk(this.dims, pos);
