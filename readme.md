@@ -8,7 +8,9 @@
 
 
 ### compile
-1. `webpack` will build to `www/bin`
++ `webpack` will build to `www/bin`
++ Clear out bin if you change artifacts
+  + `rm -rf www/bin`
 
 ### design
 * shared design resources in `/common` 

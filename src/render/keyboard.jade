@@ -1,0 +1,12 @@
+mixin active(state)
+	if (state)
+		.active
+			block
+	else
+		block
+
+h6 Mapped Key Codes
+ul Active Commands
+	each keyAndState in data
+		+active(keyAndState[1])
+			li= keyAndState[0]

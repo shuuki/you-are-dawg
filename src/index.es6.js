@@ -1,4 +1,4 @@
-// Libs
+// Lots of flyd
 var flyd = require('flyd');
 flyd.filter = require('flyd/module/filter');
 flyd.obj = require('flyd/module/obj');
@@ -10,17 +10,34 @@ var chance = require('chance');
 var d3 = require('d3');
 var _ = require('lodash');
 
-// Deps
-var verse = require('./data/data.es6');				// A universe of data
-var $ = require('./core/core.es6');						// Core nice stuff 
-var streams = require('./core/streams.es6');		// Stream goodies
-var render = require('./render/render.es6');			// My eyes still work
-var gimmicks = require('./simulation/gimmicks.es6');	// A joke here, some bones there
-var Logic = require('./simulation/logic.es6');				// A wise man once
-var actions = require('./simulation/actions.es6');		// Let things do stuf
+// It is
+var verse = require('./data/data.es6');
 
-// Style require
-require('./index.less');
+
+// It knows
+var $ = require('./core/core.es6');
+var streams = require('./core/streams.es6');
+
+
+// It thinks
+var gimmicks = require('./simulation/gimmicks.es6');
+var Logic = require('./simulation/logic.es6');
+var actions = require('./simulation/actions.es6');
+
+
+// It moves
+var render = require('./render/render.es6');
+var renderKeyboard = require('./render/keyboard.es6');
+
+
+// It's pretty
+require('./css/index.less');
+
+
+
+
+
+
 
 
 
@@ -449,7 +466,7 @@ var minimap = gameNode.append('div').classed('minimap map', true);
 // call our renderers?
 var renderFn = () => {
 	render.Renderer.to(map);
-	render.Minimap.to(minimap);
+	// render.Minimap.to(minimap);
 };
 
 
@@ -487,29 +504,12 @@ flyd.on(update, time);
 
 
 // Render keyboard state
-var renderKeyboard = (selection, data) => {
-	var u = selection.selectAll('li').data(data);
-	var e = u.enter().append('li');
+var keys = gameNode.append('div').classed('keys', true);
+var keyDispaly = keys.append('div');
+var commandDisplay = keys.append('div');
+flyd.on((state) => renderKeyboard(keyDispaly, _.pairs(state)), keyboardState);
+flyd.on((state) => renderKeyboard(commandDisplay, _.pairs(state)), commandState);
 
-	[u, e].map((sel) => {
-		sel.classed('active', (d) => d[1]).text((d) => d[0]);
-	});
-
-	u.exit().remove();
-
-	return u;
-};
-
-var keyDisplay = gameNode.append('div').classed('keys', true);
-
-keyDisplay.append('h6').text('Mapped Key Codes');
-var keyCodes = keyDisplay.append('ul');
-
-keyDisplay.append('h6').text('Active Commands');
-var activeCommands = keyDisplay.append('ul');
-
-flyd.on((state) => renderKeyboard(keyCodes, _.pairs(state)), keyboardState);
-flyd.on((state) => renderKeyboard(activeCommands, _.pairs(state)), commandState);
 
 // Debug live values
 var logger = gameNode.append('div').classed('logger', true).append('ul');

@@ -3,7 +3,7 @@ var ExtractTextPlugin = require('extract-text-webpack-plugin');
 module.exports = {
     context: process.cwd() + '/src/',
     entry: {
-        main: './main.es6.js'
+        index: './index.es6.js'
     },
     devtool: 'cheap-source-map',
     output: {
