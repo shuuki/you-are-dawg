@@ -1,3 +1,4 @@
 module.exports = {
-  contentBase: 'src'
+  contentBase: 'www',
+  publicPath: '/bin/'
 };

@@ -1,4 +1,4 @@
-var $ = require('./core.es6');
+var $ = require('../core/core.es6');
 
 // var trail = flyd.curryN(3, (character, stream) => flyd.on((pos) => {
 // 	var chunk = getChunk(pos);

@@ -20,7 +20,7 @@ var Logic = require('./simulation/logic.es6');				// A wise man once
 var actions = require('./simulation/actions.es6');		// Let things do stuf
 
 // Style require
-require('./index.less');
+require('./css/index.less');
 
 
 
