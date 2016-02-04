@@ -335,6 +335,7 @@ var human = gameActor('human', [3, 4]);
 ////////// ACTIONS?!
 var flow = flyd.stream();
 var doAction = (verb, locals) => {
+	if (!actions.verbs[verb]) throw new Error(`Verb ${verb} not found found.`);
 	flow({
 		action: actions.verbs[verb],
 		locals
@@ -343,14 +344,10 @@ var doAction = (verb, locals) => {
 
 
 
-
-
-
-
 // NPC STATE?
 var state = flyd.scan((acc, event) => {
 	acc.history.push(event);
-	var injectedLocals = _.map(event.action.requires, (label) => event.locals[label]);
+	var injectedLocals = _.map(_.get(event, 'action.requires'), (label) => event.locals[label]);
 	acc.last = event.action.fn.apply(undefined, injectedLocals);
 	return acc;
 }, {
@@ -383,12 +380,14 @@ logValues(state.map((s) => {
 
 
 // A dawg centric view
-var actionDiv = gameNode.append('div').classed('actions', true);
-actionDiv.append('label').text('Target');
-var targetSelect = actionDiv.append('select').classed('target', true);
-var targetBtns = actionDiv.append('div').classed('buttons', true);
+var actionUi = {
+	log: gameNode.append('section').attr('id', 'log'),
+	controls: gameNode.append('section').attr('id','controls'),
+};
+actionUi.target = actionUi.controls.append('div').attr('id','target');
+actionUi.actions = actionUi.controls.append('div').attr('id','actions');
 
-
+var targetSelect = actionUi.target.append('select');
 
 
 logic.add((cells, delta, actors) => {
@@ -402,14 +401,17 @@ logic.add((cells, delta, actors) => {
 		possibleActions = _.get(actions.verbMap, 'dawg.' + target.name, []);
 	}
 
+	render.joinElt('option', targetSelect, _.map(actors, 'name'));
 
-	render.joinElt('buttion', targetBtns, possibleActions)
+	render.joinElt('div', actionUi.actions, possibleActions)
+		.call((sel) => {
+			sel.classed('button', true)
+		})
 		.on('click', (d) => doAction(d, {
 			source: player,
 			target
 		}));
 
-	render.joinElt('option', targetSelect, _.map(actors, 'name'));
 });
 
 

@@ -1,15 +1,15 @@
-mixin character(char, label)
-	| char
-		.sans label
-
 #controls
 	#log
 		.entry "Help me!"
 	#actions
 		#target
 			select
-				option +character('Q', 'dawg')
+				option= subject.sprite
+					.sans= subject.name
 			.button.off >
 			select
-				option +character('!', 'guy')
-		.button sniff
+				each actor in targets
+					option= actor.sprite
+							.sans= actor.name
+		each action in actions
+			.button= action
