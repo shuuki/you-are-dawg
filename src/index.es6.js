@@ -346,18 +346,22 @@ var doAction = (verb, locals) => {
 
 // NPC STATE?
 var state = flyd.scan((acc, event) => {
-	acc.history.push(event);
+	var processed = Date.now();
+	acc.history.push([processed, event]);
 	var injectedLocals = _.map(_.get(event, 'action.requires'), (label) => event.locals[label]);
 	acc.last = event.action.fn.apply(undefined, injectedLocals);
+	acc.log.push([processed, acc.last]);
 	return acc;
 }, {
 	last: {},
+	log: [],
 	history: []
 }, flow);
 
 logValues(state.map((s) => {
 	return JSON.stringify(s.last);
 }), 'Results');
+
 
 
 
@@ -415,6 +419,15 @@ logic.add((cells, delta, actors) => {
 });
 
 
+
+
+// RENDER EVENT RESULT LOG
+flyd.on((state) => {
+	var update = actionUi.log.selectAll('.entry').data(state.log);
+	update.enter().append('div').classed('entry', true);
+	update.text((d) => `${JSON.stringify(d[1])} (${d[0]})`);
+	actionUi.log.property('scrollTop', actionUi.log.property('scrollHeight'));
+}, state);
 
 
 
