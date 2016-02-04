@@ -178,8 +178,10 @@ var actor = (name, pos) => {
 };
 
 // Get an actor + add to game
+var _actorIdCount = 0;
 var gameActor = (name, pos) => {
 	var newActor = actor(name, pos);
+	newActor.id = _actorIdCount++;
 	newActor.toString = () => newActor.name;
 	gameLand.add(newActor);
 	return newActor;
@@ -402,10 +404,11 @@ logic.add((cells, delta, actors) => {
 	var possibleActions = [];
 
 	var target = actors[targetSelect.node().selectedIndex];
+	var source = actors[sourceSelect.node().selectedIndex];
 
-	if (target)
+	if (source && target)
 	{
-		possibleActions = _.get(actions.verbMap, 'dawg.' + target.name, []);
+		possibleActions = _.get(actions.verbMap, `${source.name}.${target.name}`, []);
 	}
 
 	render.joinElt('option', sourceSelect, _.map(actors, (actor) => actor.sprite));
@@ -416,7 +419,7 @@ logic.add((cells, delta, actors) => {
 			sel.classed('button', true)
 		})
 		.on('click', (d) => doAction(d, {
-			source: player,
+			source,
 			target
 		}));
 
