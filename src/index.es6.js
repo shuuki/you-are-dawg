@@ -27,7 +27,7 @@ var actions = require('./simulation/actions.es6');
 
 // It moves
 var render = require('./render/render.es6');
-var renderKeyboard = require('./render/keyboard.es6');
+var renderKeyboard = render.jade(require('./render/keyboard.jade'));
 
 
 // It's pretty
@@ -507,8 +507,9 @@ flyd.on(update, time);
 var keys = gameNode.append('div').classed('keys', true);
 var keyDispaly = keys.append('div');
 var commandDisplay = keys.append('div');
-flyd.on((state) => renderKeyboard(keyDispaly, _.pairs(state)), keyboardState);
-flyd.on((state) => renderKeyboard(commandDisplay, _.pairs(state)), commandState);
+
+flyd.on((state) => renderKeyboard(keyDispaly, { data: _.pairs(state) }), keyboardState);
+flyd.on((state) => renderKeyboard(commandDisplay, { data: _.pairs(state) }), commandState);
 
 
 // Debug live values

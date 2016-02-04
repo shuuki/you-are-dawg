@@ -330,6 +330,13 @@ var Camera = (renderer, config) => {
 
 
 
+// @todo: better data join than innerHTML set
+var renderJade = _.curry(
+	(template, selection, data) => 
+		selection.node().innerHTML = template(data),
+	3);
+
+
 
 
 
@@ -339,6 +346,7 @@ module.exports = {
 	joinElt,
 	Land,
 	Camera,
+	jade: renderJade,
 	Renderer: new Render(),	
 	Minimap: new Render() // Are the pieces coming together already?
 };

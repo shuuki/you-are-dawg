@@ -1,0 +1,15 @@
+mixin character(char, label)
+	| char
+		.sans label
+
+#controls
+	#log
+		.entry "Help me!"
+	#actions
+		#target
+			select
+				option +character('Q', 'dawg')
+			.button.off >
+			select
+				option +character('!', 'guy')
+		.button sniff

@@ -1,0 +1,64 @@
+@font-face {
+  font-family: "Nokia";
+  src: url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/102827/1_nokiafc22-webfont.woff") format("woff");
+}
+
+@font-face {
+  font-family: "Pixel";
+  src: url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/102827/04b03-webfont.woff") format("woff");
+}
+
+
+.actions {
+	position: absolute;
+	right: 0;
+	top: 10em;
+	z-index: 2;
+}
+
+
+#controls {
+	display: flex;
+	height: 15em;
+	position: absolute;
+	bottom: 0;
+	right: 0; 
+}
+
+
+::selection {
+	background: yellow;
+}
+
+#log {
+	font-family: "Pixel";
+	height: 100%;
+	width: 70%;
+	overflow-y: auto;
+	background: #111;
+	padding: 0.5em;
+	.entry {
+		padding: 0.5em;
+		line-height: 1.2;
+		border-bottom: 0.125em solid #222;
+	}
+}
+
+#actions {
+	width: 30%;
+	height: 100%;
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+
+#target {
+	background: #333;
+	display: flex;
+	height: 3em;
+	overflow-y: auto;
+	user-select: none;
+	select:first-of-type {
+		background: rgb(235,205,0);
+		color: #333;
+	}
+}
