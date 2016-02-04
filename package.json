@@ -20,7 +20,8 @@
     "chance": "^0.8.0",
     "d3": "^3.5.10",
     "flyd": "^0.2.0",
-    "lodash": "^4.0.0"
+    "lodash": "^4.0.0",
+    "moment": "^2.11.2"
   },
   "devDependencies": {
     "autoprefixer-loader": "^3.1.0",

@@ -6,6 +6,9 @@ flyd.scanmerge = require('flyd/module/scanmerge');
 flyd.dropRepeats = require('flyd/module/droprepeats').dropRepeats;
 flyd.previous = require('flyd/module/previous');
 
+var moment = require('moment');
+moment.defaultFormat = 'HH:mm';
+
 var chance = require('chance');
 var d3 = require('d3');
 var _ = require('lodash');
@@ -408,6 +411,7 @@ logic.add((cells, delta, actors) => {
 	var dawgChunk = $.getChunk(cells.dims, cells.pos);
 	var possibleActions = [];
 
+	// Read ui state
 	var target = actors[targetSelect.node().selectedIndex];
 	var source = actors[sourceSelect.node().selectedIndex];
 
@@ -437,8 +441,9 @@ logic.add((cells, delta, actors) => {
 // RENDER EVENT RESULT LOG
 flyd.on((state) => {
 	var update = actionUi.log.selectAll('.entry').data(state.log);
-	update.enter().append('div').classed('entry', true);
-	update.text((d) => `${JSON.stringify(d[1])} (${d[0]})`);
+	var enter = update.enter().append('div').classed('entry', true);
+	update.attr('title', (d) => moment(d[0]).format())
+	update.text((d) => JSON.stringify(d[1]));
 	actionUi.log.property('scrollTop', actionUi.log.property('scrollHeight'));
 }, state);
 

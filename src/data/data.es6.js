@@ -88,7 +88,7 @@ var a = (name, sprite, tags) => { return { name, sprite, tags: tags || [] }; };
 var actors = [
 	a('nothing', '_'),
 	a('bird', 'B'),
-	a('dawg', '@', ['animal']),
+	a('dawg', '@', ['animal', 'fierce']),
 	a('human', '!', ['animal']),
 	a('squirrel', 'S', ['animal']),
 	// Maybe another structure...

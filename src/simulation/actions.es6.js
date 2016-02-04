@@ -2,9 +2,12 @@
 
 var _ = require('lodash');
 
+var actionLookup = {};
 var makeAction = (label, requires, fn) => {
 	fn.toString = () => label;
-	return { label, requires, fn };
+	var action = { label, requires, fn };
+	actionLookup[label] = action;
+	return action;
 };
 
 
@@ -18,6 +21,11 @@ var sniff = makeAction('sniff',
 		return `${source} sniffs ${target}`;
 	});
 
+var bark = makeAction('bark',
+	['source', 'target'],
+	(source, target) => {
+		return `${source} barks at ${target}`;
+	});
 
 
 
@@ -37,9 +45,16 @@ var verbMap = {
 // Or another way
 var getVerbs = (source, target, state) => {
 	var verbs = [];
+	
+	// Animals can sniff
 	if (_.includes(source.tags, 'animal'))
 	{
 		verbs.push('sniff');
+	}
+
+	if (_.includes(source.tags, 'fierce'))
+	{
+		verbs.push('bark', 'growl');
 	}
 
 	return verbs;
@@ -62,9 +77,8 @@ var getVerbs = (source, target, state) => {
 
 
 module.exports = {
-	verbs: {
-		sniff
-	},
+	makeAction,
+	verbs: actionLookup,
 	verbMap,
 	getVerbs
 };
