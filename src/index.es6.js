@@ -401,7 +401,7 @@ logic.add((cells, delta, actors) => {
 		possibleActions = _.get(actions.verbMap, 'dawg.' + target.name, []);
 	}
 
-	render.joinElt('option', targetSelect, _.map(actors, 'name'));
+	render.joinElt('option', targetSelect, _.map(actors, (actor) => actor.sprite));
 
 	render.joinElt('div', actionUi.actions, possibleActions)
 		.call((sel) => {
