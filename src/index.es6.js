@@ -388,10 +388,13 @@ var actionUi = {
 	log: gameNode.append('section').attr('id', 'log'),
 	controls: gameNode.append('section').attr('id','controls'),
 };
-actionUi.target = actionUi.controls.append('div').attr('id','target');
+var targetSelecter = actionUi.controls.append('section').attr('id', 'target');
 actionUi.actions = actionUi.controls.append('div').attr('id','actions');
 
-var targetSelect = actionUi.target.append('select');
+// [Srouce] > [Target]
+var sourceSelect = targetSelecter.append('select');
+targetSelecter.append('span').classed('button off', true).text('>');
+var targetSelect = targetSelecter.append('select');
 
 
 logic.add((cells, delta, actors) => {
@@ -405,6 +408,7 @@ logic.add((cells, delta, actors) => {
 		possibleActions = _.get(actions.verbMap, 'dawg.' + target.name, []);
 	}
 
+	render.joinElt('option', sourceSelect, _.map(actors, (actor) => actor.sprite));
 	render.joinElt('option', targetSelect, _.map(actors, (actor) => actor.sprite));
 
 	render.joinElt('div', actionUi.actions, possibleActions)
