@@ -395,8 +395,13 @@ actionUi.actions = actionUi.controls.append('div').attr('id','actions');
 
 // [Srouce] > [Target]
 var sourceSelect = targetSelecter.append('select');
-targetSelecter.append('span').classed('button off', true).text('>');
+var swapBtn = targetSelecter.append('span').classed('button off', true).text('>');
 var targetSelect = targetSelecter.append('select');
+swapBtn.on('click', () => {
+	var x = sourceSelect.node().selectedIndex;
+	sourceSelect.node().selectedIndex = targetSelect.node().selectedIndex;
+	targetSelect.node().selectedIndex = x;
+})
 
 
 logic.add((cells, delta, actors) => {
