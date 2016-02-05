@@ -2,10 +2,20 @@
 
 var _ = require('lodash');
 
+var getArgs = (fn) => {
+	var str = fn.toString();
+	var start = str.indexOf('(');
+	var end = str.indexOf(')');
+	var slice = str.slice(start+1, end);
+	return slice.split(',').map((x) => x.trim());
+}
+
 var actionLookup = {};
-var makeAction = (label, requires, fn) => {
-	fn.toString = () => label;
+
+var makeAction = (label, fn) => {
+	var requires = getArgs(fn)
 	var action = { label, requires, fn };
+	action.toString = () => label;
 	actionLookup[label] = action;
 	return action;
 };
@@ -16,13 +26,11 @@ var makeAction = (label, requires, fn) => {
 
 
 var sniff = makeAction('sniff',
-	['source', 'target'],
 	(source, target) => {
 		return `${source} sniffs ${target}`;
 	});
 
 var bark = makeAction('bark',
-	['source', 'target'],
 	(source, target) => {
 		return `${source} barks at ${target}`;
 	});
@@ -32,7 +40,6 @@ var bark = makeAction('bark',
 
 
 var bite = makeAction('bite',
-	['source', 'target'],
 	(source, target) => {
 		if (target.status.hp > 0)
 		{
