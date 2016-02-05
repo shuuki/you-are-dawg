@@ -30,6 +30,7 @@ var actions = require('./simulation/actions.es6');
 
 // It moves
 var render = require('./render/render.es6');
+var Land = require('./render/land.es6');
 var renderKeyboard = render.jade(require('./render/keyboard.jade'));
 
 
@@ -53,7 +54,7 @@ var getNumber = () => Math.random();
 // Model and Controller
 var renderDims = [15, 15];
 var minimapChunks = [3, 3];
-var gameLand = new render.Land(getNumber, { dims: renderDims });
+var gameLand = new Land(getNumber, { dims: renderDims });
 var logic = new Logic(gameLand);
 render.Renderer.dims = renderDims;
 render.Minimap.dims = $.Vec.mult(minimapChunks, renderDims);
@@ -266,6 +267,9 @@ logic.add(() => {
 
 
 
+
+
+
 // A camera lense into gameLand
 var playerCam = render.Camera(render.Renderer, { target: player, source: gameLand });
 render.Renderer.add(playerCam);
@@ -331,13 +335,34 @@ var seeds = [gameActor('seed', [5, 5])];
 // 	});
 // });
 
+// Let's make a generic human -- he'll just live in the world
+gameActor('human', [3, 4]);
 
 
-
-
-
-var human = gameActor('human', [3, 4]);
-
+// And how about on each 'h' press
+flyd.on(_.debounce((state) => {
+	if (state['human'])
+	{
+		var tile = _.random();
+		var c = $.getChunk(renderDims, player.pos)
+		var freeSpace = _.reduce(gameLand.lastRect().land, (acc, row, r) => {
+			row.forEach((col, c) => {
+				if (col.actors.length <= 0)
+				{
+					acc.push([r, c]);
+				}
+			});
+			return acc;
+		}, []);
+		
+		if (freeSpace.length > 0 )
+		{
+			var localChunk = $.getChunk(renderDims, player.pos);
+			var pos = $.localToWorld(renderDims, localChunk, _.sample(freeSpace));
+			gameActor('human', pos);
+		}
+	}
+}, 100), commandState);
 
 
 
@@ -580,7 +605,6 @@ flyd.on(renderLiveDebug, logCollect);
 
 
 //////////////// @ global access @ ////////////////////
-
 
 window.game = {
 	verse,

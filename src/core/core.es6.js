@@ -123,7 +123,7 @@ var correlatum = _.curry((rng, count, label, bounds) => {
 		});
 		return out;
 	});
-}, 4);
+},4);
 var correlator = (labels, weights, seed) => labels[_.findIndex(weights, (w) => seed <= w)];
 
 
@@ -148,12 +148,22 @@ var inMap = _.curry((map, data) => map[data] !== undefined);
 
 var getChunk = _.curry((dims, pos) =>
 	Vec.div(pos, dims)
-		.map(Math.floor), 2);
+		.map(Math.floor),
+2);
+
 var toLocal = _.curry((dims, chunk, pos) => {
-		var out = Vec.diff(pos, Vec.mult(chunk, dims));
-		out[1] = dims[1] - out[1] - 1;
-		return out;
-	}, 3);
+	var out = Vec.diff(pos, Vec.mult(chunk, dims));
+	// flip y axis to make life easy @todo elsewhere
+	out[1] = dims[1] - out[1] - 1;
+	return out;
+}, 3);
+
+var localToWorld = _.curry((dims, chunk, pos) => 
+	Vec.sum(
+		pos, Vec.mult(dims, chunk)
+	)
+, 3)
+
 
 
 // Curry stuff
@@ -175,7 +185,7 @@ module.exports = {
 	// Extraction
 	correlatum, correlator, pickFilter,
 	// Geometry?
-	getChunk, toLocal,
+	getChunk, toLocal, localToWorld,
 	// @todo: Rectangle
 	Vec, Rect,
 	// Data
