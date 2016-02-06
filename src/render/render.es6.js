@@ -3,7 +3,6 @@ var flyd = require('flyd');
 var d3 = require('d3');
 
 var $ = require('../core/core.es6');
-var verse = require('../data/data.es6');
 
 //  helper  to do a basic datajoin
 var joinElt = _.curry((elt, selection, data, keyFn) => {

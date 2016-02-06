@@ -25,21 +25,35 @@ var makeAction = (label, fn) => {
 
 
 
-var sniff = makeAction('sniff',
+makeAction('sniff',
 	(source, target) => {
 		return `${source} sniffs ${target}`;
 	});
 
-var bark = makeAction('bark',
+
+
+makeAction('bark',
 	(source, target) => {
 		return `${source} barks at ${target}`;
 	});
 
 
 
+makeAction('growl', (source, target) => {
+	return `${source} growls at ${target}`;
+});
 
 
-var bite = makeAction('bite',
+
+makeAction('check', (source, target) => {
+	return `${source} inspects ${target}`;
+});
+
+
+
+
+
+makeAction('bite',
 	(source, target) => {
 		if (target.status.hp > 0)
 		{

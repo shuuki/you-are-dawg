@@ -2,7 +2,7 @@
 
 var _ = require('lodash');
 var $ = require('../core/core.es6');
-var verse = require('../data/data.es6');
+var verse = require('../data/verse.es6');
 
 
 //////////
@@ -11,8 +11,8 @@ var verse = require('../data/data.es6');
 var genChunk = (rng, dims) => {
 	return _.chunk($.correlatum(
 		rng, dims[0] * dims[1],
-		_.map(verse.land, "sprite"),
-		_.map(verse.land, "chance")
+		_.map(verse.terra, "sprite"),
+		_.map(verse.terra, "chance")
 	), dims[0]);
 };
 

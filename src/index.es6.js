@@ -14,7 +14,7 @@ var d3 = require('d3');
 var _ = require('lodash');
 
 // It is
-var verse = require('./data/data.es6');
+var verse = require('./data/verse.es6');
 
 
 // It knows
@@ -104,8 +104,8 @@ console.log(verse, actions);		// Let me hear you shout
 
 // Key state
 var getWhich = $.get('which');
-var gameControls = _.keys(verse.controls);
-var filterKeys = flyd.filter($.inMap(verse.controls));
+var gameControls = _.keys(verse.controls.defaultControls);
+var filterKeys = flyd.filter($.inMap(verse.controls.defaultControls));
 var whichDown = filterKeys(streams.keys.down.map(getWhich));
 var whichUp = filterKeys(streams.keys.up.map(getWhich));
 
@@ -130,7 +130,7 @@ var commandState = keyboardState.map(
 	.toPairs()
 	.filter((a) => a[1])
 	.map((a) => a[0])
-	.groupBy((key) => verse.controls[key])
+	.groupBy((key) => verse.controls.defaultControls[key])
 	.value()
 );
 
@@ -157,7 +157,7 @@ var gameNode = d3.select(document.body)
 //////////////
 
 // Actors -- Living things in the world. A lookup.
-var actorsByName = _.keyBy(verse.actors, 'name');
+var actorsByName = _.keyBy(verse.actors.proto, 'name');
 
 /**
  * Make a new actor with a default name and position.
