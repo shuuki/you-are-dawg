@@ -83,6 +83,13 @@ Land.prototype.remove = function(source)
 	_.remove(this._actors, source);
 	return this;
 };
+// Collects actors with a given tag
+Land.prototype.getActors = function(tag)
+{
+	return this._actors.filter((actor) =>
+		_.includes(actor.tags, tag)
+	);
+};
 Land.prototype.lastRect = function()
 {
 	return this._cache;

@@ -15,6 +15,7 @@ var _ = require('lodash');
 
 // It is
 var verse = require('./data/verse.es6');
+var plants = require('./data/plants.es6');
 
 
 // It knows
@@ -174,10 +175,6 @@ var actor = (name, pos) => {
 	name = name || 'nothing';
 	var newActor = _.cloneDeep(actorsByName[name]);
 	newActor.pos = !pos ? [0, 0] : pos;
-
-	newActor.status = {
-		hp: 20
-	};
 	newActor.life = flyd.stream(newActor);
 
 	return newActor;
@@ -320,21 +317,6 @@ render.Minimap.add(minimapLand);
 
 
 
-// An experiment with life?
-var seeds = [gameActor('seed', [5, 5])];
-// logic.add((cells, delta) => {
-// 	seeds.forEach((seed) => {
-// 		var localSeed = $.toLocal(cells.dims, cells.pos, seed.pos);
-// 		if (!(isNaN(localSeed[0]) || isNaN(localSeed[1])))
-// 		{
-// 			if ($.Rect.contains($.Rect.create(cells.dims, cells.pos), localSeed))
-// 			{
-
-// 			}
-// 		}
-// 	});
-// });
-
 // Let's make a generic human -- he'll just live in the world
 gameActor('human', [3, 4]);
 
@@ -362,7 +344,7 @@ flyd.on(_.debounce((state) => {
 			gameActor('human', pos);
 		}
 	}
-}, 100), commandState);
+}, 100, {leading: true}), commandState);
 
 
 
@@ -505,6 +487,24 @@ logic.add((cells, delta, actors) => {
 
 
 
+
+
+
+// Life begets life
+gameActor('seed', [2, 6]);
+logic.add((cells, delta, actors, land) => {
+	land.getActors('plant').forEach((plant) => {
+		// From the sun
+		plant.status.entropy += 2;
+		var evolution = plants.evolution[plant.name];
+		if (evolution && plant.status.entropy >= evolution.entropy)
+		{
+			var evolve = actor(_.sample(evolution.next), plant.pos);
+			_.merge(plant, evolve);
+			// plant.status.entropy -= evolution.entropy; 
+		}
+	});
+}, 100);
 
 
 

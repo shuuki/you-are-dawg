@@ -8,7 +8,19 @@
  * @param  {string} sprite - For now, a char
  * @return {Actor} - a new Actor
  */
-var a = (name, sprite, tags) => { return { name, sprite, tags: tags || [] }; };
+var oldA = (name, sprite, tags) => { return { name, sprite, tags: tags || [] }; };
+
+
+var a = (name, sprites, tags) => {
+	var x = oldA(name, sprites, tags);
+
+	x.status = {
+		hp: 20,
+		entropy: 0
+	};
+
+	return x;
+};
 
 var actors = [
 	a('nothing', '_'),

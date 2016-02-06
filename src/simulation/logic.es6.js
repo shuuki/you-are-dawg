@@ -53,7 +53,7 @@ Logic.prototype.step = function(delta)
 		source[2] = source[2] - delta;
 		if (source[2] <= 0)
 		{
-			source[0](lastLand, delta, actors);
+			source[0](lastLand, delta, actors, this.land);
 			source[2] = source[1];
 		}
 	});
