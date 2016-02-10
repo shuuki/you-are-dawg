@@ -3,7 +3,6 @@ var Tether = require('tether');
 // Lots of flyd
 var flyd = require('flyd');
 flyd.filter = require('flyd/module/filter');
-flyd.obj = require('flyd/module/obj');
 flyd.scanmerge = require('flyd/module/scanmerge');
 flyd.dropRepeats = require('flyd/module/droprepeats').dropRepeats;
 
@@ -238,6 +237,7 @@ logic.add(playerMover); // No time given
 
 // sniff sniff I found you
 logic.add(() => {
+	console.log(player.status.sniffing);
 	map.classed('sniffing', player.status.sniffing);
 }, 100);
 

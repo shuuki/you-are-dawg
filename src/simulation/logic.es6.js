@@ -61,10 +61,12 @@ Logic.prototype.step = function(delta, currentTime)
 	// @todo: Should sort by time after diff -- some things can jump in the future
 	// @todo: better datastructure for time remaining buckets
 	this.sources().forEach((source) => {
-		var inInterval = source[1] % currentTime === 0
+			// We hit the interval
+		var inInterval = currentTime % source[1] === 0
+			// The delta was bigger than our interval
 			|| delta > source[1]
-			// Or we jumped over
-			|| ((source[1] % currentTime) > (source[1] % (currentTime + delta)));
+			// Or we jumped over the check
+			|| ((currentTime % source[1]) > ((currentTime + delta) % source[1]));
 		if (inInterval){
 			source[0](this.land, delta, actors);
 		}
