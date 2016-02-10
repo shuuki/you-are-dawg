@@ -203,7 +203,7 @@ var getBin = (binPath, valuePath, bins, search) => {
 	var out;
 	// lodash forEach for early out
 	_.forEach(bins, (bin, i) => {
-		if (_.get(bin, binPath) > search)
+		if (_.get(bin, binPath) >= search)
 		{
 			out = valuePath ? _.get(bin, valuePath) : bin;
 			return false;

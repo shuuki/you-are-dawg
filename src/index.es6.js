@@ -100,7 +100,7 @@ var _removeLog = (label) => {
 // Time conversions to drive the universe
 // Relative multipler for deltas
 // Higher value = faster steps forward in time
-var timeWarp = 10000;
+var timeWarp = 1000 * 60 * 10; // each ms = 10 minutes
 
 // Map of conversions for this planet's seasons
 var planetTime = { // Earth based
@@ -149,7 +149,7 @@ logic.add((land, delta) => {
 	circadian.month = bin(circadian.now, fromMillis.month, planetTime.year);
 	circadian.year = bin(circadian.now, fromMillis.year, Number.MAX_SAFE_INTEGER);
 	circadian.sol = $.getBin('time', undefined, verse.sol, circadian.hour);
-	circadian.luna = $.getBin('limit', undefined, verse.luna, circadian.day);
+	circadian.luna = $.getBin('limit', undefined, verse.luna, circadian.month % 1);
 
 	_logValue('Time', `${_.padStart(Math.floor(circadian.hour), 2, '0')}:${_.padStart(Math.floor(circadian.minute), 2, '0')}:${_.padStart(Math.floor(circadian.second), 2, '0')}`);
 	_logValue('Date', `${circadian.day.toFixed(2)} / ${circadian.month.toFixed(2)} / ${circadian.year.toFixed(4)}`);
