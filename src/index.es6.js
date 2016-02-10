@@ -1,10 +1,11 @@
+var Tether = require('tether');
+
 // Lots of flyd
 var flyd = require('flyd');
 flyd.filter = require('flyd/module/filter');
 flyd.obj = require('flyd/module/obj');
 flyd.scanmerge = require('flyd/module/scanmerge');
 flyd.dropRepeats = require('flyd/module/droprepeats').dropRepeats;
-flyd.previous = require('flyd/module/previous');
 
 var moment = require('moment');
 moment.defaultFormat = 'HH:mm';
@@ -41,21 +42,10 @@ require('./css/index.less');
 
 
 
-
-
-
-
-
-
-var getNumber = () => Math.random();
-
-
-
-
 // Model and Controller
 var renderDims = [15, 15];
 var minimapChunks = [3, 3];
-var gameLand = new Land(getNumber, { dims: renderDims });
+var gameLand = new Land(Math.random, { dims: renderDims });
 var logic = new Logic(gameLand);
 render.Renderer.dims = renderDims;
 render.Minimap.dims = $.Vec.mult(minimapChunks, renderDims);
@@ -93,12 +83,7 @@ var logValues = (stream, label) => {
 
 
 // Frames per second (I prefer millis per frame)
-logValues(
-	streams.movingAverage(120, // keep 120 frames in average
-		flyd.previous(time).map(
-			(p) => isNaN(p) ? 0 : 1000 / (time() - p)
-		)
-	).map((x) => x.toFixed(2)), 'FPS');
+logValues(streams.fps(120, time).map((x) => x.toFixed(2)), 'FPS');
 
 
 console.log(verse, actions);		// Let me hear you shout
@@ -219,7 +204,7 @@ logValues(tileUnderPlayer.map(JSON.stringify), 'Tile');
 
 
 // Move the player by keys
-var playerMover = (cells, delta) => {
+var playerMover = (land, delta) => {
 	// Snap to max is someone shortened it
 	player.status.move.current = Math.min(player.status.move.current, player.status.move.max);
 	if (player.status.move.current > 0)
@@ -255,6 +240,21 @@ logic.add(playerMover); // No time given
 logic.add(() => {
 	map.classed('sniffing', player.status.sniffing);
 }, 100);
+
+
+
+
+
+
+// Say what
+logic.add((land, delta, actors) => {
+	
+})
+
+
+
+
+
 
 
 
@@ -417,7 +417,8 @@ swapBtn.on('click', () => {
 })
 
 
-logic.add((cells, delta, actors) => {
+logic.add((land, delta, actors) => {
+	var cells = land.lastLand();
 	var dawgChunk = $.getChunk(cells.dims, cells.pos);
 	var possibleActions = [];
 
@@ -471,7 +472,7 @@ flyd.on((state) => {
 
 
 // A grim reaper?
-logic.add((cells, delta, actors) => {
+logic.add((land, delta, actors) => {
 	actors.forEach((actor) => {
 		// Death brings seeds?
 		if (actor.status.hp <= 0)
@@ -492,7 +493,8 @@ logic.add((cells, delta, actors) => {
 
 // Life begets life
 gameActor('seed', [2, 6]);
-logic.add((cells, delta, actors, land) => {
+logic.add((land, delta, actors) => {
+	console.log(land.getActors('plant'));
 	land.getActors('plant').forEach((plant) => {
 		// From the sun
 		plant.status.entropy += 2;
@@ -545,7 +547,7 @@ var renderFn = () => {
 var lastTime = time();
 var update = (time) => {
 	var delta = time - lastTime;		// The time that has past
-	logic.step(delta);						// Tells us how to change
+	logic.step(delta, time);						// Tells us how to change
 	renderFn();									// The results of which we see
 	lastTime = time;					// Then we step forward
 };
@@ -588,15 +590,53 @@ var logger = gameNode.append('div').classed('logger', true).append('ul');
 var renderLiveDebug = (data) => {
 	var u = logger.selectAll('li').data(data);
 	var e = u.enter().append('li');
-	e.append('b');
 	e.append('span');
 
-	[u, e].map((sel) => {
-		sel.select('b').text((d) => d.label + ':');
-		sel.select('span').text((d) => d.value);
+	[u].map((sel) => {
+		sel.select('span').text((d) => `${d.label} : ${d.value}`);
 	});
 };
 flyd.on(renderLiveDebug, logCollect);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Since everything is made in d3 right now....
+// Let's try using tether to wire them together...?
+setTimeout(() => new Tether({
+	element: actionUi.controls.node(), attachment: 'top left',
+	target: map.node(), targetAttachment: 'top right'
+}), 100);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

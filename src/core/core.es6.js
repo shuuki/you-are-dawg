@@ -177,9 +177,7 @@ dist = _.curry(dist, 2);
 
 
 
-
-
-module.exports = {
+var core = {
 	// Maths
 	sum, diff, square, dist, mult, div,
 	// Extraction
@@ -193,3 +191,5 @@ module.exports = {
 	// Boolean logic
 	neq
 };
+
+module.exports = _.merge(core, require('./rand.es6'));

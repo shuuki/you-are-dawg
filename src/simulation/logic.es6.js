@@ -22,9 +22,18 @@ var Logic = function(land)
 Logic.prototype.title = 'LogicManager';
 
 /**
+ * @param  {Object[][]} landChunk - grid of cells
+ * @param  {Number} delta - time delta
+ * @param  {Actor[]} - Actors in the chunk
+ * @param  {Land} - Land source of lastLand
+ * @return {void}
+ */
+
+/**
  * Add a logic function to run.
  * Runs at next update, then at each `interval` millis.
- * @param {[type]} source   [description]
+ * Functions at the same interval run in order of added.
+ * @param {LogicFn} source   [description]
  * @param {[type]} interval [description]
  */
 Logic.prototype.add = function(source, interval)
@@ -32,7 +41,7 @@ Logic.prototype.add = function(source, interval)
 	interval = isNaN(interval) ? 0 : interval;
 	
 	var x = this.sources();
-	x.push([source, interval, 0]);
+	x.push([source, interval]);
 	return this.sources(x);
 };
 Logic.prototype.remove = function(source)
@@ -41,20 +50,23 @@ Logic.prototype.remove = function(source)
 	x.splice(_.findIndex(x, (a) => a[0] === source), 1);
 	return this.sources(x);	
 };
-Logic.prototype.step = function(delta)
+Logic.prototype.step = function(delta, currentTime)
 {
 	// @todo: better than this
-	var lastLand = this.land._cache;
-	var actors = _.sortBy(_.flatten(_.map(_.flatten(lastLand.land), 'actors')), 'id');
+	var actors = _.sortBy(
+		_.flatten(
+			_.map(_.flatten(this.land.lastLand().land), 'actors')
+		), 'id');
 	
 	// @todo: Should sort by time after diff -- some things can jump in the future
 	// @todo: better datastructure for time remaining buckets
 	this.sources().forEach((source) => {
-		source[2] = source[2] - delta;
-		if (source[2] <= 0)
-		{
-			source[0](lastLand, delta, actors, this.land);
-			source[2] = source[1];
+		var inInterval = source[1] % currentTime === 0
+			|| delta > source[1]
+			// Or we jumped over
+			|| ((source[1] % currentTime) > (source[1] % (currentTime + delta)));
+		if (inInterval){
+			source[0](this.land, delta, actors);
 		}
 	});
 };

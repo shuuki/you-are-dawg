@@ -30,6 +30,10 @@ body {
 
 // Render stuff
 .map {
+	transform: scale(0.5, 0.5);
+	transform-origin: top left;
+	pointer-events: none;
+
 	.dawg {
 		color: cornflowerblue;
 	}
@@ -100,12 +104,6 @@ body {
 .keys {
 	display: none;
 
-
-	position: absolute;
-	right: 0;
-	top: 0;
-	margin-top: 0.5em;
-	
 	.active {
 		color: chartreuse;
 		display: inline-block;
@@ -129,14 +127,23 @@ body {
 
 .logger {
 	position: absolute;
-	bottom: 0;
+	word-break: break-all;
+	overflow: auto;
+	top: 0;
 	right: 0;
+	width: 20em;
+	font-size: 0.5em;
 	ul {
 		.inline-list;
 		li {
 			margin-right: 2em;
+			margin-bottom: 1em;
 		}
 	}
+}
+
+#controls {
+	width: 10em;
 }
 
 

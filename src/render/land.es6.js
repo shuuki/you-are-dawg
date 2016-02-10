@@ -90,7 +90,7 @@ Land.prototype.getActors = function(tag)
 		_.includes(actor.tags, tag)
 	);
 };
-Land.prototype.lastRect = function()
+Land.prototype.lastLand = Land.prototype.lastRect = function()
 {
 	return this._cache;
 };

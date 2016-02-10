@@ -1,5 +1,6 @@
 var _ = require('lodash');
 var flyd = require('flyd');
+flyd.previous = require('flyd/module/previous');
 
 // @see https://github.com/paldepind/flyd/tree/master/module/every
 var every = require('flyd/module/every');
@@ -89,9 +90,16 @@ var movingAverage = flyd.curryN(2,
 
 
 
+
+
+
+
+
+
+
+
 // Time stream synced to window's animation frame
 var time = flyd.stream(Date.now());
-
 function step(timestamp) {
 	time(Date.now());
 
@@ -101,6 +109,37 @@ function step(timestamp) {
 	}
 }
 window.requestAnimationFrame(step);
+
+
+
+
+
+
+
+var fps = (frames, timeStream) => {
+	var s = timeStream !== undefined ? timeStream : time;
+	var width = frames !== undefined ? frames : 120;
+	return movingAverage(width, flyd.previous(s).map(
+			(p) => isNaN(p) ? 0 : 1000 / (s() - p)
+		));
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -118,7 +157,7 @@ module.exports = {
 	lookup,
 	every,
 	// Transform
-	log, movingAverage,
+	log, movingAverage, fps,
 	// Static streams
 	time,
 	keys // DOM events
