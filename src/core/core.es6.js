@@ -137,7 +137,7 @@ var pickFilter = _.curry((pick, filter, collection) =>
 		.pick(pick)
 		.pairs()
 		.filter(filter)
-		.pluck(0)
+		.map('0')
 		.value(),
 3); // curried
 
@@ -175,13 +175,50 @@ dist = _.curry(dist, 2);
 
 
 
+/**
+ * Boolean to fire event if interval has passed
+ * in time / delta
+ * @param  {Number}
+ * @param  {Number}
+ * @param  {Number}
+ * @return {Boolean}
+ */
+var intervalCheck = (interval, time, delta) =>
+		// We hit the interval
+		time % interval === 0
+		// The delta was bigger than our interval
+		|| delta > interval
+		// Or we jumped over the check
+		|| (time % interval) > ((time + delta) % interval);
+
+
+/**
+ * Finds bin that search falls into and returns value
+ * @param  {String} binPath - path to get the bin's max value
+ * @param  {String} valuePath - path of value to return
+ * @param  {[type]}
+ * @return {[type]}
+ */
+var getBin = (binPath, valuePath, bins, search) => {
+	var out;
+	// lodash forEach for early out
+	_.forEach(bins, (bin, i) => {
+		if (_.get(bin, binPath) > search)
+		{
+			out = valuePath ? _.get(bin, valuePath) : bin;
+			return false;
+		}
+	});
+
+	return out;
+};
 
 
 var core = {
 	// Maths
 	sum, diff, square, dist, mult, div,
 	// Extraction
-	correlatum, correlator, pickFilter,
+	correlatum, correlator, pickFilter, getBin,
 	// Geometry?
 	getChunk, toLocal, localToWorld,
 	// @todo: Rectangle
@@ -189,7 +226,9 @@ var core = {
 	// Data
 	Arr2D, get: get, inMap,
 	// Boolean logic
-	neq
+	neq,
+	// Utility
+	intervalCheck
 };
 
 module.exports = _.merge(core, require('./rand.es6'));

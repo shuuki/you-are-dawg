@@ -62,22 +62,113 @@ var logValues = (stream, label) => {
 	label = label || '' + __logI++;
 	var dedupe = flyd.dropRepeats(stream);
 
-	flyd.on((v) => {
-		var arr = logCollect();
-		var x = _.find(arr, { label });
-		if (!x) { x = { label }; arr.push(x); }
-		x.value = v;
-		logCollect(arr);
-	}, dedupe);
+	flyd.on(_logValue(label), dedupe);
 
 	flyd.on(() => {
-		var arr = logCollect();
-		_.remove(arr, { label });
-		logCollect(arr);
+		_removeLog(label);
 	}, dedupe.end);
 	
 	return stream;
 }
+// Helpers for logValues
+var _logValue = _.curry((label, v) => {
+	var arr = logCollect();
+	var x = _.find(arr, { label });
+	if (!x) { x = { label }; arr.push(x); }
+	x.value = v;
+	logCollect(arr);
+}, 2);
+var _removeLog = (label) => {
+	var arr = logCollect();
+		_.remove(arr, { label });
+		logCollect(arr);
+};
+
+
+
+///////////////////////////
+///////////////////////////
+///////////////////////////
+///////////////////////////
+///////////////////////////
+// I WENT DEEP ON TIME, GUYS
+///////////////////////////
+///////////////////////////
+///////////////////////////
+///////////////////////////
+///////////////////////////
+// Time conversions to drive the universe
+// Relative multipler for deltas
+// Higher value = faster steps forward in time
+var timeWarp = 10000;
+
+// Map of conversions for this planet's seasons
+var planetTime = { // Earth based
+	// hour -> day
+	day: 24,
+	// day -> month
+	month: 30,
+	// month -> year
+	year: 52
+};
+
+// Our rhythms are well defined
+var circadian = {
+	now: 0,
+	day: 0, month: 0, year: 0,
+	hour: 0, minute: 0, second: 0,
+	sol: verse.sol[0], luna: verse.luna[0]
+};
+
+var fromMillis = {
+	second: 1000,
+	minute: 1000 * 60,
+	hour: 1000 * 60 * 60
+};
+// Specific to local planet
+fromMillis.day = planetTime.day * fromMillis.hour;
+fromMillis.month = planetTime.month * fromMillis.day;
+fromMillis.year = planetTime.year * fromMillis.month;
+
+
+var clock = d3.select(document.body).append('div').classed('clock', true);
+var secondHand = clock.append('div').classed('second', true);
+var minuteHand = clock.append('div').classed('minute', true);
+var hourHand = clock.append('div').classed('hour', true);
+
+
+var bin = (base, start, end) => (base / start) % end;
+logic.add((land, delta) => {
+
+	// Relative to start
+	circadian.now += delta * timeWarp;
+	circadian.second = bin(circadian.now, fromMillis.second, 60);
+	circadian.minute = bin(circadian.now, fromMillis.minute, 60);
+	circadian.hour = bin(circadian.now, fromMillis.hour, planetTime.day);
+	circadian.day = bin(circadian.now, fromMillis.day, planetTime.month);
+	circadian.month = bin(circadian.now, fromMillis.month, planetTime.year);
+	circadian.year = bin(circadian.now, fromMillis.year, Number.MAX_SAFE_INTEGER);
+	circadian.sol = $.getBin('time', undefined, verse.sol, circadian.hour);
+	circadian.luna = $.getBin('limit', undefined, verse.luna, circadian.day);
+
+	_logValue('Time', `${_.padStart(Math.floor(circadian.hour), 2, '0')}:${_.padStart(Math.floor(circadian.minute), 2, '0')}:${_.padStart(Math.floor(circadian.second), 2, '0')}`);
+	_logValue('Date', `${circadian.day.toFixed(2)} / ${circadian.month.toFixed(2)} / ${circadian.year.toFixed(4)}`);
+	_logValue('sol', circadian.sol.name);
+	_logValue('luna', circadian.luna.name);
+	return circadian;
+});
+
+
+
+///////////////////////
+///////////////////////
+///////////////////////
+///////////////////////
+///////////////////////
+///////////////////////
+///////////////////////
+///////////////////////
+///////////////////////
 
 
 
@@ -237,7 +328,6 @@ logic.add(playerMover); // No time given
 
 // sniff sniff I found you
 logic.add(() => {
-	console.log(player.status.sniffing);
 	map.classed('sniffing', player.status.sniffing);
 }, 100);
 
@@ -246,10 +336,14 @@ logic.add(() => {
 
 
 
-// Say what
+// sol
+var sun = {
+	// gotta' stay safe
+	entropy: Number.MAX_SAFE_INTEGER
+};
 logic.add((land, delta, actors) => {
-	
-})
+	// Distribute entropy
+});
 
 
 
@@ -494,7 +588,6 @@ logic.add((land, delta, actors) => {
 // Life begets life
 gameActor('seed', [2, 6]);
 logic.add((land, delta, actors) => {
-	console.log(land.getActors('plant'));
 	land.getActors('plant').forEach((plant) => {
 		// From the sun
 		plant.status.entropy += 2;

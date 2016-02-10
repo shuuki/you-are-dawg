@@ -1,5 +1,5 @@
 var flyd = require('flyd');
-
+var $ = require('../core/core.es6');
 
 
 
@@ -14,7 +14,7 @@ var flyd = require('flyd');
  */
 var Logic = function(land)
 {
-	var sources = flyd.stream([]);
+	var sources = flyd.stream({bins: [], intervals: []});
 	/*shrug assign self props?*/
 	_.merge(this, { land, sources });
 };
@@ -38,17 +38,43 @@ Logic.prototype.title = 'LogicManager';
  */
 Logic.prototype.add = function(source, interval)
 {
+	var sources = this.sources();
 	interval = isNaN(interval) ? 0 : interval;
-	
-	var x = this.sources();
-	x.push([source, interval]);
-	return this.sources(x);
+	var idx = _.sortedIndex(sources.intervals, interval);
+	if (sources.intervals[idx] === interval)
+	{
+		sources.bins[idx].push(source);
+	}
+	else
+	{
+		sources.intervals.splice(idx, 0, interval);
+		sources.bins.splice(idx, 0, [source]);
+	}
+	return this.sources(sources);
 };
 Logic.prototype.remove = function(source)
 {
-	var x = this.sources();
-	x.splice(_.findIndex(x, (a) => a[0] === source), 1);
-	return this.sources(x);	
+	var sources = this.sources();
+	var toPull = [];
+	
+	sources.bins.forEach((bin, binIdx) => {
+		bin.forEach((source, i) => {
+			if (source === bin[binIdx][i])
+			{
+				if (!toPull[binIdx])
+				{
+					toPull[binIdx] = [];
+				}
+				toPull[binIdx].push(i);
+			}
+		});
+	});
+
+	toPull.forEach((idxs, binIdx) =>
+		_.pullAt(sources.bins[binIdx], idxs)
+	);
+	
+	return this.sources(sources);	
 };
 Logic.prototype.step = function(delta, currentTime)
 {
@@ -60,17 +86,16 @@ Logic.prototype.step = function(delta, currentTime)
 	
 	// @todo: Should sort by time after diff -- some things can jump in the future
 	// @todo: better datastructure for time remaining buckets
-	this.sources().forEach((source) => {
-			// We hit the interval
-		var inInterval = currentTime % source[1] === 0
-			// The delta was bigger than our interval
-			|| delta > source[1]
-			// Or we jumped over the check
-			|| ((currentTime % source[1]) > ((currentTime + delta) % source[1]));
-		if (inInterval){
-			source[0](this.land, delta, actors);
+	var sources = this.sources();
+	
+	sources.intervals.forEach((interval, i) => {
+		if ($.intervalCheck(interval, currentTime, delta))
+		{
+			sources.bins[i].forEach(
+				(source) => source(this.land, delta, actors)
+			);
 		}
-	});
+	})
 };
 
 

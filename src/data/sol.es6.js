@@ -8,7 +8,7 @@ var sun = [
 	{time: 15, name: "afternoon"},
 	{time: 19, name: "evening"},
 	{time: 21, name: "twilight"},
-	{time: 24, name: "night"}	
+	{time: 24, name: "night"}
 ];
 
 module.exports = sun;
