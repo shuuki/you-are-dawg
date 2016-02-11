@@ -39,8 +39,6 @@ var renderKeyboard = render.jade(require('./render/keyboard.jade'));
 var ui = require('./render/ui.es6')(document.body);
 require('./css/index.less');
 
-console.log(ui);
-
 
 // Model and Controller
 var renderDims = [15, 15];
@@ -227,13 +225,56 @@ var keyCommands = keyboardState.map(
 
 
 
-var touchCommands = flyd.combine((start, move, end) => {
-	return [];
+var touchCommands = flyd.combine((start, move, end, self, changes) => {
+	var rect = ui.map.node().getBoundingClientRect();
+
+	var commands = {
+		North: $.Rect.create(
+			[rect.height * 0.25, rect.width],
+			[rect.top, rect.left]
+		),
+		East: $.Rect.create(
+			[rect.height, rect.width * 0.25],
+			[rect.top, rect.left + rect.width - rect.width * 0.25]
+		),
+		South: $.Rect.create(
+			[rect.height * 0.25, rect.width],
+			[rect.top + rect.height - rect.height * 0.25, rect.left]
+		),
+		West: $.Rect.create(
+			[rect.height, rect.width * 0.25],
+			[rect.top, rect.left]
+		)
+	};
+
+	return changes.reduce((acc, s) => {
+		var event = s();
+
+		switch (event.type) {
+			case 'touchstart':
+			case 'touchmove':
+				_.forEach(event.touches, (touch) => {
+					var pos = [touch.pageY, touch.pageX];
+					_.forEach(commands, (v, k) => {
+						if ($.Rect.contains(v, pos))
+						{
+							event.preventDefault();
+							acc[k] = [];
+						}
+					});
+				});
+			break;
+		}
+
+		return acc;
+	}, {});
 }, [
 	streams.touch.start,
 	streams.touch.move,
 	streams.touch.end
 ]);
+
+log(touchCommands);
 
 
 
@@ -250,8 +291,6 @@ var commandState = flyd.immediate(flyd.combine(
 	(a, b) => _.merge({}, a(), b()),
 	[keyCommands, touchCommands]
 ));
-
-log(commandState);
 
 
 

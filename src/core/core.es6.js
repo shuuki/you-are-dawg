@@ -48,15 +48,21 @@ var Vec = {
 };
 
 
-
+/**
+ * Rectangle. A dimension and position vector.
+ * Whatever order you use is how its defined.
+ * I like [rows, columns] | [r, c]
+ * @type {Object}
+ */
 var Rect = {
-	create: (dims, pos) => { return {pos, dims}; },
+	create: (dims, pos) => { return { pos, dims }; },
 	contains: (rect, pt) => _.every(pt, (d, i) =>
 		d >= rect.pos[i] &&
 		d < rect.pos[i] + rect.dims[i]
 	),
 	corners: (rect) => permutations(0, rect.dims).map(Vec.sum(rect.pos))
 };
+Rect.fromNode = (node) => Rect.create([node.clientWidth, node.clientHeight], [node.clientTop, node.clientLeft]);
 
 
 
