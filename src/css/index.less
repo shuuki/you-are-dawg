@@ -3,6 +3,7 @@
 //@import url(../css/dawg.css);
 
 @import "./actions";
+@import "./ui";
 
 * {
 	box-sizing: border-box;
@@ -83,7 +84,7 @@ body {
 		}
 	}
 	
-	position: absolute;
+	position: relative;
 	cursor: crosshair;
 }
 
@@ -125,13 +126,10 @@ body {
 	font-size: 4px;
 }
 
-.logger {
-	position: absolute;
+.debug {
+	position: relative;
 	word-break: break-all;
 	overflow: auto;
-	top: 0;
-	right: 0;
-	width: 20em;
 	font-size: 0.5em;
 	ul {
 		li {
@@ -141,7 +139,7 @@ body {
 	}
 }
 
-#controls {
+.controls {
 	width: 10em;
 }
 

@@ -36,9 +36,10 @@ var renderKeyboard = render.jade(require('./render/keyboard.jade'));
 
 
 // It's pretty
+var ui = require('./render/ui.es6')(document.body);
 require('./css/index.less');
 
-
+console.log(ui);
 
 
 // Model and Controller
@@ -56,6 +57,8 @@ var time = streams.time;
 var log = streams.log;
 var w = window;
 
+
+// Logging
 var __logI = 0;
 var logCollect = flyd.stream([]);
 var logValues = (stream, label) => {
@@ -100,7 +103,7 @@ var _removeLog = (label) => {
 // Time conversions to drive the universe
 // Relative multipler for deltas
 // Higher value = faster steps forward in time
-var timeWarp = 1000 * 60 * 10; // each ms = 10 minutes
+var timeWarp = 2; // each ms = 10 minutes
 
 // Map of conversions for this planet's seasons
 var planetTime = { // Earth based
@@ -178,6 +181,12 @@ logValues(streams.fps(120, time).map((x) => x.toFixed(2)), 'FPS');
 
 console.log(verse, actions);		// Let me hear you shout
 
+
+
+
+
+
+
 // Key state
 var getWhich = $.get('which');
 var gameControls = _.keys(verse.controls.defaultControls);
@@ -200,14 +209,15 @@ var keyboardState = flyd.scanmerge([
 	}]
 ], _.zipObject(gameControls, gameControls.map(_.constant(0))));
 
+
 // Transform the keys into {command: keys pressed that are triggering}
-var commandState = keyboardState.map(
-	(x) => _(x)
-	.toPairs()
-	.filter((a) => a[1])
-	.map((a) => a[0])
-	.groupBy((key) => verse.controls.defaultControls[key])
-	.value()
+var keyCommands = keyboardState.map(
+		(x) => _(x)
+		.toPairs()
+		.filter((a) => a[1])
+		.map((a) => a[0])
+		.groupBy((key) => verse.controls.defaultControls[key])
+		.value()
 );
 
 
@@ -215,14 +225,40 @@ var commandState = keyboardState.map(
 
 
 
+
+
+var touchCommands = flyd.combine((start, move, end) => {
+	return [];
+}, [
+	streams.touch.start,
+	streams.touch.move,
+	streams.touch.end
+]);
+
+
+
+
+
+
+
+
+
+
+
+
+var commandState = flyd.immediate(flyd.combine(
+	(a, b) => _.merge({}, a(), b()),
+	[keyCommands, touchCommands]
+));
+
+log(commandState);
+
+
+
 /////////////////////////////// Enter Dawg //////////////////////////
 
 
 
-
-var gameNode = d3.select(document.body)
-	.append('div')
-	.classed('game', true);
 
 
 
@@ -328,7 +364,7 @@ logic.add(playerMover); // No time given
 
 // sniff sniff I found you
 logic.add(() => {
-	map.classed('sniffing', player.status.sniffing);
+	ui.map.classed('sniffing', player.status.sniffing);
 }, 100);
 
 
@@ -493,12 +529,8 @@ logValues(state.map((s) => {
 
 
 // A dawg centric view
-var actionUi = {
-	log: gameNode.append('section').attr('id', 'log'),
-	controls: gameNode.append('section').attr('id','controls'),
-};
-var targetSelecter = actionUi.controls.append('section').attr('id', 'target');
-actionUi.actions = actionUi.controls.append('div').attr('id','actions');
+var targetSelecter = ui.controls.append('section').attr('id', 'target');
+ui.actions = ui.controls.append('div').attr('id','actions');
 
 // [Srouce] > [Target]
 var sourceSelect = targetSelecter.append('select');
@@ -529,7 +561,7 @@ logic.add((land, delta, actors) => {
 	render.joinElt('option', sourceSelect, _.map(actors, (actor) => actor.sprite));
 	render.joinElt('option', targetSelect, _.map(actors, (actor) => actor.sprite));
 
-	render.joinElt('div', actionUi.actions, possibleActions)
+	render.joinElt('div', ui.actions, possibleActions)
 		.call((sel) => {
 			sel.classed('button', true)
 		})
@@ -545,11 +577,11 @@ logic.add((land, delta, actors) => {
 
 // RENDER EVENT RESULT LOG
 flyd.on((state) => {
-	var update = actionUi.log.selectAll('.entry').data(state.log);
+	var update = ui.log.selectAll('.entry').data(state.log);
 	var enter = update.enter().append('div').classed('entry', true);
 	update.attr('title', (d) => moment(d[0]).format())
 	update.text((d) => JSON.stringify(d[1]));
-	actionUi.log.property('scrollTop', actionUi.log.property('scrollHeight'));
+	ui.log.property('scrollTop', ui.log.property('scrollHeight'));
 }, state);
 
 
@@ -622,16 +654,9 @@ logic.add((land, delta, actors) => {
 
 
 
-// I enjoy being able to see
-var map = gameNode.append('div').classed('map', true);
-var minimap = gameNode.append('div').classed('minimap map', true);
-
-
-
-
 // call our renderers?
 var renderFn = () => {
-	render.Renderer.to(map);
+	render.Renderer.to(ui.map);
 	// render.Minimap.to(minimap);
 };
 
@@ -670,18 +695,15 @@ flyd.on(update, time);
 
 
 // Render keyboard state
-var keys = gameNode.append('div').classed('keys', true);
-var keyDispaly = keys.append('div');
-var commandDisplay = keys.append('div');
-
-flyd.on((state) => renderKeyboard(keyDispaly, { data: _.toPairs(state) }), keyboardState);
-flyd.on((state) => renderKeyboard(commandDisplay, { data: _.toPairs(state) }), commandState);
+// var keyDispaly = keys.append('div');
+// var commandDisplay = keys.append('div');
+// flyd.on((state) => renderKeyboard(keyDispaly, { data: _.toPairs(state) }), keyboardState);
+// flyd.on((state) => renderKeyboard(commandDisplay, { data: _.toPairs(state) }), commandState);
 
 
 // Debug live values
-var logger = gameNode.append('div').classed('logger', true).append('ul');
 var renderLiveDebug = (data) => {
-	var u = logger.selectAll('li').data(data);
+	var u = ui.debug.selectAll('li').data(data);
 	var e = u.enter().append('li');
 	e.append('span');
 
@@ -707,9 +729,11 @@ flyd.on(renderLiveDebug, logCollect);
 // Since everything is made in d3 right now....
 // Let's try using tether to wire them together...?
 setTimeout(() => new Tether({
-	element: actionUi.controls.node(), attachment: 'top left',
-	target: map.node(), targetAttachment: 'top right'
+	element: ui.controls.node(), attachment: 'top left',
+	target: ui.map.node(), targetAttachment: 'top right'
 }), 100);
+
+
 
 
 
