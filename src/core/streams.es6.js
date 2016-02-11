@@ -135,10 +135,44 @@ var fps = (frames, timeStream) => {
 
 
 
+var registerDomEvent = (window, events) => {
+	var out = { deregister: undefined, stream: undefined };
 
+	if (_.isString(events))
+	{
+		out.stream = flyd.stream();
+		out.deregister = window.addEventListener(e, out.stream);
+	}
 
+	if (_.isArray(events))
+	{
+		return events.map((e) => {
+			out.stream[e] = flyd.stream();
+			out.deregister.push(window.addEventListener(e, out.stream[e]));
+		});
+	}
 
+	if (_.isObject(events))
+	{
+		out.deregister = {};
+		out.stream = {};
+		_.forEach(events, (e, k) => {
+			out.stream[k] = flyd.stream();
+			out.deregister[k] = window.addEventListener(e, out.stream[k]);
+		});
+	}
 
+	return out;
+}
+
+var touch = registerDomEvent(window, {
+	start: 'touchstart',
+	end: 'touchend',
+	center: 'touchcenter',
+	leave: 'touchleave',
+	move: 'touchmove',
+	start: 'touchstart'
+}).stream;
 
 
 
@@ -160,5 +194,5 @@ module.exports = {
 	log, movingAverage, fps,
 	// Static streams
 	time,
-	keys // DOM events
+	keys, touch // DOM events
 };
