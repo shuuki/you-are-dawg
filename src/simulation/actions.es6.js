@@ -55,16 +55,14 @@ makeAction('bark',
 	(source, target) => {
 		var log = [`${source} barks at ${target}`]
 
-		target.affect.fearful -= 5;
-		log.push($.getBin)
-		if (target.affect.fearful < 0)
-		{
-			log.push(`${target} is feeling uneasy`);
-		}
-		else if (target.affect.fearful < 0)
-		{
-			log.push(`${target} is feeling uneasy`);
-		}
+		target.status.affect.fearful += 2;
+		log.push($.getBin('0', '1', [
+				[5, `${target} is feeling uneasy`],
+				[10, `${target} is looking for an exit`],
+				[15, `${target} starts to sweat`],
+				[30, `${target} backs away`],
+				[45, `${target} urinated in fear`]
+		], target.status.affect.fearful));
 		return log;
 	});
 
@@ -120,7 +118,7 @@ makeAction('throw stick',
 
 var verbMap = {
 	dawg: {
-		dawg: ['sniff', 'bark', 'growl', 'check'],
+		dawg: ['sniff', 'growl', 'check'],
 		human: ['sniff'],
 		seed: ['sniff']
 	},
