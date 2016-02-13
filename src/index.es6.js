@@ -1,5 +1,3 @@
-var Tether = require('tether');
-
 // Lots of flyd
 var flyd = require('flyd');
 flyd.filter = require('flyd/module/filter');
@@ -491,10 +489,12 @@ logic.add((land, delta, actors) => {
 			sel.classed('button', true)
 		})
 		// Pass the action event onto the flow
+		// @todo: inject locals better than just here
 		.on('click', (d) => flowAction(d, {
 			source,
 			target,
-			land
+			land,
+			actorFactory
 		}));
 
 });
@@ -634,18 +634,6 @@ flyd.on(update, time);
 
 
 
-
-
-
-
-
-
-// Since everything is made in d3 right now....
-// Let's try using tether to wire them together...?
-setTimeout(() => new Tether({
-	element: ui.controls.node(), attachment: 'top left',
-	target: ui.map.node(), targetAttachment: 'top right'
-}), 100);
 
 
 

@@ -1,10 +1,10 @@
 'use strict';
 
 var d3 = require('d3');
-var mainTpl = require('./main.jade');
+var uiTpl = require('./ui.jade');
 
 module.exports = (element) => {
-	var html = mainTpl();
+	var html = uiTpl();
 	element.innerHTML = html;
 
 	// Grab shit out of jade

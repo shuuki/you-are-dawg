@@ -95,8 +95,9 @@ makeAction('treat',
 	});
 
 makeAction('throw stick',
-	(source, land, direction) => {
+	(source, land, actorFactory, direction) => {
 		var direction = direction || _.sample(['N', 'E', 'S', 'W']);
+		console.log(source, land, actorFactory, direction);
 
 		return `${land}`;
 	});

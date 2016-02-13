@@ -31,10 +31,6 @@ body {
 
 // Render stuff
 .map {
-	transform: scale(0.5, 0.5);
-	transform-origin: top left;
-	pointer-events: none;
-
 	.dawg {
 		color: cornflowerblue;
 	}
@@ -57,7 +53,7 @@ body {
 }
 
 .map {
-	font-size: 32px;
+	font-size: 18px;
 	&.other {
 		color: red;
 	}
@@ -86,6 +82,7 @@ body {
 	
 	position: relative;
 	cursor: crosshair;
+	pointer-events: none;
 }
 
 .sniffing {

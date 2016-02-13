@@ -45,13 +45,13 @@ actors.forEach((actor) => {
 	var status = {};
 
 	// If the tags
-	if (allTags(actor, ['plant', 'animal']))
+	if (someTags(actor, ['plant', 'animal']))
 	{
 		status.hp = 20;
 	}
 
 	// Plants get entropy
-	if (_.includes(actor.tags, 'plant'))
+	if (someTags(actor.tags, ['plant']))
 	{
 		status.entropy = 0;
 	}
@@ -61,6 +61,18 @@ actors.forEach((actor) => {
 	{
 		status.sniffing = false;
 		status.move = cooldown(250);
+	}
+
+	if (actor.name === 'human')
+	{
+		status.hp = 50;
+		status.dawgAffect = {
+			trusting: 0,
+			fearful: 0,
+			loving: 0,
+			empathetic: 0,
+			companionship: 0
+		};
 	}
 
 
