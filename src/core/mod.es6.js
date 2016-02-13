@@ -26,10 +26,19 @@ var mod = _.curry((fn, path, source) => {
 
 
 
-// I guess I'll toss some useful partials here
+// I guess I'll toss some useful modifications here?
 var backAway = _.curry((distance, source, target) => {
-	// var direction = $.Vec()
-});
+	// Direction vector = |Source - Target|
+	// Distance = Direction * distance
+	// Rounded to keep integer movements
+	var moveMod = $.Vec.norm(
+		$.Vec.diff(source.pos, target.pos)
+	).map($.mult(distance)).map(Math.round);
+
+	source.pos = $.Vec.sum(source.pos, moveMod);
+
+	return moveMod;
+}, 3);
 
 
 

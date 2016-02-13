@@ -5,17 +5,6 @@ var $ = require('../core/core.es6');
 var Mod = require('../core/mod.es6');
 
 
-
-
-
-
-
-
-
-
-
-
-
 // Action Factory Helpers
 var getArgs = (fn) => {
 	var str = fn.toString();
@@ -69,14 +58,14 @@ makeAction('bark',
 					[5, `${target} is feeling uneasy`],
 					[10, `${target} is looking for an exit`],
 					[15, `${target} starts to sweat`],
-					[30, `${target} backs away`, () => target.pos],
+					[30, `${target} backs away`, () => Mod.backAway(2, target, source)],
 					[45, `${target} urinated in fear`]
 			], target.status.affect.fearful);
 
 			// Run any functions
 			if (response[2])
 			{
-				response[2](target);
+				response[2]();
 			}
 
 			// Push the message
