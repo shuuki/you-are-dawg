@@ -1,3 +1,4 @@
+var _ = require('lodash');
 var $ = require('../core/core.es6');
 
 // var trail = flyd.curryN(3, (character, stream) => flyd.on((pos) => {
@@ -34,6 +35,31 @@ var randomMove = _.curry((rng, pos) => {
 
 
 
+// LOGIC MOVER FUNCTION WITH A BUNCH OF DEPENDENCIES
+var playerMover = _.curry((commandState, tileUnderPlayer, player, land, delta) => {
+	// Snap to max is someone shortened it
+	player.status.move.current = Math.min(player.status.move.current, player.status.move.max);
+	if (player.status.move.current > 0)
+	{
+		player.status.move.current -= delta;
+	}
+	var commands = commandState();
+	player.status.sniffing = !_.isEmpty(commands.sniff);
+	player.status.move.max = player.status.sniffing ? 400 : 200;
+
+	if (!_.isEmpty(commands) && player.status.move.current <= 0)
+	{
+		player.pos = _.reduce(commands, (pos, v, dir) => cardinal(dir, pos), player.pos);
+		player.status.move.current = player.status.move.max;
+	}
+
+	tileUnderPlayer(land.at(player.pos));
+
+	// @todo: check if changed
+	player.life(player);
+}, 5);
+
+
 
 
 
@@ -43,5 +69,8 @@ var randomMove = _.curry((rng, pos) => {
 
 module.exports = {
 	// Movement
-	move: { cardinal, randomMove }
+	move: {
+		cardinal, randomMove,
+		player: playerMover
+	}
 };

@@ -87,6 +87,13 @@ var _removeLog = (label) => {
 
 
 
+
+
+
+
+
+
+
 ///////////////////////////
 ///////////////////////////
 ///////////////////////////
@@ -185,6 +192,15 @@ console.log(verse, actions);		// Let me hear you shout
 
 
 
+
+
+
+
+
+
+
+
+
 // Key state
 var getWhich = $.get('which');
 var gameControls = _.keys(verse.controls.defaultControls);
@@ -274,17 +290,6 @@ var touchCommands = flyd.combine((start, move, end, self, changes) => {
 	streams.touch.end
 ]);
 
-log(touchCommands);
-
-
-
-
-
-
-
-
-
-
 
 
 var commandState = flyd.immediate(flyd.combine(
@@ -300,24 +305,20 @@ var commandState = flyd.immediate(flyd.combine(
 
 // A way to build actors
 var actorFactory = new ActorFactory(verse.actors.proto);
-
-
-
-
-
-
-//////////////
-// Some actors / state
-//////////////
 var gameActor = (name, pos) => {
 	var newActor = actorFactory.actor(name, pos);
 	gameLand.add(newActor);
 	return newActor;
 };
 
-var cooldown = (max, current) => {
-	return { max, current: !current ? 0 : current };
-};
+
+
+
+
+
+
+
+
 
 
 
@@ -327,66 +328,27 @@ var cooldown = (max, current) => {
 var player = gameActor('dawg', [10, 10]);
 logValues(player.life.map((x) => x.pos.join(',')), 'Dawg Paws');
 
-
-
-
-// Something to update
 var tileUnderPlayer = flyd.stream({});
 logValues(tileUnderPlayer.map(JSON.stringify), 'Tile');
 
+logic.add(
+	// Player mover is a command + state based cardnal mover
+	gimmicks.move.player(commandState, tileUnderPlayer, player)
+)
 
-
-
-
-
-
-// Move the player by keys
-var playerMover = (land, delta) => {
-	// Snap to max is someone shortened it
-	player.status.move.current = Math.min(player.status.move.current, player.status.move.max);
-	if (player.status.move.current > 0)
-	{
-		player.status.move.current -= delta;
-	}
-	var commands = commandState();
-	player.status.sniffing = !_.isEmpty(commands.sniff);
-	player.status.move.max = player.status.sniffing ? 400 : 200;
-
-	if (!_.isEmpty(commands) && player.status.move.current <= 0)
-	{
-		player.pos = _.reduce(commands, (pos, v, dir) => gimmicks.move.cardinal(dir, pos), player.pos);
-		player.status.move.current = player.status.move.max;
-	}
-
-	tileUnderPlayer(gameLand.at(player.pos));
-
-	// @todo: check if changed
-	player.life(player);
-};
-logic.add(playerMover); // No time given 
-
-
-
-
-
-
-
-
-
-// sniff sniff I found you
 logic.add(() => {
 	ui.map.classed('sniffing', player.status.sniffing);
 }, 100);
 
-
-
-
-
-
-
-// A camera lense into gameLand
 var playerCam = render.Camera(render.Renderer, { target: player, source: gameLand });
 render.Renderer.add(playerCam);
+
+
+
+
+
+
+
 
 
 
@@ -427,10 +389,6 @@ var minimapLand = () => {
 	return cells;
 };
 render.Minimap.add(minimapLand);
-
-
-
-
 
 
 
@@ -623,7 +581,7 @@ logic.add((land, delta, actors) => {
 		var evolution = plants.evolution[plant.name];
 		if (evolution && plant.status.entropy >= evolution.entropy)
 		{
-			var evolve = actor(_.sample(evolution.next), plant.pos);
+			var evolve = actorFactory.actorsByName[_.sample(evolution.next)];	
 			_.merge(plant, evolve);
 		}
 	});
