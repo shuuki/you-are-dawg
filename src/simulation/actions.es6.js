@@ -110,10 +110,12 @@ makeAction('treat',
 
 makeAction('throw stick',
 	(source, land, actorFactory, direction) => {
-		var direction = direction || _.sample(['N', 'E', 'S', 'W']);
-		console.log(source, land, actorFactory, direction);
+		direction = direction || [_.random(-5, 5), _.random(-5, 5)];
+		var stick = actorFactory.actor('stick', $.Vec.sum(source.pos, direction));
+		land.add(stick);
 
-		return `${land}`;
+		var log = [JSON.stringify(stick)];
+		return `${source} throws a stick ${$.dist(stick.pos, source.pos).toFixed(2)} ft away`;
 	});
 
 

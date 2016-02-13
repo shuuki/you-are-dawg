@@ -24,7 +24,9 @@ var actors = [
 	a('spruce', 'A', ['plant']),
 	a('pine', 'T', ['plant']),
 	// And an attribute that you can really play with
-	a('water', 'w')
+	a('water', 'w'),
+	// Just THINGS
+	a('stick', '-', ['item', 'grab'])
 ];
 
 // An array of unique actor tags
