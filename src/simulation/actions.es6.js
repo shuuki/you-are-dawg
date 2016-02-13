@@ -93,10 +93,16 @@ makeAction('check', (source, target) => {
 
 makeAction('bite',
 	(source, target) => {
+		if (!_.has(target, 'status.hp'))
+		{
+			return `${source} bites ${target} -> It has no effect`;
+		}
+
 		if (target.status.hp > 0)
 		{
 			target.status.hp -= 2;
 		}
+
 		return `${source} bites ${target} -> ${target.status.hp}`;
 	});
 
@@ -113,6 +119,10 @@ makeAction('treat',
 		];
 	});
 
+
+
+
+
 makeAction('throw stick',
 	(source, land, actorFactory, direction) => {
 		direction = direction || [_.random(-5, 5), _.random(-5, 5)];
@@ -123,6 +133,20 @@ makeAction('throw stick',
 		return `${source} throws a stick ${$.dist(stick.pos, source.pos).toFixed(2)} ft away`;
 	});
 
+
+
+makeAction('pick up',
+	(source, target, land) => {
+		if ($.Vec.eq(source.pos, target.pos))
+		{
+			land.remove(target);
+			return `${source} picked up the ${target}`;
+		}
+		else
+		{
+			return `${source} is too far from ${target}!`;
+		}
+	});
 
 
 
@@ -142,9 +166,9 @@ var verbMap = {
 
 
 // Or another way
-var getVerbs = (source, target, state) => {
+var getVerbs = (source, target, land) => {
 	var verbs = [];
-	
+
 	// Animals can sniff
 	if (_.includes(source.tags, 'animal'))
 	{
@@ -159,6 +183,11 @@ var getVerbs = (source, target, state) => {
 	if (source.name === 'human')
 	{
 		verbs.push('throw stick');
+	}
+
+	if (_.includes(target.tags, 'grab'))
+	{
+		verbs.push('pick up');
 	}
 
 	return verbs;

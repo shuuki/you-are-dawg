@@ -487,7 +487,7 @@ logic.add((land, delta, actors) => {
 	if (source && target)
 	{
 		var fromMap = _.get(actions.verbMap, `${source.name}.${target.name}`, []);
-		possibleActions = _.uniq(fromMap.concat(actions.getVerbs(source, target, {})));
+		possibleActions = _.uniq(fromMap.concat(actions.getVerbs(source, target, land)));
 	}
 
 	render.joinElt('option', sourceSelect, _.map(actors, (actor) => actor.sprite));

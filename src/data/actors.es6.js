@@ -87,5 +87,5 @@ actors.forEach((actor) => {
 module.exports = {
 	proto: actors,
 	names,
-	tags
+	tags, someTags, allTags
 };
