@@ -53,16 +53,20 @@ makeAction('sniff',
 
 makeAction('bark',
 	(source, target) => {
-		var log = [`${source} barks at ${target}`]
+		var log = [`${source} barks at ${target}`];
 
-		target.status.affect.fearful += 2;
-		log.push($.getBin('0', '1', [
-				[5, `${target} is feeling uneasy`],
-				[10, `${target} is looking for an exit`],
-				[15, `${target} starts to sweat`],
-				[30, `${target} backs away`],
-				[45, `${target} urinated in fear`]
-		], target.status.affect.fearful));
+		if(_.has(target, 'status.affect.fearful'))
+		{
+			target.status.affect.fearful += 2;
+			log.push($.getBin('0', '1', [
+					[5, `${target} is feeling uneasy`],
+					[10, `${target} is looking for an exit`],
+					[15, `${target} starts to sweat`],
+					[30, `${target} backs away`],
+					[45, `${target} urinated in fear`]
+			], target.status.affect.fearful));
+		}
+
 		return log;
 	});
 

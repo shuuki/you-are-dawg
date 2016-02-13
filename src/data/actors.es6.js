@@ -51,7 +51,7 @@ actors.forEach((actor) => {
 	}
 
 	// Plants get entropy
-	if (someTags(actor.tags, ['plant']))
+	if (someTags(actor, ['plant']))
 	{
 		status.entropy = 0;
 	}
