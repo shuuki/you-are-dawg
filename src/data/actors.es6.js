@@ -66,7 +66,7 @@ actors.forEach((actor) => {
 	if (actor.name === 'human')
 	{
 		status.hp = 50;
-		status.dawgAffect = {
+		status.affect = {
 			trusting: 0,
 			fearful: 0,
 			loving: 0,

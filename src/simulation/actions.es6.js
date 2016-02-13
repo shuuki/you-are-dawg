@@ -53,7 +53,19 @@ makeAction('sniff',
 
 makeAction('bark',
 	(source, target) => {
-		return `${source} barks at ${target}`;
+		var log = [`${source} barks at ${target}`]
+
+		target.affect.fearful -= 5;
+		log.push($.getBin)
+		if (target.affect.fearful < 0)
+		{
+			log.push(`${target} is feeling uneasy`);
+		}
+		else if (target.affect.fearful < 0)
+		{
+			log.push(`${target} is feeling uneasy`);
+		}
+		return log;
 	});
 
 

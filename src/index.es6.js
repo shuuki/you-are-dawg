@@ -123,7 +123,7 @@ flyd.on(renderLiveDebug, logCollect);
 // Time conversions to drive the universe
 // Relative multipler for deltas
 // Higher value = faster steps forward in time
-var timeWarp = 2; // each ms = 10 minutes
+var timeWarp = 5000; // each ms = 10 minutes
 
 // Map of conversions for this planet's seasons
 var planetTime = { // Earth based
@@ -162,6 +162,7 @@ var hourHand = clock.append('div').classed('hour', true);
 
 var bin = (base, start, end) => (base / start) % end;
 logic.add((land, delta) => {
+	var body = d3.select(document.body);
 
 	// Relative to start
 	circadian.now += delta * timeWarp;
@@ -178,6 +179,14 @@ logic.add((land, delta) => {
 	_logValue('Date', `${circadian.day.toFixed(2)} / ${circadian.month.toFixed(2)} / ${circadian.year.toFixed(4)}`);
 	_logValue('sol', circadian.sol.name);
 	_logValue('luna', circadian.luna.name);
+
+	// Apply classes to body
+	var classStatus = verse.sol.map(
+		(x) => 'sol-' + x.name).concat(verse.luna.map(
+		(x) => 'luna-' + x.name)
+	).map((name) => [name, name === 'sol-' + circadian.sol.name || name === 'luna-' + circadian.luna.name]);
+	d3.select(document.body).classed(_.fromPairs(classStatus));
+	
 	return circadian;
 });
 

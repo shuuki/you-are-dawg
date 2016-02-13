@@ -207,14 +207,22 @@ var intervalCheck = (interval, time, delta) =>
  */
 var getBin = (binPath, valuePath, bins, search) => {
 	var out;
+
 	// lodash forEach for early out
 	_.forEach(bins, (bin, i) => {
 		if (_.get(bin, binPath) >= search)
 		{
+			bin = bins[i];
 			out = valuePath ? _.get(bin, valuePath) : bin;
 			return false;
 		}
 	});
+
+	if (!out)
+	{
+		var bin = _.last(bins);
+		return valuePath ? _.get(bin, valuePath) : bin;
+	}
 
 	return out;
 };
