@@ -16,7 +16,7 @@ var _ = require('lodash');
 // It is
 var verse = require('./data/verse.es6');
 var plants = require('./data/plants.es6');
-
+var ActorFactory = require('./simulation/ActorFactory.es6');
 
 // It knows
 var $ = require('./core/core.es6');
@@ -298,6 +298,9 @@ var commandState = flyd.immediate(flyd.combine(
 
 
 
+// A way to build actors
+var actorFactory = new ActorFactory(verse.actors.proto);
+
 
 
 
@@ -306,38 +309,8 @@ var commandState = flyd.immediate(flyd.combine(
 //////////////
 // Some actors / state
 //////////////
-
-// Actors -- Living things in the world. A lookup.
-var actorsByName = _.keyBy(verse.actors.proto, 'name');
-
-/**
- * Make a new actor with a default name and position.
- * Shapes loaded from `actorsByName`
- *
- * @name Actor
- * @typedef {object} Actor
- * @prop {string} name - What should I look up?
- * @prop {object} status - Arbitrary shape status object for now
- * @prop {[number, number]} pos
- * @prop {stream<Actor>} life - stream of own value. Used to update on mutation.
- */
-var actor = (name, pos) => {
-	name = name || 'nothing';
-	var newActor = _.cloneDeep(actorsByName[name]);
-	newActor.pos = !pos ? [0, 0] : pos;
-	newActor.life = flyd.stream(newActor);
-
-	return newActor;
-};
-
-// Get an actor + add to game
-var _actorIdCount = 0;
 var gameActor = (name, pos) => {
-	var newActor = actor(name, pos);
-	newActor.id = _actorIdCount++;
-	newActor.toString = () => newActor.name;
-	
-	// This is where it goes into renderer
+	var newActor = actorFactory.actor(name, pos);
 	gameLand.add(newActor);
 	return newActor;
 };
@@ -352,7 +325,6 @@ var cooldown = (max, current) => {
 
 // Player stuff
 var player = gameActor('dawg', [10, 10]);
-_.merge(player.status, { sniffing: false, move: cooldown(250) });
 logValues(player.life.map((x) => x.pos.join(',')), 'Dawg Paws');
 
 
@@ -405,30 +377,6 @@ logic.add(playerMover); // No time given
 logic.add(() => {
 	ui.map.classed('sniffing', player.status.sniffing);
 }, 100);
-
-
-
-
-
-
-// sol
-var sun = {
-	// gotta' stay safe
-	entropy: Number.MAX_SAFE_INTEGER
-};
-logic.add((land, delta, actors) => {
-	// Distribute entropy
-});
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -519,7 +467,7 @@ flyd.on(_.debounce((state) => {
 
 ////////// ACTIONS?!
 var flow = flyd.stream();
-var doAction = (verb, locals) => {
+var flowAction = (verb, locals) => {
 	if (!actions.verbs[verb]) throw new Error(`Verb ${verb} not found found.`);
 	flow({
 		action: actions.verbs[verb],
@@ -527,14 +475,10 @@ var doAction = (verb, locals) => {
 	});
 };
 
-
-
-// NPC STATE?
 var state = flyd.scan((acc, event) => {
 	var processed = Date.now();
 	acc.history.push([processed, event]);
-	var injectedLocals = _.map(_.get(event, 'action.requires'), (label) => event.locals[label]);
-	acc.last = event.action.fn.apply(undefined, injectedLocals);
+	acc.last = actions.doAction(event.action, event);
 	acc.log.push([processed, acc.last]);
 	return acc;
 }, {
@@ -604,9 +548,11 @@ logic.add((land, delta, actors) => {
 		.call((sel) => {
 			sel.classed('button', true)
 		})
-		.on('click', (d) => doAction(d, {
+		// Pass the action event onto the flow
+		.on('click', (d) => flowAction(d, {
 			source,
-			target
+			target,
+			land
 		}));
 
 });
@@ -657,17 +603,28 @@ logic.add((land, delta, actors) => {
 
 
 // Life begets life
+var sun = {
+	// gotta' stay safe
+	entropy: Number.MAX_SAFE_INTEGER
+};
 gameActor('seed', [2, 6]);
+
+// @todo: sun gives based on delta and circadian
 logic.add((land, delta, actors) => {
+	var sunGives = 1;
+
 	land.getActors('plant').forEach((plant) => {
-		// From the sun
-		plant.status.entropy += 2;
+		if (sun.entropy > 0)
+		{
+			sun.entropy -= sunGives;
+			plant.status.entropy += sunGives;
+		}
+
 		var evolution = plants.evolution[plant.name];
 		if (evolution && plant.status.entropy >= evolution.entropy)
 		{
 			var evolve = actor(_.sample(evolution.next), plant.pos);
 			_.merge(plant, evolve);
-			// plant.status.entropy -= evolution.entropy; 
 		}
 	});
 }, 100);

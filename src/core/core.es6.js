@@ -220,7 +220,7 @@ var getBin = (binPath, valuePath, bins, search) => {
 };
 
 
-var core = {
+module.exports = {
 	// Maths
 	sum, diff, square, dist, mult, div,
 	// Extraction
@@ -236,5 +236,3 @@ var core = {
 	// Utility
 	intervalCheck
 };
-
-module.exports = _.merge(core, require('./rand.es6'));

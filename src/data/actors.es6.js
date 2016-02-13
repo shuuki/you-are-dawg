@@ -8,23 +8,11 @@
  * @param  {string} sprite - For now, a char
  * @return {Actor} - a new Actor
  */
-var oldA = (name, sprite, tags) => { return { name, sprite, tags: tags || [] }; };
-
-
-var a = (name, sprites, tags) => {
-	var x = oldA(name, sprites, tags);
-
-	x.status = {
-		hp: 20,
-		entropy: 0
-	};
-
-	return x;
-};
+var a = (name, sprite, tags) => { return { name, sprite, tags: tags || [] }; };
 
 var actors = [
 	a('nothing', '_'),
-	a('bird', 'B'),
+	a('bird', 'B', ['animal']),
 	a('dawg', '@', ['animal', 'fierce']),
 	a('human', '!', ['animal']),
 	a('squirrel', 'S', ['animal']),
@@ -42,6 +30,45 @@ var actors = [
 // An array of unique actor tags
 var tags = _.uniq(_.flatten(_.map(actors, 'tags')));
 var names = _.uniq(_.flatten(_.map(actors, 'name')));
+
+
+
+// Cooldown status helper
+var cooldown = (max, current) => { return { max, current: !current ? 0 : current }; };
+
+// Helpers
+var someTags = (actor, tags) => _.intersection(actor.tags, tags).length > 0;
+var allTags = (actor, tags) => _.difference(tags, actor.tags).length === 0;
+
+// Apply status based on tags and name
+actors.forEach((actor) => {
+	var status = {};
+
+	// If the tags
+	if (allTags(actor, ['plant', 'animal']))
+	{
+		status.hp = 20;
+	}
+
+	// Plants get entropy
+	if (_.includes(actor.tags, 'plant'))
+	{
+		status.entropy = 0;
+	}
+
+	// Dawg gets status
+	if (actor.name === 'dawg')
+	{
+		status.sniffing = false;
+		status.move = cooldown(250);
+	}
+
+
+	actor.status = status;
+});
+
+
+
 
 module.exports = {
 	proto: actors,

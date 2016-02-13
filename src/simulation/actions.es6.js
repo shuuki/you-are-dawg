@@ -1,6 +1,8 @@
 'use strict';
 
 var _ = require('lodash');
+var $ = require('../core/core.es6');
+$.mod = require('../core/mod.es6').mod;
 
 var getArgs = (fn) => {
 	var str = fn.toString();
@@ -19,6 +21,23 @@ var makeAction = (label, fn) => {
 	actionLookup[label] = action;
 	return action;
 };
+
+/**
+ * Do an action given an environment
+ * @param  {Action} action - The action to perform
+ * @param  {Object} environment - Object satisfying action's requirements
+ * @return {String[]} - Summary of results of the action
+ */
+var doAction = (action, environment) => {
+	// map requirement strings to instances from environment
+	var locals = _.map(action.requires,
+		(requirement) => environment.locals[requirement]);
+
+	// Return result of action
+	return action.fn.apply(undefined, locals);
+}
+
+
 
 
 
@@ -60,7 +79,27 @@ makeAction('bite',
 			target.status.hp -= 2;
 		}
 		return `${source} bites ${target} -> ${target.status.hp}`;
-	})
+	});
+
+
+
+
+makeAction('treat',
+	(source, target) => {
+		source.hp += 5;
+
+		return [
+			`${source} gives ${target} a treat`,
+			`${target} trusts ${source} a little more`
+		];
+	});
+
+makeAction('throw stick',
+	(source, land, direction) => {
+		var direction = direction || _.sample(['N', 'E', 'S', 'W']);
+
+		return `${land}`;
+	});
 
 
 
@@ -71,6 +110,9 @@ var verbMap = {
 		dawg: ['sniff', 'bark', 'growl', 'check'],
 		human: ['sniff'],
 		seed: ['sniff']
+	},
+	human: {
+		dawg: ['treat']
 	}
 };
 
@@ -90,6 +132,11 @@ var getVerbs = (source, target, state) => {
 	if (_.includes(source.tags, 'fierce'))
 	{
 		verbs.push('bark', 'growl', 'bite');
+	}
+
+	if (source.name === 'human')
+	{
+		verbs.push('throw stick');
 	}
 
 	return verbs;
@@ -112,7 +159,7 @@ var getVerbs = (source, target, state) => {
 
 
 module.exports = {
-	makeAction,
+	makeAction, doAction,
 	verbs: actionLookup,
 	verbMap,
 	getVerbs
