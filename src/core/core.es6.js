@@ -6,10 +6,19 @@ var diff = (a, b) => a-b; var sdiff = _.spread(diff);
 var mult = (a, b) => a*b; var smult = _.spread(mult);
 var square = (a) => a*a;
 var div = (a, b) => a/b; var sdiv = _.spread(div);
+var divR = (b, a) => a/b; var sdivR = _.spread(divR);
 var dist = (a, b) => Math.sqrt(
 	square(diff(a[0], b[0])) +
 	square(diff(a[1], b[1]))
 );
+
+// Curry stuff after we spread them
+sum = _.curry(sum, 2);
+mult = _.curry(mult, 2);
+div = _.curry(div, 2); divR = _.curry(divR, 2);
+diff = _.curry(diff, 2);
+dist = _.curry(dist, 2);
+
 
 var _pCache = [];
 var permutations = (emptyVal, arr) => {
@@ -44,7 +53,9 @@ var Vec = {
 	div: _.curry((src, by) => _.zip(src, by).map(sdiv), 2),
 	mult: _.curry((src, by) => _.zip(src, by).map(smult), 2),
 	sum: _.curry((src, by) => _.zip(src, by).map(ssum), 2),
-	ap: _.curry((fn, self, arr) => arr.map((x) => fn.apply(self, x)), 3)
+	ap: _.curry((fn, self, arr) => arr.map((x) => fn.apply(self, x)), 3),
+	len: (vec) => Math.sqrt(vec.map(square).reduce(sum, 0)),
+	norm: (vec) => vec.map(divR(Vec.len(vec)))
 };
 
 
@@ -60,9 +71,9 @@ var Rect = {
 		d >= rect.pos[i] &&
 		d < rect.pos[i] + rect.dims[i]
 	),
-	corners: (rect) => permutations(0, rect.dims).map(Vec.sum(rect.pos))
+	corners: (rect) => permutations(0, rect.dims).map(Vec.sum(rect.pos)),
+	fromNode: (node) => Rect.create([node.clientWidth, node.clientHeight], [node.clientTop, node.clientLeft])
 };
-Rect.fromNode = (node) => Rect.create([node.clientWidth, node.clientHeight], [node.clientTop, node.clientLeft]);
 
 
 
@@ -169,15 +180,6 @@ var localToWorld = _.curry((dims, chunk, pos) =>
 		pos, Vec.mult(dims, chunk)
 	)
 , 3)
-
-
-
-// Curry stuff
-sum = _.curry(sum, 2);
-mult = _.curry(mult, 2);
-div = _.curry(div, 2);
-diff = _.curry(diff, 2);
-dist = _.curry(dist, 2);
 
 
 

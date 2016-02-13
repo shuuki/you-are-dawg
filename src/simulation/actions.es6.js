@@ -2,8 +2,21 @@
 
 var _ = require('lodash');
 var $ = require('../core/core.es6');
-$.mod = require('../core/mod.es6').mod;
+var Mod = require('../core/mod.es6');
 
+
+
+
+
+
+
+
+
+
+
+
+
+// Action Factory Helpers
 var getArgs = (fn) => {
 	var str = fn.toString();
 	var start = str.indexOf('(');
@@ -13,7 +26,6 @@ var getArgs = (fn) => {
 }
 
 var actionLookup = {};
-
 var makeAction = (label, fn) => {
 	var requires = getArgs(fn)
 	var action = { label, requires, fn };
@@ -38,12 +50,6 @@ var doAction = (action, environment) => {
 }
 
 
-
-
-
-
-
-
 makeAction('sniff',
 	(source, target) => {
 		return `${source} sniffs ${target}`;
@@ -58,13 +64,23 @@ makeAction('bark',
 		if(_.has(target, 'status.affect.fearful'))
 		{
 			target.status.affect.fearful += 2;
-			log.push($.getBin('0', '1', [
+
+			var response = $.getBin('0', undefined, [
 					[5, `${target} is feeling uneasy`],
 					[10, `${target} is looking for an exit`],
 					[15, `${target} starts to sweat`],
-					[30, `${target} backs away`],
+					[30, `${target} backs away`, () => target.pos],
 					[45, `${target} urinated in fear`]
-			], target.status.affect.fearful));
+			], target.status.affect.fearful);
+
+			// Run any functions
+			if (response[2])
+			{
+				response[2](target);
+			}
+
+			// Push the message
+			log.push(response[1]);
 		}
 
 		return log;

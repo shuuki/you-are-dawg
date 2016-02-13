@@ -24,6 +24,17 @@ var mod = _.curry((fn, path, source) => {
 	return _.get(path, source);
 }, 3);
 
+
+
+// I guess I'll toss some useful partials here
+var backAway = _.curry((distance, source, target) => {
+	// var direction = $.Vec()
+});
+
+
+
+
 module.exports = {
-	mod
+	mod,
+	backAway
 };
