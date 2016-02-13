@@ -40,13 +40,20 @@ var ui = require('./render/ui.es6')(document.body);
 require('./css/index.less');
 
 
+
+// WHAT KIND OF WORLD DO WE LIVE IN!?
+console.log(verse, actions);
+
+
+
+
 // Model and Controller
 var renderDims = [15, 15];
-var minimapChunks = [3, 3];
 var gameLand = new Land(Math.random, { dims: renderDims });
 var logic = new Logic(gameLand);
 render.Renderer.dims = renderDims;
-render.Minimap.dims = $.Vec.mult(minimapChunks, renderDims);
+
+
 
 
 
@@ -84,7 +91,17 @@ var _removeLog = (label) => {
 		_.remove(arr, { label });
 		logCollect(arr);
 };
+// Print live vlalues to UI
+var renderLiveDebug = (data) => {
+	var u = ui.debug.selectAll('li').data(data);
+	var e = u.enter().append('li');
+	e.append('span');
 
+	[u].map((sel) => {
+		sel.select('span').text((d) => `${d.label} : ${d.value}`);
+	});
+};
+flyd.on(renderLiveDebug, logCollect);
 
 
 
@@ -184,7 +201,6 @@ logic.add((land, delta) => {
 logValues(streams.fps(120, time).map((x) => x.toFixed(2)), 'FPS');
 
 
-console.log(verse, actions);		// Let me hear you shout
 
 
 
@@ -197,11 +213,12 @@ console.log(verse, actions);		// Let me hear you shout
 
 
 
+//////////         ~~ INPUT stat ~~            //////////
 
 
 
+// @todo: move into its own module
 
-// Key state
 var getWhich = $.get('which');
 var gameControls = _.keys(verse.controls.defaultControls);
 var filterKeys = flyd.filter($.inMap(verse.controls.defaultControls));
@@ -233,13 +250,6 @@ var keyCommands = keyboardState.map(
 		.groupBy((key) => verse.controls.defaultControls[key])
 		.value()
 );
-
-
-
-
-
-
-
 
 var touchCommands = flyd.combine((start, move, end, self, changes) => {
 	var rect = ui.map.node().getBoundingClientRect();
@@ -299,8 +309,14 @@ var commandState = flyd.immediate(flyd.combine(
 
 
 
-/////////////////////////////// Enter Dawg //////////////////////////
 
+
+
+
+
+
+
+/////////////////////////////// Enter Dawg //////////////////////////
 
 
 // A way to build actors
@@ -310,13 +326,6 @@ var gameActor = (name, pos) => {
 	gameLand.add(newActor);
 	return newActor;
 };
-
-
-
-
-
-
-
 
 
 
@@ -354,47 +363,8 @@ render.Renderer.add(playerCam);
 
 
 
-
-
-// And a minimap
-var minimapLand = () => {
-	var data = gameLand._data;
-	var cells = $.Arr2D.create(render.Minimap.dims[0], render.Minimap.dims[1]);
-	var center = minimapChunks.map((x) => Math.floor(x / 2));
-	var chunk = $.getChunk(render.Renderer.dims, player.pos);
-	var srcSize = $.Rect.create(render.Renderer.dims, [0, 0]);
-	
-	for (var x = -center[0]; x < minimapChunks[0] - center[0]; x++)
-	{
-		for (var y = -center[1]; y < minimapChunks[1] - center[1]; y++)
-		{
-			var pos = $.Vec.diff(chunk, [x, y]);
-			var key = gameLand.keyFn(pos);
-			if (data[key])
-			{
-				// Top left to paste
-				var offset = $.Vec.mult([-x + center[0], y + center[1]], render.Renderer.dims);
-				
-				for (var c = 0; c < data[key].length; c++)
-				{
-					for (var r = 0; r < data[key][c].length; r++)
-					{
-						cells[offset[1] + r][offset[0] + c] = { land: data[key][r][c]}
-					}
-				}
-			}
-		}
-	}
-
-	return cells;
-};
-render.Minimap.add(minimapLand);
-
-
-
 // Let's make a generic human -- he'll just live in the world
 gameActor('human', [3, 4]);
-
 
 // And how about on each 'h' press
 flyd.on(_.debounce((state) => {
@@ -420,6 +390,23 @@ flyd.on(_.debounce((state) => {
 		}
 	}
 }, 100, {leading: true}), commandState);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -464,16 +451,13 @@ logValues(state.map((s) => {
 
 
 
-
-
-
-
+////////////////// UI COMPONENT - ACTIONS
 
 // A dawg centric view
 var targetSelecter = ui.controls.append('section').attr('id', 'target');
 ui.actions = ui.controls.append('div').attr('id','actions');
 
-// [Srouce] > [Target]
+// [Source] > [Target]
 var sourceSelect = targetSelecter.append('select');
 var swapBtn = targetSelecter.append('span').classed('button off', true).text('>');
 var targetSelect = targetSelecter.append('select');
@@ -516,8 +500,6 @@ logic.add((land, delta, actors) => {
 });
 
 
-
-
 // RENDER EVENT RESULT LOG
 flyd.on((state) => {
 	var update = ui.log.selectAll('.entry').data(state.log);
@@ -526,6 +508,15 @@ flyd.on((state) => {
 	update.text((d) => JSON.stringify(d[1]));
 	ui.log.property('scrollTop', ui.log.property('scrollHeight'));
 }, state);
+
+
+
+
+
+
+
+
+
 
 
 
@@ -551,12 +542,6 @@ logic.add((land, delta, actors) => {
 		}
 	})
 });
-
-
-
-
-
-
 
 
 
@@ -608,10 +593,14 @@ logic.add((land, delta, actors) => {
 
 
 
+
+
+
+
+
 // call our renderers?
 var renderFn = () => {
 	render.Renderer.to(ui.map);
-	// render.Minimap.to(minimap);
 };
 
 
@@ -648,35 +637,6 @@ flyd.on(update, time);
 
 
 
-// Render keyboard state
-// var keyDispaly = keys.append('div');
-// var commandDisplay = keys.append('div');
-// flyd.on((state) => renderKeyboard(keyDispaly, { data: _.toPairs(state) }), keyboardState);
-// flyd.on((state) => renderKeyboard(commandDisplay, { data: _.toPairs(state) }), commandState);
-
-
-// Debug live values
-var renderLiveDebug = (data) => {
-	var u = ui.debug.selectAll('li').data(data);
-	var e = u.enter().append('li');
-	e.append('span');
-
-	[u].map((sel) => {
-		sel.select('span').text((d) => `${d.label} : ${d.value}`);
-	});
-};
-flyd.on(renderLiveDebug, logCollect);
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -692,35 +652,13 @@ setTimeout(() => new Tether({
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //////////////// @ global access @ ////////////////////
 
 window.game = {
 	verse,
 	gimmicks,
 	render,
+	actions,
 	$,
 	streams,
 	keyboardState
