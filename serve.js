@@ -10,8 +10,8 @@ var server = new WebpackDevServer(compiler, devServerConfig);
 
 
 var protocol = 'http';
-var port = 8080;
-var host = 'localhost';
+var port = 5000;
+var host = '0.0.0.0';
 
 server.listen(port, host, function(){
   console.log('Walking the dawg on: ' + protocol + '://' + host + ':' + port);

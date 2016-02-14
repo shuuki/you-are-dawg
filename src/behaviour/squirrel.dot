@@ -1,5 +1,21 @@
 digraph squirrel {
-	a -> b;
-	b -> c;
-	A -> { B C }
+	subgraph default {
+		home [label="Have home tree?"];
+		home -> no -> search;
+		home -> yes -> forrage;
+	}
+
+	subgraph search {
+		found [label="Found home tree?"];
+		found -> no -> search;
+		found -> yes -> makeHome -> default;
+	}
+
+	subgraph forrage {
+		spiral -> found;
+		found -> yes -> collect -> checkInventory;
+		found -> no -> spiral;
+		checkInventory -> full -> goHome;
+		checkInventory -> notFull -> forrage;
+	}
 }
