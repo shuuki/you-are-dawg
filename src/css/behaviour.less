@@ -1,25 +1,39 @@
 @import "./core";
 @import "./flex";
 
+// Debug Tool
 .behaviour {
+  &.hide {
+    pointer-events: none;
+    .toggle {
+      pointer-events: all;
+    }
+  }
+
   .absolute-expand;
   .flex-col;
+  justify-content: flex-end;
 
   .controls {
     flex-grow: 1;
   }
 
   .graph {
-
+    position: absolute;
   }
 
   .editor {
-
+    select {
+      font-size: 1em;
+    }
+    textarea {
+      flex-grow: 1;
+    }
   }
 }
 
 
-// The chart
+// DAG
 g.type-TK > rect {
   fill: #00ffd0;
 }
