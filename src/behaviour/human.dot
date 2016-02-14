@@ -1,4 +1,3 @@
-digraph test {
-	a -> b;
-	b -> c;
+digraph human {
+  eat -> sleep -> rave -> eat;
 }

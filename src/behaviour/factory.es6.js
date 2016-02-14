@@ -14,8 +14,9 @@ var BehaviourDebugger = require('./debug.es6');
 // @todo: generate this based on files
 // @see: https://webpack.github.io/docs/context.html
 var behaviors = {
-	human: require('raw!./human.dot'),
-	squirrel: require('raw!./squirrel.dot')
+	human: require('./human.dot'),
+	squirrel: require('./squirrel.dot'),
+	example: require('./example.dot')
 };
 
 
@@ -39,7 +40,15 @@ var cache = {};
 var loadBehaviour = (name) => {
 	if (!cache[name])
 	{
-		cache[name] = load(behaviors[name]);
+		cache[name] = load(behaviors[name]).then(
+			(graph) => {
+				return {
+					graph,
+					name,
+					source: behaviors[name]
+				};
+			},
+			(err) => new Error(`Could not load "${name}"`));
 	}
 
 	return cache[name];

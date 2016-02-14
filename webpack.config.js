@@ -18,6 +18,7 @@ module.exports = {
         loaders: [
             { test: /\.es6\.js$/, loader: 'babel', exclude: '/(node_modules|bower_components)/' },
             { test: /\.jade$/, loader: 'jade', exclude: '/(node_modules|bower_components)/' },
+            { test: /\.dot$/, loader: 'raw', exclude: '/(node_modules|bower_components)/' },
             { test: /\.less$/, loader: ExtractTextPlugin.extract('style', 'css!autoprefixer!less'), exclude: '/(node_modules|bower_components)/' }
         ]
     },
