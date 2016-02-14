@@ -52,6 +52,11 @@ actors.forEach((actor) => {
 		status.hp = 20;
 	}
 
+	if (someTags(actor, ['animal']))
+	{
+		status.inventory = [];
+	}
+
 	// Plants get entropy
 	if (someTags(actor, ['plant']))
 	{

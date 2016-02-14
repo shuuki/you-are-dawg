@@ -182,9 +182,9 @@ logic.add((land, delta) => {
 
 	// Apply classes to body
 	var classStatus = verse.sol.map(
-		(x) => 'sol-' + x.name).concat(verse.luna.map(
-		(x) => 'luna-' + x.name)
-	).map((name) => [name, name === 'sol-' + circadian.sol.name || name === 'luna-' + circadian.luna.name]);
+		(x) => 'sol-' + x.name.split(' ').join('-')).concat(verse.luna.map(
+		(x) => 'luna-' + x.name.split(' ').join('-'))
+	).map((name) => [name, name === 'sol-' + circadian.sol.name.split(' ').join('-') || name === 'luna-' + circadian.luna.name.split(' ').join('-')]);
 	d3.select(document.body).classed(_.fromPairs(classStatus));
 	
 	return circadian;
@@ -333,6 +333,11 @@ var gameActor = (name, pos) => {
 	gameLand.add(newActor);
 	return newActor;
 };
+
+
+
+// Load some behaviours
+var behaviourFactory = require('./behaviour/factory.es6');
 
 
 

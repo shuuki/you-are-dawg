@@ -139,6 +139,7 @@ makeAction('pick up',
 	(source, target, land) => {
 		if ($.Vec.eq(source.pos, target.pos))
 		{
+			source.status.inventory.push(target);
 			land.remove(target);
 			return `${source} picked up the ${target}`;
 		}
@@ -185,9 +186,15 @@ var getVerbs = (source, target, land) => {
 		verbs.push('throw stick');
 	}
 
-	if (_.includes(target.tags, 'grab'))
+	// If the source is an animal (-> has inventory) and target is grabbable
+	if (_.includes(target.tags, 'grab') && _.has(source, 'status.inventory'))
 	{
 		verbs.push('pick up');
+	}
+
+	if (_.get(source, 'status.inventory', []).length > 0 && _.has(target, 'status.inventory'))
+	{
+		verbs.push('give');
 	}
 
 	return verbs;
