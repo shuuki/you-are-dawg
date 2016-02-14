@@ -34,11 +34,11 @@ var load = (src) => {
 
 
 
-var _cache = {};
+var cache = {};
 var loadBehaviour = (name) => {
 	if (!cache[name])
 	{
-		cache[name] = log(behaviors[name]);
+		cache[name] = load(behaviors[name]);
 	}
 
 	return cache[name];

@@ -1,2 +1,4 @@
-a -> b
-b -> c
+digraph test {
+	a -> b;
+	b -> c;
+}

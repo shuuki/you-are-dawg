@@ -4,6 +4,7 @@
 
 @import "./actions";
 @import "./ui";
+@import "./chart";
 
 * {
 	box-sizing: border-box;
@@ -15,6 +16,12 @@ body {
 	color: #ccc;
 	font-family: Nokia, monospace;
 	-webkit-font-smoothing: none;
+}
+
+.hide {
+	:not(.toggle) {
+		display: none;
+	}
 }
 
 .glyph {
@@ -128,7 +135,7 @@ body {
 }
 
 .debug {
-	z-index: 999999;
+	z-index: 1000000;
 }
 
 .debug {
