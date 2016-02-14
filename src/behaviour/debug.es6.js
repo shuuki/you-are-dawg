@@ -21,6 +21,13 @@ var BehaviourDebugger = function(loadFn, manifest, paused)
 	var svg = node.select('svg.graph');
 	var dagGroup = svg.append('g');
 
+	var zoom = d3.behavior.zoom().on("zoom", () => {
+		dagGroup.attr('transform',
+			`translate(${d3.event.translate}) `
+			+ `scale(${d3.event.scale})`);
+	});
+	svg.call(zoom);
+
 	// Visible toggle
 	var vis = flyd.stream(true);
 	var selectedDot = flyd.stream();
@@ -62,6 +69,10 @@ var BehaviourDebugger = function(loadFn, manifest, paused)
 		updateSelection(dotSelect.node());
 	});
 
+	this.sourceText.on('input', () => {
+		console.log('!!');
+	});
+
 		// Populate select dropdown
 	this.updateBehavious(manifest);
 	updateSelection(dotSelect.node());
@@ -69,26 +80,31 @@ var BehaviourDebugger = function(loadFn, manifest, paused)
 	flyd.on((res) => this.displayLoad(res), loadedDot);
 };
 
+BehaviourDebugger.prototype.renderBehaviour = function(behaviour)
+{
+	try
+	{
+		this.render(this.dagGroup, behaviour.graph);
+		this.outputText.node().value = 'No render errors.';
+	}
+	catch (error)
+	{
+		this.dagGroup.select('g').remove();
+		this.outputText.node().value = error.stack.toString();
+	}
+};
+
 BehaviourDebugger.prototype.displayLoad = function(res)
 {
 	if (res instanceof Error)
 	{
-		this.sourceText.text(res.message);
+		this.sourceText.node().value = res.message;
+		this.outputText.node().value = '';
 	}
 	else
 	{
-		this.sourceText.text(res.source);
-		
-		// Render Dag
-		try
-		{
-			this.render(this.dagGroup, res.graph);
-			this.outputText.text('No render errors.');
-		}
-		catch (error)
-		{
-			this.outputText.text(`${error.stack}`);
-		}
+		this.sourceText.node().value = res.source;
+		this.renderBehaviour(res);
 	}
 };
 
