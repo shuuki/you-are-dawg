@@ -51,6 +51,8 @@ var gameLand = new Land(Math.random, { dims: renderDims });
 var logic = new Logic(gameLand);
 render.Renderer.dims = renderDims;
 
+var paused = flyd.stream(false);
+
 
 
 
@@ -337,7 +339,7 @@ var gameActor = (name, pos) => {
 
 
 // Load some behaviours
-var behaviourFactory = require('./behaviour/factory.es6');
+var behaviourFactory = require('./behaviour/factory.es6')(paused);
 
 
 
@@ -622,7 +624,12 @@ var renderFn = () => {
 var lastTime = time();
 var update = (time) => {
 	var delta = time - lastTime;		// The time that has past
-	logic.step(delta, time);						// Tells us how to change
+	
+	if (!paused())
+	{
+		logic.step(delta, time);						// Tells us how to change
+	}
+
 	renderFn();									// The results of which we see
 	lastTime = time;					// Then we step forward
 };

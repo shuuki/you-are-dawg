@@ -9,29 +9,31 @@
 }
 
 
-.controls {
-	display: flex;
-	flex-direction: column;
-	height: 15em;
-	position: relative;
-	z-index: 1;
-
-	#target {
-		background: #333;
+.interact {
+	.controls {
 		display: flex;
-		height: 4em;
-		overflow-y: auto;
-		user-select: none;
-		select:first-of-type {
-			background: rgb(235,205,0);
-			color: #333;
-		}
-	}
+		flex-direction: column;
+		height: 15em;
+		position: relative;
+		z-index: 1;
 
-	#actions {
-		height: 100%;
-		overflow-x: hidden;
-		overflow-y: auto;
+		#target {
+			background: #333;
+			display: flex;
+			height: 4em;
+			overflow-y: auto;
+			user-select: none;
+			select:first-of-type {
+				background: rgb(235,205,0);
+				color: #333;
+			}
+		}
+
+		#actions {
+			height: 100%;
+			overflow-x: hidden;
+			overflow-y: auto;
+		}
 	}
 }
 

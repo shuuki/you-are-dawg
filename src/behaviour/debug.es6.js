@@ -3,28 +3,36 @@
 var d3 = require('d3');
 var ui = require('./debug.jade');
 var dagreD3 = require('dagre-d3');
+var flyd = require('flyd');
 
-var node = d3.select(document.body)
-	.append('div')
-	.classed('behaviour debug', true);
-
-node.html(ui());
-var svg = node.select('svg.graph');
-var svgGroup = svg.append('g');
-
-var vis = {
-	_vis: false,
-	visible: (set) => set === undefined ? vis._vis : vis._vis = set
-};
-node.select('.toggle').on('click', () => {
-	//set it to invisible, then check the value
-	node.classed('hide', vis.visible(!vis.visible()));
-});
-
-var render = new dagreD3.render();
-var BehaviourDebugger = function(loadFn, manifest)
+var BehaviourDebugger = function(loadFn, manifest, paused)
 {
-	console.log(loadFn);
+	var render = new dagreD3.render();
+	var node = d3.select(document.body)
+		.append('div')
+		.classed('behaviour debug', true);
+
+	// Render structure
+	node.html(ui());
+
+	// Build dag SVG
+	var svg = node.select('svg.graph');
+	var svgGroup = svg.append('g');
+
+	// Visible toggle
+	var vis = flyd.stream(false);
+
+	flyd.on((isVisible) => {
+		node.classed('hide', !isVisible);
+		paused(isVisible);
+	}, vis);
+
+	node.select('.toggle').on('click', () => {
+		// Toggle vis stream
+		vis(!vis());
+	});
+
+	// @todo: move to menu
 	loadFn('human').then(
 		(res) => {
 			console.log(res);

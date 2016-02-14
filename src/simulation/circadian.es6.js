@@ -1,5 +1,18 @@
 'use strict';
 
+
+/////////////////
+/// 
+/// 
+/// @TODO:
+/// 
+/// FINISH the ideas I'm throwing down here
+/// Build API
+/// 
+/// 
+/////////////////
+
+
 // Time conversions to drive the universe
 // Relative multipler for deltas
 // Higher value = faster steps forward in time

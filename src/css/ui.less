@@ -1,12 +1,24 @@
 .game {
-	display: flex;
-	direction: column;
-	// justify-content: flex-start;
-	// align-items: stretch;
-};
+	.interact {
+		display: flex;
+		justify-content: flex-start;
+		align-items: stretch;
 
-.interact {
-	display: flex;
-	justify-content: flex-start;
-	align-items: stretch;
+		.controls {
+			width: 10em;
+		}
+
+		.debug {
+			position: relative;
+			word-break: break-all;
+			overflow: auto;
+			font-size: 0.5em;
+			ul {
+				li {
+					margin-right: 2em;
+					margin-bottom: 1em;
+				}
+			}
+		}
+	}
 }

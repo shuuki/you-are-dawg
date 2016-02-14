@@ -1,4 +1,5 @@
 var dot = require('graphlib-dot');
+var BehaviourDebugger = require('./debug.es6');
 
 // All the docs -- first the language, then the libs using 'em
 // @see https://en.wikipedia.org/wiki/DOT_(graph_description_language)
@@ -50,20 +51,16 @@ var loadBehaviour = (name) => {
 
 
 
-// Debug
-var BehaviourDebugger = require('./debug.es6');
-new BehaviourDebugger(loadBehaviour, behaviors);
 
 
+module.exports = (paused) => {
+	// Debug
+	new BehaviourDebugger(loadBehaviour, behaviors, paused);
 
 
-
-
-
-
-
-module.exports = {
-	behaviors,
-	// Promisified loader
-	load: loadBehaviour
-};
+	return {
+		behaviors,
+		// Promisified loader
+		load: loadBehaviour
+	};
+}

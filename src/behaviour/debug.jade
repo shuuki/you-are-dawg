@@ -1,9 +1,13 @@
-button.toggle Show/hid
-.controls
+button.toggle Show/hide
+.controls.flex-row
 	// svg.graph => singular only element (first chosen) => dag render target
-	svg(
-		viewBox="0 0 200 200",
-		height="100%",
-		width="100%",
-		preserveAspectRatio="xMidYMid"
-	).graph
+	div.flex
+		svg(
+			viewBox="0 0 200 200",
+			height="100%",
+			width="100%",
+			preserveAspectRatio="xMidYMid"
+		).graph
+
+	.editor.flex
+		textarea.absolute-expand
