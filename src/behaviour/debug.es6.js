@@ -7,6 +7,7 @@ var flyd = require('flyd');
 
 var BehaviourDebugger = function(factoryAPI, manifest, paused)
 {
+	var self = this;
 	var render = new dagreD3.render();
 
 	// Build DOM node from template
@@ -69,8 +70,8 @@ var BehaviourDebugger = function(factoryAPI, manifest, paused)
 		updateSelection(dotSelect.node());
 	});
 
-	this.sourceText.on('input', () => {
-		console.log('!!');
+	this.sourceText.on('input', (e) => {
+		loadedDot(factoryAPI.override(selectedDot(), d3.event.target.value));
 	});
 
 		// Populate select dropdown
@@ -105,12 +106,13 @@ BehaviourDebugger.prototype.displayLoad = function(res)
 	{
 		this.sourceText.node().value = res.source;
 		this.outputText.node().value = res.error.message;
-		this.dagGroup.select('g').remove();
+		this.dagGroup.classed('error', true);
 	}
 	else
 	{
 		this.sourceText.node().value = res.source;
 		this.renderBehaviour(res);
+		this.dagGroup.classed('error', false);
 	}
 };
 

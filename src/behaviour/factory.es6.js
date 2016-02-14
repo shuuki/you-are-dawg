@@ -33,7 +33,7 @@ var load = (name) => {
 	}
 	else
 	{
-		var source = overrides[name] || behaviors[name];
+		var source = _.get(overrides, name, _.get(behaviors, name, ''));
 		var loadPromise = new Promise((resolve, reject) => {
 			resolve(dot.read(source));
 		}).then(
@@ -51,12 +51,12 @@ var load = (name) => {
 	}
 };
 var override = (name, source) => {
-	override[name] = source;
+	overrides[name] = source;
 	delete compiled[name];
 	return load(name);
 };
 var removeOverride = (name) => {
-	delete override[name];
+	delete overrides[name];
 	delete compiled[name];
 	return load(name);
 };

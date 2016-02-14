@@ -34,10 +34,10 @@
       font-size: 0.75em;
       tab-size: 2;
       font-family: monospace;
-      white-space: nowrap;
     }
     .source {
       flex-grow: 1;
+      white-space: nowrap;
     }
     .output {
       flex-grow: 0.5;
@@ -49,28 +49,30 @@
 
 
 // DAG
-text {
-  font-weight: 300;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serf;
-  font-size: 14px;
-}
+.graph {
+  font-family: sans-serif;
 
-.node {
-  rect, circle, ellipse {
-    stroke: #999;
-    fill: #fff;
-    stroke-width: 1.5px;
+  .node, .edgePath {
+    fill: hsv(195, 0.2, 1);
+    stroke: hsv(195, 0.5, 0.75);
+    stroke-width: 2px;
   }
-}
 
-.edgePath path {
-  stroke: hsv(90, 1, 1);
-  stroke-width: 1.5px;
-}
+  text {
+    stroke : black;
+    fill: black;
+    stroke-width: 0px;
+  }
 
-.cluster rect {
-  stroke: #333;
-  fill: #000;
-  fill-opacity: 0.1;
-  stroke-width: 1.5px;
+  .cluster rect {
+    fill: #000;
+    fill-opacity: 0.1;
+  }
+
+  .error {
+    .node, .edgePath {
+      stroke: red;
+      fill: salmon;
+    }
+  }
 }
