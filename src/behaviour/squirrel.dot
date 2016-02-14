@@ -1,0 +1,5 @@
+digraph squirrel {
+	a -> b;
+	b -> c;
+	A -> { B C }
+}
