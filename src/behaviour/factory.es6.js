@@ -18,40 +18,47 @@ var behaviors = {
 	squirrel: require('./squirrel.dot'),
 	example: require('./example.dot')
 };
+var overrides = {};
+var compiled = {};
 
 
 
 
 
 
-
-var load = (src) => {
-	return new Promise((resolve, reject) => {
-		resolve(dot.read(src));
-	});
-};
-
-
-
-
-
-
-var cache = {};
-var loadBehaviour = (name) => {
-	if (!cache[name])
+var load = (name) => {
+	if (compiled[name])
 	{
-		cache[name] = load(behaviors[name]).then(
-			(graph) => {
-				return {
-					graph,
-					name,
-					source: behaviors[name]
-				};
-			},
-			(err) => new Error(`Could not load "${name}"`));
+		return compiled[name];
 	}
+	else
+	{
+		var source = overrides[name] || behaviors[name];
+		var loadPromise = new Promise((resolve, reject) => {
+			resolve(dot.read(source));
+		}).then(
+			(graph) => {
+				compiled[name] = loadPromise;
+				return { graph, name, source };
+			},
+			(error) => {
+				delete compiled[name];
+				return { error, name, source };
+			}
+		);
 
-	return cache[name];
+		return loadPromise;
+	}
+};
+var override = (name, source) => {
+	override[name] = source;
+	delete compiled[name];
+	return load(name);
+};
+var removeOverride = (name) => {
+	delete override[name];
+	delete compiled[name];
+	return load(name);
 };
 
 
@@ -60,16 +67,18 @@ var loadBehaviour = (name) => {
 
 
 
+var factoryAPI = {
+	behaviors,
+	load,
+	override,
+	removeOverride
+};
 
-
+// This is janky here like this
 module.exports = (paused) => {
 	// Debug
-	new BehaviourDebugger(loadBehaviour, behaviors, paused);
+	new BehaviourDebugger(factoryAPI, behaviors, paused);
 
-
-	return {
-		behaviors,
-		// Promisified loader
-		load: loadBehaviour
-	};
+	// And the API
+	return factoryAPI;
 }

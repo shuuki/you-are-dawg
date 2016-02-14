@@ -5,7 +5,7 @@ var ui = require('./debug.jade');
 var dagreD3 = require('dagre-d3');
 var flyd = require('flyd');
 
-var BehaviourDebugger = function(loadFn, manifest, paused)
+var BehaviourDebugger = function(factoryAPI, manifest, paused)
 {
 	var render = new dagreD3.render();
 
@@ -31,7 +31,7 @@ var BehaviourDebugger = function(loadFn, manifest, paused)
 	// Visible toggle
 	var vis = flyd.stream(true);
 	var selectedDot = flyd.stream();
-	var loadedDot = selectedDot.map(loadFn);
+	var loadedDot = selectedDot.map(factoryAPI.load);
 
 	// Bind locals to controller
 	this.node = node;
@@ -82,24 +82,30 @@ var BehaviourDebugger = function(loadFn, manifest, paused)
 
 BehaviourDebugger.prototype.renderBehaviour = function(behaviour)
 {
+	// Error while rendering
 	try
 	{
+		behaviour.graph.graph().transition = (sel) => {
+			return sel.transition().duration(500);
+		};
+
 		this.render(this.dagGroup, behaviour.graph);
 		this.outputText.node().value = 'No render errors.';
 	}
 	catch (error)
 	{
-		this.dagGroup.select('g').remove();
 		this.outputText.node().value = error.stack.toString();
 	}
 };
 
 BehaviourDebugger.prototype.displayLoad = function(res)
 {
-	if (res instanceof Error)
+	// Error in source
+	if (res.error)
 	{
-		this.sourceText.node().value = res.message;
-		this.outputText.node().value = '';
+		this.sourceText.node().value = res.source;
+		this.outputText.node().value = res.error.message;
+		this.dagGroup.select('g').remove();
 	}
 	else
 	{
