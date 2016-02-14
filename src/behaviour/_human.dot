@@ -1,0 +1,26 @@
+enter=>start: Dawg enters NPC's Perception radius
+curious=>operation: Check NPC's Detection:>#detection-check
+detect=>condition: NPC detects Dawg?
+choice=>operation: Present Dawg Choices:>#dawg-choices
+engage=>condition: Dawg engages NPC?
+initiative=>operation: Check who gets Initiative:>#initiative-check
+dawgup=>condition: Dawg gets Initiative?
+attitude=>operation: Check NPC's Attitude to Dawg:>#attitude-check
+neutral=>condition: NPC is Neutral?
+hostile=>condition: NPC is Hostile?
+end=>end: End, Indifference:>#indifference
+continue=>end: Start Fighting or Socializing based on Choice:>#fighting
+social=>end: Start Socializing:>#socializing
+fight=>end: Start Fighting:>#fighting
+enter->curious->detect
+detect(yes)->initiative
+detect(no)->choice->engage
+initiative->dawgup
+dawgup(yes)->choice
+dawgup(no)->attitude->neutral
+engage(yes)->continue
+engage(no)->attitude
+neutral(no)->hostile
+neutral(yes)->end
+hostile(no)->social
+hostile(yes)->fight
