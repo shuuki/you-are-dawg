@@ -35,8 +35,13 @@ var load = (name) => {
 	{
 		var source = _.get(overrides, name,
 			_.get(behaviors, name, `digraph { a->b; }`));
+		
+		var cleanSource = source.split('\n')
+			.map((x) => x.trim())
+			.join('\n');
+
 		var loadPromise = new Promise((resolve, reject) => {
-			resolve(dot.read(source));
+			resolve(dot.read(cleanSource));
 		}).then(
 			(graph) => {
 				compiled[name] = loadPromise;

@@ -381,6 +381,7 @@ render.Renderer.add(playerCam);
 gameActor('human', [3, 4]);
 
 // And how about on each 'h' press
+// @todo: GO THROUGH LOGIC!!!
 flyd.on(_.debounce((state) => {
 	if (state['human'])
 	{

@@ -5,6 +5,8 @@ var ui = require('./debug.jade');
 var dagreD3 = require('dagre-d3');
 var flyd = require('flyd');
 
+var nodeTpl = require('./node.jade')
+
 var BehaviourDebugger = function(factoryAPI, manifest, paused)
 {
 	var self = this;
