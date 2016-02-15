@@ -1,17 +1,17 @@
-digraph squirrel {
-	subgraph default {
+graph squirrel {
+	digraph default {
 		home [label="Have home tree?"];
 		home -> no -> search;
 		home -> yes -> forrage;
 	}
 
-	subgraph search {
+	digraph search {
 		found [label="Found home tree?"];
 		found -> no -> search;
 		found -> yes -> makeHome -> default;
 	}
 
-	subgraph forrage {
+	digraph forrage {
 		spiral -> found;
 		found -> yes -> collect -> checkInventory;
 		found -> no -> spiral;

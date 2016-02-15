@@ -9,8 +9,12 @@
 		).graph
 
 	.editor.flex.flex-col
-		select.dots
+		input(list="dot", name="dots", value="New Behaviour").dots
+		datalist#dot
 		textarea.source
 		textarea.output
+		.actions.flex-row
+			button.apply.flex Apply
+			button.reset.flex Reset
 
 button.toggle Show/hide

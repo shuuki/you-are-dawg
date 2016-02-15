@@ -19,6 +19,7 @@ var BehaviourDebugger = function(factoryAPI, manifest, paused)
 
 	// Local ui bindings
 	var dotSelect = node.select('.dots');
+	var dotDataList = node.select('#dot');
 	var svg = node.select('svg.graph');
 	var dagGroup = svg.append('g');
 
@@ -39,6 +40,7 @@ var BehaviourDebugger = function(factoryAPI, manifest, paused)
 	this.render = render;
 	this.vis = vis;
 	this.svg = svg;
+	this.dotDataList = dotDataList;
 	this.dagGroup = dagGroup;
 	this.dotSelect = dotSelect;
 	this.selectedDot = selectedDot;
@@ -58,15 +60,10 @@ var BehaviourDebugger = function(factoryAPI, manifest, paused)
 	});
 
 	var updateSelection = (selectSource) => {
-		var option = _.first(selectSource.selectedOptions);
-		
-		if (option)
-		{
-			selectedDot(d3.select(option).datum());
-		}
+		selectedDot(selectSource.value);
 	};
 
-	dotSelect.on('change', () => {
+	dotSelect.on('input', () => {
 		updateSelection(dotSelect.node());
 	});
 
@@ -77,6 +74,15 @@ var BehaviourDebugger = function(factoryAPI, manifest, paused)
 		// Populate select dropdown
 	this.updateBehavious(manifest);
 	updateSelection(dotSelect.node());
+
+	node.select('.actions .reset').on('click', () => {
+		loadedDot(factoryAPI.removeOverride(selectedDot()));
+	});
+
+	node.select('.actions .apply').on('click', () => {
+		// @todo: write to file? write to somewhere...
+		
+	});
 
 	flyd.on((res) => this.displayLoad(res), loadedDot);
 };
@@ -118,10 +124,11 @@ BehaviourDebugger.prototype.displayLoad = function(res)
 
 BehaviourDebugger.prototype.updateBehavious = function(manifest)
 {
-	var dots = ['New Behaviour'].concat(_.keys(manifest));
-	var dotsUp = this.dotSelect.selectAll('option').data(dots);
+	var dots = _.keys(manifest);
+	var dotsUp = this.dotDataList.selectAll('option').data(dots);
 	dotsUp.enter().append('option');
 	dotsUp.text((d) => d);
+	dotsUp.attr('contenteditable', (d, i) => i === 0)
 };
 
 module.exports = BehaviourDebugger;

@@ -33,7 +33,8 @@ var load = (name) => {
 	}
 	else
 	{
-		var source = _.get(overrides, name, _.get(behaviors, name, ''));
+		var source = _.get(overrides, name,
+			_.get(behaviors, name, `digraph { a->b; }`));
 		var loadPromise = new Promise((resolve, reject) => {
 			resolve(dot.read(source));
 		}).then(
