@@ -1,4 +1,4 @@
-.controls.flex-row
+.controls.flex-col
 	// svg.graph => singular only element (first chosen) => dag render target
 	div.flex
 		svg(
@@ -9,7 +9,7 @@
 		).graph
 
 	.editor.flex.flex-col
-		input(list="dot", name="dots", value="New Behaviour").dots
+		input(list="dot", name="dots").dots
 		datalist#dot
 		textarea.source
 		textarea.output

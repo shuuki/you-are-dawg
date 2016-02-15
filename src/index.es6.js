@@ -338,11 +338,10 @@ var gameActor = (name, pos) => {
 
 
 
-// Load some behaviours
-var behaviourFactory = require('./behaviour/factory.es6')(paused);
 
-
-
+// Debug UI for factory
+var BehaviourDebug = require('./behaviour/debug/debug.es6');
+var behaviourDebug = new BehaviourDebug(paused);
 
 
 
@@ -381,31 +380,32 @@ render.Renderer.add(playerCam);
 gameActor('human', [3, 4]);
 
 // And how about on each 'h' press
-// @todo: GO THROUGH LOGIC!!!
-flyd.on(_.debounce((state) => {
+var makeHuman = _.throttle(() => {
+	var c = $.getChunk(renderDims, player.pos);
+	var freeSpace = _.reduce(gameLand.lastRect().land, (acc, row, r) => {
+		row.forEach((col, c) => {
+			if (col.actors.length <= 0)
+			{
+				acc.push([r, c]);
+			}
+		});
+		return acc;
+	}, []);
+	
+	if (freeSpace.length > 0 )
+	{
+		var localChunk = $.getChunk(renderDims, player.pos);
+		var pos = $.localToWorld(renderDims, localChunk, _.sample(freeSpace));
+		gameActor('human', pos);
+	}
+}, 500);
+logic.add((land, delta) => {
+	var state = commandState();
 	if (state['human'])
 	{
-		var tile = _.random();
-		var c = $.getChunk(renderDims, player.pos)
-		var freeSpace = _.reduce(gameLand.lastRect().land, (acc, row, r) => {
-			row.forEach((col, c) => {
-				if (col.actors.length <= 0)
-				{
-					acc.push([r, c]);
-				}
-			});
-			return acc;
-		}, []);
-		
-		if (freeSpace.length > 0 )
-		{
-			var localChunk = $.getChunk(renderDims, player.pos);
-			var pos = $.localToWorld(renderDims, localChunk, _.sample(freeSpace));
-			gameActor('human', pos);
-		}
+		makeHuman();
 	}
-}, 100, {leading: true}), commandState);
-
+});
 
 
 

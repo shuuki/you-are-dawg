@@ -5,9 +5,9 @@ var ui = require('./debug.jade');
 var dagreD3 = require('dagre-d3');
 var flyd = require('flyd');
 
-var nodeTpl = require('./node.jade')
+var behaviourFactory = require('../factory.es6');
 
-var BehaviourDebugger = function(factoryAPI, manifest, paused)
+var BehaviourDebugger = function(paused)
 {
 	var self = this;
 	var render = new dagreD3.render();
@@ -33,9 +33,9 @@ var BehaviourDebugger = function(factoryAPI, manifest, paused)
 	svg.call(zoom);
 
 	// Visible toggle
-	var vis = flyd.stream(true);
+	var vis = flyd.stream(false);
 	var selectedDot = flyd.stream();
-	var loadedDot = selectedDot.map(factoryAPI.load);
+	var loadedDot = selectedDot.map(behaviourFactory.load);
 
 	// Bind locals to controller
 	this.node = node;
@@ -70,15 +70,15 @@ var BehaviourDebugger = function(factoryAPI, manifest, paused)
 	});
 
 	this.sourceText.on('input', (e) => {
-		loadedDot(factoryAPI.override(selectedDot(), d3.event.target.value));
+		loadedDot(behaviourFactory.override(selectedDot(), d3.event.target.value));
 	});
 
 		// Populate select dropdown
-	this.updateBehavious(manifest);
+	this.updateBehavious(behaviourFactory.manifest);
 	updateSelection(dotSelect.node());
 
 	node.select('.actions .reset').on('click', () => {
-		loadedDot(factoryAPI.removeOverride(selectedDot()));
+		loadedDot(behaviourFactory.removeOverride(selectedDot()));
 	});
 
 	node.select('.actions .apply').on('click', () => {
@@ -130,7 +130,6 @@ BehaviourDebugger.prototype.updateBehavious = function(manifest)
 	var dotsUp = this.dotDataList.selectAll('option').data(dots);
 	dotsUp.enter().append('option');
 	dotsUp.text((d) => d);
-	dotsUp.attr('contenteditable', (d, i) => i === 0)
 };
 
 module.exports = BehaviourDebugger;

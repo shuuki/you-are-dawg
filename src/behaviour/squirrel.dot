@@ -1,21 +1,29 @@
-graph squirrel {
-	digraph default {
-		home [label="Have home tree?"];
-		home -> no -> search;
-		home -> yes -> forrage;
-	}
+digraph {
 
-	digraph search {
-		found [label="Found home tree?"];
-		found -> no -> search;
-		found -> yes -> makeHome -> default;
-	}
+goHome[label="go(home)", shape="ellipse"]
+goForrage[label="go(forrage)", shape="ellipse"]
+goFindTree[label="go(findTree)", shape="ellipse"]
 
-	digraph forrage {
-		spiral -> found;
-		found -> yes -> collect -> checkInventory;
-		found -> no -> spiral;
-		checkInventory -> full -> goHome;
-		checkInventory -> notFull -> forrage;
-	}
+subgraph clusterdefault {
+  home [label="Have home tree?"];
+  home -> goForrage [label="yes"];
+  home -> goFindTree [label="no"];
+}
+
+subgraph clusterfindTree {
+  search [label="search(home)"]
+  set [label="this.home = tree"]
+
+  search -> search [label="looking..."]
+  search -> set [label="Found a tree?"]
+  set -> goForrage;
+}
+
+subgraph clusterforrage {
+  spiral [shape="circle"]
+  spiral -> collect [label="found?"]
+  collect -> spiral [label="not full"]
+  collect -> goHome [label=""]
+}
+
 }

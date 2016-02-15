@@ -1,28 +1,15 @@
-// https://commons.wikimedia.org/wiki/File:Some_types_of_control_flow_graphs.svg
-digraph CFG_examples {
-  node [shape=circle width=0.3 height=0.3 label="" fixedsize=true]
-  edge [arrowsize=0.5]
-  if -> { then; else } -> fi
-  while -> body [weight=3]
-  body -> while:w
-  while -> end
-  body -> end [style="invis" weight=3]
-  fi -> exit1 [style="invis"]
-  exit1 -> exit2
-  exit2 -> body2 [weight=4]
-  body2 -> exit1:w
-  exit1 -> out:e
-  exit2 -> out
-  body2 -> out [style="invis" weight=4]
-  end -> top [style="invis"]
-  top -> entry1 [weight=2]
-  entry1 -> out2
-  top -> entry2:w 
-  entry1 -> entry2 [weight=4]
-  entry2 -> entry1:w
-  entry2 -> out2 [style="invis" weight=4]
-  if [xlabel = "(a)"]
-  while [xlabel = "(b)"]
-  exit1 [xlabel = "(c)"]
-  top [xlabel = "(d)"]
-} /*end digraph*/
+// name your digraph
+digraph myBehaviour {
+	// Declare function calls on the graph
+	goHome [label="go(home)"]
+	goHunt [label="go(hunt)"]
+	goSleep [label="go(sleep)"]
+
+	// Cluster states by using subgraphs
+	subgraph clustermyState {
+		cond [label="this.sleepiness"];
+		cond -> goHunt [label="> 100"];
+		cond -> goHome [label="> 250"];
+		cond -> goSleep [label="> 400"];
+	}
+}

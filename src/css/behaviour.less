@@ -40,13 +40,13 @@
       white-space: nowrap;
     }
     .output {
-      flex-grow: 0.5;
+      flex-grow: 0.25;
       background-color: grey;
       color: salmon;
     }
     .actions {
       button {
-        height: 3em;
+        height: 2em;
       }
     }
   }
@@ -69,14 +69,17 @@
     stroke-width: 0px;
   }
 
-  .label text{
-    stroke-width: 0.025em;
-    stroke: white;
+  .edgeLabels {
+    text {
+      stroke-width: 0.025em;
+      stroke: white;
+      fill: white;
+    }
   }
 
   .cluster rect {
     fill: #000;
-    fill-opacity: 0.1;
+    fill-opacity: 0.5;
   }
 
   .error {

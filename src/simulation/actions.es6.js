@@ -4,6 +4,13 @@ var _ = require('lodash');
 var $ = require('../core/core.es6');
 var Mod = require('../core/mod.es6');
 
+/**
+ * @typedef {Object} Action - A snippet to string together in behaviours
+ * @property {String} label
+ * @property {String[]} requires - Named, ordered argument list plucked from function source
+ * @property {function} fn - Possibly stateful function that gets called with locals from state 
+*/
+
 
 // Action Factory Helpers
 var getArgs = (fn) => {

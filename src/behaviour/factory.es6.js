@@ -1,5 +1,4 @@
 var dot = require('graphlib-dot');
-var BehaviourDebugger = require('./debug.es6');
 
 // All the docs -- first the language, then the libs using 'em
 // @see https://en.wikipedia.org/wiki/DOT_(graph_description_language)
@@ -13,11 +12,8 @@ var BehaviourDebugger = require('./debug.es6');
 // Manifest of local dot files
 // @todo: generate this based on files
 // @see: https://webpack.github.io/docs/context.html
-var behaviors = {
-	human: require('./human.dot'),
-	squirrel: require('./squirrel.dot'),
-	example: require('./example.dot')
-};
+var exampleDot = require('./example.dot');
+var manifest = require('./manifest');
 var overrides = {};
 var compiled = {};
 
@@ -34,7 +30,7 @@ var load = (name) => {
 	else
 	{
 		var source = _.get(overrides, name,
-			_.get(behaviors, name, `digraph { a->b; }`));
+			_.get(manifest, name, exampleDot));
 		
 		var cleanSource = source.split('\n')
 			.map((x) => x.trim())
@@ -73,18 +69,9 @@ var removeOverride = (name) => {
 
 
 
-var factoryAPI = {
-	behaviors,
+module.exports = {
+	manifest,
 	load,
 	override,
 	removeOverride
 };
-
-// This is janky here like this
-module.exports = (paused) => {
-	// Debug
-	new BehaviourDebugger(factoryAPI, behaviors, paused);
-
-	// And the API
-	return factoryAPI;
-}
