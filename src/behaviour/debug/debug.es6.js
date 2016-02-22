@@ -7,7 +7,7 @@ var flyd = require('flyd');
 
 var behaviourFactory = require('../factory.es6');
 
-var BehaviourDebugger = function(paused)
+var BehaviourDebugger = function(runner, paused)
 {
 	var self = this;
 	var render = new dagreD3.render();

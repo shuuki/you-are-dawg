@@ -9,6 +9,7 @@ var ActorFactory = function(actorList)
 };
 
 var _actorIdCount = 0;
+
 ActorFactory.prototype.actor = function(name, pos)
 {
 	name = name || 'nothing';

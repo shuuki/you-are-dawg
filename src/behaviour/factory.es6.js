@@ -1,4 +1,7 @@
+var _ = require('lodash');
 var dot = require('graphlib-dot');
+
+console.log(dot);
 
 // All the docs -- first the language, then the libs using 'em
 // @see https://en.wikipedia.org/wiki/DOT_(graph_description_language)
@@ -12,7 +15,7 @@ var dot = require('graphlib-dot');
 // Manifest of local dot files
 // @todo: generate this based on files
 // @see: https://webpack.github.io/docs/context.html
-var exampleDot = require('./example.dot');
+var exampleDot = require('./dots/example.dot');
 var manifest = require('./manifest');
 var overrides = {};
 var compiled = {};

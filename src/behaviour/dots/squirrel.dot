@@ -1,0 +1,31 @@
+digraph {
+
+// Terminal state transition nodes
+goHome[label="default", shape="ellipse"]
+goForrage[label="forrage", shape="ellipse"]
+goFindTree[label="findTree", shape="ellipse"]
+
+// State clusters
+subgraph clusterdefault {
+	home [label="if(this.status.home)"];
+	home -> goForrage [label="true"];
+	home -> goFindTree [label="false"];
+}
+
+subgraph clusterfindTree {
+	search [label="search(home)"]
+	set [label="this.home = tree"]
+
+	search -> search [label="looking..."]
+	search -> set [label="Found a tree?"]
+	set -> goForrage;
+}
+
+subgraph clusterforrage {
+	spiral [shape="circle"]
+	spiral -> collect [label="found?"]
+	collect -> spiral [label="not full"]
+	collect -> goHome [label=""]
+}
+
+}

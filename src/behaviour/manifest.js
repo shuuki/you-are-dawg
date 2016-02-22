@@ -1,9 +1,9 @@
 'use strict';
 
 var knownDots = {
-	human: require('./human.dot'),
-	squirrel: require('./squirrel.dot'),
-	dawg: require('./dawg.dot')
+	human: require('./dots/human.dot'),
+	squirrel: require('./dots/squirrel.dot'),
+	dawg: require('./dots/dawg.dot')
 };
 
 module.exports = knownDots;

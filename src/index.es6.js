@@ -47,6 +47,8 @@ console.log(verse, actions);
 
 // Model and Controller
 var renderDims = [15, 15];
+
+var actorFactory = new ActorFactory(verse.actors.proto);
 var gameLand = new Land(Math.random, { dims: renderDims });
 var logic = new Logic(gameLand);
 render.Renderer.dims = renderDims;
@@ -326,10 +328,6 @@ var commandState = flyd.immediate(flyd.combine(
 
 
 /////////////////////////////// Enter Dawg //////////////////////////
-
-
-// A way to build actors
-var actorFactory = new ActorFactory(verse.actors.proto);
 var gameActor = (name, pos) => {
 	var newActor = actorFactory.actor(name, pos);
 	gameLand.add(newActor);
@@ -337,11 +335,12 @@ var gameActor = (name, pos) => {
 };
 
 
+var BehaviourRunner = require('./behaviour/runner.es6');
 
 
 // Debug UI for factory
 var BehaviourDebug = require('./behaviour/debug/debug.es6');
-var behaviourDebug = new BehaviourDebug(paused);
+var behaviourDebug = new BehaviourDebug(BehaviourRunner, paused);
 
 
 
