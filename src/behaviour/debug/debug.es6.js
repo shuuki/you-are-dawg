@@ -35,7 +35,12 @@ var BehaviourDebugger = function(runner, paused)
 	// Visible toggle
 	var vis = flyd.stream(false);
 	var selectedDot = flyd.stream();
-	var loadedDot = selectedDot.map(behaviourFactory.load);
+
+	var last;
+	var loadedDot = flyd.combine((name, self) => {
+		if (last) last.end(true);
+		last = flyd.on(self, behaviourFactory.load(name()));
+	}, [selectedDot]);
 
 	// Bind locals to controller
 	this.node = node;
@@ -83,7 +88,6 @@ var BehaviourDebugger = function(runner, paused)
 
 	node.select('.actions .apply').on('click', () => {
 		// @todo: write to file? write to somewhere...
-		
 	});
 
 	flyd.on((res) => this.displayLoad(res), loadedDot);

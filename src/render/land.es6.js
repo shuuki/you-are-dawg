@@ -72,17 +72,20 @@ var Land = function(rng, config)
 	// set config
 	_.merge(this, config);
 };
+
 Land.prototype.add = function(source)
 {
 	// @todo: Easy optimization if actors is slow -> sort by dawg pos
 	this._actors.push(source);
 	return this;
 };
+
 Land.prototype.remove = function(source)
 {
 	_.remove(this._actors, source);
 	return this;
 };
+
 // Collects actors with a given tag
 Land.prototype.getActors = function(tag)
 {
@@ -90,10 +93,12 @@ Land.prototype.getActors = function(tag)
 		_.includes(actor.tags, tag)
 	);
 };
+
 Land.prototype.lastLand = Land.prototype.lastRect = function()
 {
 	return this._cache;
 };
+
 Land.prototype.at = function(pos)
 {
 	var chunk = $.getChunk(this.dims, pos);
@@ -118,6 +123,7 @@ Land.prototype.at = function(pos)
 
 	return land;
 };
+
 Land.prototype.getRect = function(dims, pos)
 {
 	// Grab current land (string[][])

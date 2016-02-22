@@ -11,31 +11,32 @@ var chance = require('chance');
 var d3 = require('d3');
 var _ = require('lodash');
 
-// It is
-var verse = require('./data/verse.es6');
-var plants = require('./data/plants.es6');
-var ActorFactory = require('./simulation/ActorFactory.es6');
-
-// It knows
 var $ = require('./core/core.es6');
 var streams = require('./core/streams.es6');
 
 
-// It thinks
-var gimmicks = require('./simulation/gimmicks.es6');
-var Logic = require('./simulation/logic.es6');
-var actions = require('./simulation/actions.es6');
+// Base sum config
+var verse = require('./data/verse.es6');
+var plants = require('./data/plants.es6');
 
-
-// It moves
-var render = require('./render/render.es6');
+// Things to use
+var ActorFactory = require('./simulation/ActorFactory.es6');
+var BehaviourRunner = require('./behaviour/runner.es6');
 var Land = require('./render/land.es6');
-var renderKeyboard = render.jade(require('./render/keyboard.jade'));
+var Logic = require('./simulation/logic.es6');
 
 
-// It's pretty
+
+
+
+// @todo: separate render logic out
+// @todo: move ui components/controllers/whatever elsewhere
+var render = require('./render/render.es6');
 var ui = require('./render/ui.es6')(document.body);
 require('./css/index.less');
+
+
+
 
 
 
@@ -53,7 +54,31 @@ var gameLand = new Land(Math.random, { dims: renderDims });
 var logic = new Logic(gameLand);
 render.Renderer.dims = renderDims;
 
+// @todo: remove this ... thing
+var gameActor = (name, pos) => {
+	var newActor = actorFactory.actor(name, pos);
+	gameLand.add(newActor);
+	return newActor;
+};
+
+
 var paused = flyd.stream(false);
+
+
+
+// @todo: design Action / Behaviour / Logic interactions
+var actions = require('./simulation/actions.es6');
+var behaviourRunner = new BehaviourRunner();
+
+// Debug UI for factory
+// @todo: add component to ui better
+var BehaviourDebug = require('./behaviour/debug/debug.es6');
+var behaviourDebug = new BehaviourDebug(behaviourRunner, paused);
+
+logic.add((land, delta) => {
+	behaviourRunner.run(land, delta);
+});
+
 
 
 
@@ -328,29 +353,30 @@ var commandState = flyd.immediate(flyd.combine(
 
 
 /////////////////////////////// Enter Dawg //////////////////////////
-var gameActor = (name, pos) => {
-	var newActor = actorFactory.actor(name, pos);
-	gameLand.add(newActor);
-	return newActor;
-};
-
-
-var BehaviourRunner = require('./behaviour/runner.es6');
-
-
-// Debug UI for factory
-var BehaviourDebug = require('./behaviour/debug/debug.es6');
-var behaviourDebug = new BehaviourDebug(BehaviourRunner, paused);
-
-
-
-
 // Player stuff
 var player = gameActor('dawg', [10, 10]);
 logValues(player.life.map((x) => x.pos.join(',')), 'Dawg Paws');
 
+
+
+
+
+// Add a squirrel to play with
+gameActor('squirrel', [3, 3]);
+
+
+
+
+
+
+
 var tileUnderPlayer = flyd.stream({});
 logValues(tileUnderPlayer.map(JSON.stringify), 'Tile');
+
+
+// @todo: figure out how to loop ui based logic in better
+// Maybe pass keyboard/ui-command into flow state?
+var gimmicks = require('./simulation/gimmicks.es6');
 
 logic.add(
 	// Player mover is a command + state based cardnal mover

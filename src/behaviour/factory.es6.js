@@ -1,7 +1,6 @@
-var _ = require('lodash');
+var _ = require('lodash/fp');
 var dot = require('graphlib-dot');
-
-console.log(dot);
+var flyd = require('flyd');
 
 // All the docs -- first the language, then the libs using 'em
 // @see https://en.wikipedia.org/wiki/DOT_(graph_description_language)
@@ -25,46 +24,51 @@ var compiled = {};
 
 
 
+
+
+
+var update = (name) => {
+	var source = _.get(name, overrides)
+		|| _.get(name, manifest)
+		|| exampleDot;
+
+	var cleanSource = source.split('\n')
+		.map((x) => x.trim())
+		.join('\n');
+
+	try {
+		var graph = dot.read(cleanSource);
+		return { graph, source, name };
+	}
+	catch (error)
+	{
+		console.log(error);
+		// return { };
+	}
+}
+
 var load = (name) => {
-	if (compiled[name])
+	if (!compiled[name])
 	{
-		return compiled[name];
+		compiled[name] = flyd.stream();
+		compiled[name](update(name));
 	}
-	else
-	{
-		var source = _.get(overrides, name,
-			_.get(manifest, name, exampleDot));
-		
-		var cleanSource = source.split('\n')
-			.map((x) => x.trim())
-			.join('\n');
 
-		var loadPromise = new Promise((resolve, reject) => {
-			resolve(dot.read(cleanSource));
-		}).then(
-			(graph) => {
-				compiled[name] = loadPromise;
-				return { graph, name, source };
-			},
-			(error) => {
-				delete compiled[name];
-				return { error, name, source };
-			}
-		);
-
-		return loadPromise;
-	}
+	return compiled[name];
 };
+
 var override = (name, source) => {
 	overrides[name] = source;
-	delete compiled[name];
+	update(name);
 	return load(name);
 };
+
 var removeOverride = (name) => {
 	delete overrides[name];
-	delete compiled[name];
+	update(name);
 	return load(name);
 };
+
 
 
 
@@ -76,5 +80,6 @@ module.exports = {
 	manifest,
 	load,
 	override,
-	removeOverride
+	removeOverride,
+	compiled
 };

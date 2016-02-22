@@ -18,6 +18,7 @@ ActorFactory.prototype.actor = function(name, pos)
 	newActor.pos = !pos ? [0, 0] : pos;
 	newActor.life = flyd.stream(newActor);
 	newActor.id = _actorIdCount++;
+	newActor.state = 'default';
 	newActor.toString = () => newActor.name;
 
 	return newActor;
