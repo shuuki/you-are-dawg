@@ -42,6 +42,9 @@ var BehaviourDebugger = function(runner, paused)
 		last = flyd.on(self, behaviourFactory.load(name()));
 	}, [selectedDot]);
 
+	flyd.on((x) => console.log('selected', x), selectedDot);
+	flyd.on((x) => console.log('loaded', x), loadedDot);
+
 	// Bind locals to controller
 	this.node = node;
 	this.render = render;
@@ -67,7 +70,7 @@ var BehaviourDebugger = function(runner, paused)
 	});
 
 	var updateSelection = (selectSource) => {
-		selectedDot(selectSource.value);
+		selectedDot(selectSource.value || ' ');
 	};
 
 	dotSelect.on('input', () => {
@@ -75,7 +78,8 @@ var BehaviourDebugger = function(runner, paused)
 	});
 
 	this.sourceText.on('input', (e) => {
-		loadedDot(behaviourFactory.override(selectedDot(), d3.event.target.value));
+		// loadedDot();
+		behaviourFactory.override(selectedDot(), d3.event.target.value);
 	});
 
 		// Populate select dropdown
@@ -83,7 +87,7 @@ var BehaviourDebugger = function(runner, paused)
 	updateSelection(dotSelect.node());
 
 	node.select('.actions .reset').on('click', () => {
-		loadedDot(behaviourFactory.removeOverride(selectedDot()));
+		// loadedDot(behaviourFactory.removeOverride(selectedDot()));
 	});
 
 	node.select('.actions .apply').on('click', () => {
@@ -98,7 +102,8 @@ BehaviourDebugger.prototype.renderBehaviour = function(behaviour)
 	// Error while rendering
 	try
 	{
-		behaviour.graph.graph().transition = (sel) => {
+		console.log('RENDER', behaviour);
+		behaviour.graph.transition = (sel) => {
 			return sel.transition().duration(500);
 		};
 

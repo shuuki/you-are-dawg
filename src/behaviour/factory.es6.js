@@ -23,6 +23,10 @@ var compiled = {};
 
 
 
+var getOrElse = _.curry((path, object, orElse) => {
+	if (_.has(path, object)) return _.get(path, object);
+	return orElse();
+}, 3);
 
 
 
@@ -42,7 +46,7 @@ var update = (name) => {
 	}
 	catch (error)
 	{
-		console.log(error);
+		console.log('ERROR', error);
 		// return { };
 	}
 }
@@ -59,13 +63,13 @@ var load = (name) => {
 
 var override = (name, source) => {
 	overrides[name] = source;
-	update(name);
+	load(name)(update(name));
 	return load(name);
 };
 
 var removeOverride = (name) => {
 	delete overrides[name];
-	update(name);
+	load(name)(update(name));
 	return load(name);
 };
 

@@ -12,20 +12,4 @@ subgraph clusterdefault {
 	home -> goFindTree [label="false"];
 }
 
-subgraph clusterfindTree {
-	search [label="search(home)"]
-	set [label="this.home = tree"]
-
-	search -> search [label="looking..."]
-	search -> set [label="Found a tree?"]
-	set -> goForrage;
-}
-
-subgraph clusterforrage {
-	spiral [shape="circle"]
-	spiral -> collect [label="found?"]
-	collect -> spiral [label="not full"]
-	collect -> goHome [label=""]
-}
-
 }
