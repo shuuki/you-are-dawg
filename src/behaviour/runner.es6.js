@@ -4,6 +4,7 @@ var _ = require('lodash/fp');
 var factory = require('./factory.es6');
 var jsep = require('jsep');
 var flyd = require('flyd');
+flyd.filter = require('flyd/module/filter');
 
 // Topo sort a tree
 var topo = (graph, root) => {
@@ -37,11 +38,12 @@ var BehaviourRunner = function()
 	//@todo: bind ast exec
 	//@todo: execute ast
 	var isCluster = (x) => x.startsWith('cluster');
-	var compile = flyd.map((res) => _.fromPairs(
+	var filterErrors = flyd.filter((x) => !x.error);
+	var compile = (s) => flyd.map((res) => _.fromPairs(
 		res.graph.nodes()
 			.filter(isCluster)
 			.map((x) => [x, topo(res.graph, res.graph.children(x)[0])]))
-	);
+		, filterErrors(s));
 
 	// Compile behaviour trees
 	this.behaviours = {

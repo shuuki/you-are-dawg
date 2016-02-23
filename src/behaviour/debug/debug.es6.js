@@ -39,7 +39,9 @@ var BehaviourDebugger = function(runner, paused)
 	var last;
 	var loadedDot = flyd.combine((name, self) => {
 		if (last) last.end(true);
-		last = flyd.on(self, behaviourFactory.load(name()));
+		var up = behaviourFactory.load(name());
+		self(up());
+		last = flyd.on(self, up);
 	}, [selectedDot]);
 
 	flyd.on((x) => console.log('selected', x), selectedDot);
@@ -102,7 +104,6 @@ BehaviourDebugger.prototype.renderBehaviour = function(behaviour)
 	// Error while rendering
 	try
 	{
-		console.log('RENDER', behaviour);
 		behaviour.graph.transition = (sel) => {
 			return sel.transition().duration(500);
 		};

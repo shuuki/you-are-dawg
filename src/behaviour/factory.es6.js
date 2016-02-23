@@ -32,9 +32,8 @@ var getOrElse = _.curry((path, object, orElse) => {
 
 
 var update = (name) => {
-	var source = _.get(name, overrides)
-		|| _.get(name, manifest)
-		|| exampleDot;
+	var source = getOrElse(name, overrides, () =>
+		getOrElse(name, manifest, () => exampleDot));
 
 	var cleanSource = source.split('\n')
 		.map((x) => x.trim())
@@ -47,7 +46,7 @@ var update = (name) => {
 	catch (error)
 	{
 		console.log('ERROR', error);
-		// return { };
+		return { error, source, name };
 	}
 }
 
