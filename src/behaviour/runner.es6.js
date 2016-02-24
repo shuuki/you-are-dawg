@@ -67,9 +67,9 @@ var runFn = (exp, src, actor, locals, flowAction) => {
 			break;
 		case 'if':
 			src = `return ${src.replace('if', '!!')}`;
-			break;
-	}
-	return Function(src).call(actor, locals)
+			break
+;	}
+	return Function(src).call(actor, locals);
 }
 
 // @todo: figure out how to register behavious? Exceute them? Etc?
@@ -87,19 +87,21 @@ BehaviourRunner.prototype.run = function(land, delta, flowAction)
 				switch (exp.type)
 				{
 					case 'Identifier':
-						// String result is a state change!
 						return exp.name;
 					case 'CallExpression':
 						var res = runFn(exp, stack[1], actor, { land, delta, source: actor }, flowAction);
-
-						if (res)
+						var next;
+						if (stack[2])
 						{
-							var next = stack[2].filter(_.matches([res.toString()]))[0];
-						}
-						else
-						{
-							// Random edge choice
-							next = _.sample(stack[2]);
+							if (res)
+							{
+								next = stack[2].filter(_.matches([res.toString()]))[0];
+							}
+							else
+							{
+								// Random edge choice
+								next = _.sample(stack[2]);
+							}
 						}
 
 						if (next)
@@ -122,7 +124,10 @@ BehaviourRunner.prototype.run = function(land, delta, flowAction)
 		if (state)
 		{
 			var result = exec(actor, state);
-			// actor.state = result;
+			if (_.isString(result))
+			{
+				actor.state = result;
+			}
 		}
 	});
 };

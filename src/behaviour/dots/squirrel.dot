@@ -2,15 +2,17 @@ digraph {
 
 // Terminal state transition nodes
 goHome[label="default", shape="ellipse"]
-goForrage[label="forrage", shape="ellipse"]
-goFindTree[label="findTree", shape="ellipse"]
+forrage[label="false", shape="ellipse"]
+findTree[label="flow('findTree')", shape="ellipse"]
 
-// State clusters
+// State clusters -- the first node defined is taken to be the root!!!!
 subgraph clusterdefault {
-	test [label="flow('findTree')"]
+	// root
 	home [label="if(this.status.home)"];
-	home -> test [label="true"];
-	home -> goFindTree [label="false"];
+
+	// whatever else
+	home -> forrage [label="true"];
+	home -> findTree [label="false"];
 }
 
 }
