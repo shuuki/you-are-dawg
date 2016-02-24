@@ -357,7 +357,7 @@ logValues(player.life.map((x) => x.pos.join(',')), 'Dawg Paws');
 
 
 // Add a squirrel to play with
-gameActor('squirrel', [3, 3]);
+_.range(100).forEach(() => gameActor('squirrel', [3, 3]));
 
 
 
@@ -459,8 +459,8 @@ var state = flyd.scan((acc, event) => {
 
 	acc.last = actions.doAction(event.action, event);
 
-	acc.history.push([processed, event]);
-	acc.log.push([processed, acc.last]);
+	// acc.history.push([processed, event]);
+	// acc.log.push([processed, acc.last]);
 
 	return acc;
 }, {
@@ -471,7 +471,7 @@ var state = flyd.scan((acc, event) => {
 
 logic.add((land, delta, actors) => {
 	// Tick actor state
-	behaviourRunner.run(land, delta, flow);
+	behaviourRunner.run(land, delta, flowAction);
 });
 
 

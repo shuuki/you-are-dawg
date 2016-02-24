@@ -39,11 +39,19 @@ var BehaviourRunner = function()
 	//@todo: execute ast
 	var isCluster = (x) => x.startsWith('cluster');
 	var filterErrors = flyd.filter((x) => !x.error);
-	var compile = (s) => flyd.map((res) => _.fromPairs(
-		res.graph.nodes()
-			.filter(isCluster)
-			.map((x) => [x, topo(res.graph, res.graph.children(x)[0])]))
-		, filterErrors(s));
+	var compile = (s) => flyd.map((res) => {
+		try {
+			return _.fromPairs(
+			res.graph.nodes()
+				.filter(isCluster)
+				.map((x) => [x, topo(res.graph, res.graph.children(x)[0])]))
+		}
+		catch (error)
+		{
+			console.log(error);
+			return error;
+		}
+	}, filterErrors(s));
 
 	// Compile behaviour trees
 	this.behaviours = {
@@ -51,17 +59,21 @@ var BehaviourRunner = function()
 	};
 };
 
-var runFn = (name, src, actor) => {
-	switch (name) {
+var runFn = (exp, src, actor, locals, flowAction) => {
+	switch (exp.callee.name) {
+		case 'flow':
+			// console.log('flow', src, actor, locals);
+			return flowAction(exp.arguments[0].value, locals);
+			break;
 		case 'if':
-			src = src.replace('if', '!!');
+			src = `return ${src.replace('if', '!!')}`;
 			break;
 	}
-	return Function(`return ${src}`).call(actor)
+	return Function(src).call(actor, locals)
 }
 
 // @todo: figure out how to register behavious? Exceute them? Etc?
-BehaviourRunner.prototype.run = function(land, delta)
+BehaviourRunner.prototype.run = function(land, delta, flowAction)
 {
 	var squirrels = _.filter({ name: 'squirrel' }, land._actors);
 	var states = this.behaviours['squirrel']();
@@ -78,8 +90,18 @@ BehaviourRunner.prototype.run = function(land, delta)
 						// String result is a state change!
 						return exp.name;
 					case 'CallExpression':
-						var res = runFn(exp.callee.name, stack[1], actor);
-						var next = stack[2].filter(_.matches([res.toString()]))[0];
+						var res = runFn(exp, stack[1], actor, { land, delta, source: actor }, flowAction);
+
+						if (res)
+						{
+							var next = stack[2].filter(_.matches([res.toString()]))[0];
+						}
+						else
+						{
+							// Random edge choice
+							next = _.sample(stack[2]);
+						}
+
 						if (next)
 						{
 							return step(next[1]);
@@ -87,7 +109,7 @@ BehaviourRunner.prototype.run = function(land, delta)
 						break;
 				}
 
-				console.log('Oh no!!', stack);
+				// console.log('Oh no!!', stack);
 			})(tree);
 		}
 		catch (error) {

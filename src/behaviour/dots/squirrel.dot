@@ -7,8 +7,9 @@ goFindTree[label="findTree", shape="ellipse"]
 
 // State clusters
 subgraph clusterdefault {
+	test [label="flow('findTree')"]
 	home [label="if(this.status.home)"];
-	home -> goForrage [label="true"];
+	home -> test [label="true"];
 	home -> goFindTree [label="false"];
 }
 

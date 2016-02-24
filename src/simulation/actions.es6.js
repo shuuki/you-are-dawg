@@ -156,6 +156,8 @@ makeAction('pick up',
 		}
 	});
 
+_.forEach(require('./actions/squirrel'), (fn, label) => makeAction(label, fn));
+
 
 
 
