@@ -44,8 +44,8 @@ var BehaviourDebugger = function(runner, paused)
 		last = flyd.on(self, up);
 	}, [selectedDot]);
 
-	flyd.on((x) => console.log('selected', x), selectedDot);
-	flyd.on((x) => console.log('loaded', x), loadedDot);
+	// flyd.on((x) => console.log('selected', x), selectedDot);
+	// flyd.on((x) => console.log('loaded', x), loadedDot);
 
 	// Bind locals to controller
 	this.node = node;

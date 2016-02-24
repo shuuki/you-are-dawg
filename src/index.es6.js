@@ -75,11 +75,6 @@ var behaviourRunner = new BehaviourRunner();
 var BehaviourDebug = require('./behaviour/debug/debug.es6');
 var behaviourDebug = new BehaviourDebug(behaviourRunner, paused);
 
-logic.add((land, delta) => {
-	behaviourRunner.run(land, delta);
-});
-
-
 
 
 
@@ -369,7 +364,6 @@ gameActor('squirrel', [3, 3]);
 
 
 
-
 var tileUnderPlayer = flyd.stream({});
 logValues(tileUnderPlayer.map(JSON.stringify), 'Tile');
 
@@ -462,15 +456,24 @@ var flowAction = (verb, locals) => {
 
 var state = flyd.scan((acc, event) => {
 	var processed = Date.now();
-	acc.history.push([processed, event]);
+
 	acc.last = actions.doAction(event.action, event);
+
+	acc.history.push([processed, event]);
 	acc.log.push([processed, acc.last]);
+
 	return acc;
 }, {
 	last: {},
 	log: [],
 	history: []
 }, flow);
+
+logic.add((land, delta, actors) => {
+	// Tick actor state
+	behaviourRunner.run(land, delta, flow);
+});
+
 
 logValues(state.map((s) => {
 	return JSON.stringify(s.last);

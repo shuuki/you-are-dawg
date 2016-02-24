@@ -6,7 +6,7 @@ var Mod = require('../core/mod.es6');
 
 /**
  * @typedef {Object} Action - A snippet to string together in behaviours
- * @property {String} label
+ * @property {String} type
  * @property {String[]} requires - Named, ordered argument list plucked from function source
  * @property {function} fn - Possibly stateful function that gets called with locals from state 
 */
@@ -22,11 +22,11 @@ var getArgs = (fn) => {
 }
 
 var actionLookup = {};
-var makeAction = (label, fn) => {
+var makeAction = (type, fn) => {
 	var requires = getArgs(fn)
-	var action = { label, requires, fn };
-	action.toString = () => label;
-	actionLookup[label] = action;
+	var action = { type, requires, fn };
+	action.toString = () => type;
+	actionLookup[type] = action;
 	return action;
 };
 
